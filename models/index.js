@@ -1,5 +1,6 @@
 import dbConfig from "../config/db.config.js";
 
+
 import  Sequelize from "sequelize";
 //console.log("Connecting DB")
 //console.log(dbConfig.MYSQL_DB_PASSWORD)
@@ -17,9 +18,20 @@ db.sequelize = sequelize;
 
 
 import UserModel from "./user.model.js";
+import GoalModel from "./goal.model.js";
+import UserGoalModel from "./usergoals.model.js";
+
 
 
 db.user = UserModel(sequelize, Sequelize);
+db.goal = GoalModel(sequelize, Sequelize);
+db.userGoalModel = UserGoalModel(sequelize, Sequelize);
+
+db.userGoalModel.belongsTo(db.user);
+db.user.hasMany(db.userGoalModel, {onDelete: 'CASCADE', hooks: true})
+db.userGoalModel.belongsTo(db.goal);
+db.goal.hasMany(db.userGoalModel, {onDelete: 'CASCADE', hooks: true})
+
 
 
 
