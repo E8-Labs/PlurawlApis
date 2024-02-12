@@ -142,6 +142,40 @@ export const LoginUser = async (req, res) => {
 
 }
 
+export const CheckIn = (req, res) => {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (authData) {
+            //console.log("Auth data ", authData)
+            let userid = authData.user.id;
+            const user = await User.findByPk(userid);
+            if (user) {
+                let data = {
+                    mood: req.body.mood,
+                    feeling: req.body.feeling,
+                    description: req.body.description,
+                    acronym: req.body.acronym,
+                    UserId: user.id,
+                    type: req.body.type, //
+                }
+                db.userCheckinModel.create(data).then(async (result) => {
+                    let u = await UserProfileFullResource(user);
+                    res.send({ status: true, message: "User Checkedin ", data: u })
+                })
+                .catch((error) => {
+
+                })
+                
+            }
+            else {
+                res.send({ status: false, message: "No Profile found", data: null })
+            }
+
+        }
+        else {
+            res.send({ status: false, message: "Unauthenticated user", data: null })
+        }
+    })
+}
 
 export const UpdateProfile = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
@@ -202,7 +236,7 @@ export const UpdateProfile = async (req, res) => {
                 // res.send({ status: false, message: "No file uploaded", data: null })
                 // let state = req.body.state;
                 // user.state = state;
-                
+
                 if (typeof req.body.state !== 'undefined') {
                     user.state = req.body.state;
                 }
@@ -236,7 +270,7 @@ export const UpdateProfile = async (req, res) => {
 }
 
 
-export const UpdateGoals = (req, res)=> {
+export const UpdateGoals = (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
         if (authData) {
             //console.log("Auth data ", authData)
@@ -247,20 +281,22 @@ export const UpdateGoals = (req, res)=> {
             const user = await User.findByPk(userid);
             if (user) {
                 let goals = req.body.goals;
-                if(goals.length > 0){
-                    await db.userGoalModel.destroy({where: {
-                        UserId: user.id
-                    }})
+                if (goals.length > 0) {
+                    await db.userGoalModel.destroy({
+                        where: {
+                            UserId: user.id
+                        }
+                    })
                 }
-                for(let i = 0; i < goals.length; i++){
+                for (let i = 0; i < goals.length; i++) {
                     let g = goals[i];
                     let userGoal = await db.userGoalModel.create({
                         GoalId: g.id,
                         UserId: user.id,
                         name: g.name,
                     })
-                    if(userGoal){
-                        console.log("Goal created ", g)                        
+                    if (userGoal) {
+                        console.log("Goal created ", g)
                     }
                 }
 
@@ -335,3 +371,5 @@ export const GetUsers = (req, res) => {
         }
     })
 }
+
+

@@ -20,6 +20,7 @@ db.sequelize = sequelize;
 import UserModel from "./user.model.js";
 import GoalModel from "./goal.model.js";
 import UserGoalModel from "./usergoals.model.js";
+import UserCheckinModel from "./checkin.model.js";
 
 
 
@@ -33,7 +34,9 @@ db.userGoalModel.belongsTo(db.goal);
 db.goal.hasMany(db.userGoalModel, {onDelete: 'CASCADE', hooks: true})
 
 
-
+db.userCheckinModel = UserCheckinModel(sequelize, Sequelize);
+db.userCheckinModel.belongsTo(db.user);
+db.user.hasMany(db.userCheckinModel, {onDelete: 'CASCADE', hooks: true});
 
 
 export default db;

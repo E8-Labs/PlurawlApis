@@ -25,10 +25,13 @@ const UserProfileFullResource = async (user, currentUser = null) =>{
 async function  getUserData(user, currentUser = null) {
     
     
-    // let token = await db.PlaidTokens.findOne({where: {
-    //     UserId: user.id,
-    //     plaid_token_type: PlaidTokenTypes.TokenAuth
-    // }});
+    let checkin = await db.userCheckinModel.findOne({where: {
+        UserId: user.id,
+    },
+    order: [
+        ['createdAt', 'DESC'],
+      ],
+    });
 
     // let houses = await db.HouseModel.findOne({where: {
     //     UserId: user.id,
@@ -62,7 +65,7 @@ async function  getUserData(user, currentUser = null) {
         provider_id: user.provider_id,
         provider_name: user.provider_name,
         points: user.points,
-
+        lastcheckin: checkin
     }
 
 
