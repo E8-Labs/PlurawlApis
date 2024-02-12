@@ -209,6 +209,18 @@ export const UpdateProfile = async (req, res) => {
                 if (typeof req.body.city !== 'undefined') {
                     user.city = req.body.city;
                 }
+                if (typeof req.body.race !== 'undefined') {
+                    user.race = req.body.race;
+                }
+                if (typeof req.body.gender !== 'undefined') {
+                    user.gender = req.body.gender;
+                }
+                if (typeof req.body.veteran !== 'undefined') {
+                    user.veteran = req.body.veteran;
+                }
+                if (typeof req.body.lgbtq !== 'undefined') {
+                    user.lgbtq = req.body.lgbtq;
+                }
                 const saved = await user.save();
 
                 let u = await UserProfileFullResource(user)
@@ -224,8 +236,47 @@ export const UpdateProfile = async (req, res) => {
 }
 
 
-function uploadImage(fileContent, fieldname) {
+export const UpdateGoals = (req, res)=> {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (authData) {
+            //console.log("Auth data ", authData)
+            let userid = authData.user.id;
+            // if (typeof req.query.userid !== 'undefined') {
+            //     userid = req.query.userid;
+            // }
+            const user = await User.findByPk(userid);
+            if (user) {
+                let goals = req.body.goals;
+                if(goals.length > 0){
+                    await db.userGoalModel.destroy({where: {
+                        UserId: user.id
+                    }})
+                }
+                for(let i = 0; i < goals.length; i++){
+                    let g = goals[i];
+                    let userGoal = await db.userGoalModel.create({
+                        GoalId: g.id,
+                        UserId: user.id,
+                        name: g.name,
+                    })
+                    if(userGoal){
+                        console.log("Goal created ", g)                        
+                    }
+                }
 
+
+                let u = await UserProfileFullResource(user);
+                res.send({ status: true, message: "Goals updated ", data: u })
+            }
+            else {
+                res.send({ status: false, message: "No Profile found", data: null })
+            }
+
+        }
+        else {
+            res.send({ status: false, message: "Unauthenticated user", data: null })
+        }
+    })
 }
 
 
