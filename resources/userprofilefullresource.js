@@ -1,4 +1,5 @@
 import db from "../models/index.js";
+import CheckInTypes from "../models/checkintype.js";
 // import LoanStatus from "../../models/loanstatus.js";
 // import PlaidTokenTypes from "../../models/plaidtokentypes.js";
 // import UserLoanFullResource from "../loan/loan.resource.js";
@@ -27,6 +28,7 @@ async function  getUserData(user, currentUser = null) {
     
     let checkin = await db.userCheckinModel.findOne({where: {
         UserId: user.id,
+        type: CheckInTypes.TypeManual
     },
     order: [
         ['createdAt', 'DESC'],
