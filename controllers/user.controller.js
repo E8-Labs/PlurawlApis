@@ -255,6 +255,13 @@ export const UpdateProfile = async (req, res) => {
                 if (typeof req.body.lgbtq !== 'undefined') {
                     user.lgbtq = req.body.lgbtq;
                 }
+                if (typeof req.body.title !== 'undefined') {
+                    user.title = req.body.title;
+                }
+                if (typeof req.body.company !== 'undefined') {
+                    user.company = req.body.company;
+                }
+
                 const saved = await user.save();
 
                 let u = await UserProfileFullResource(user)

@@ -1,0 +1,2 @@
+1- Will work on the logic to run cron job and store the weekly vibe overview in the database table.
+2- Also will generate the quote of the day in the crone job and store it in the db.

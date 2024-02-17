@@ -5,7 +5,7 @@ const UserJournalModel = (sequelize, Sequelize) => {
         default: ''
       },
       detail: { // text or content of the journal
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(5000),
         default: ''
       },
       type: {
@@ -13,7 +13,7 @@ const UserJournalModel = (sequelize, Sequelize) => {
         values: ["manual", 'aichat', 'journal'], // mood can be set via these functions
         default: 'manual'
       },
-      cod: { // cognitive disorder: one of 7 cognitive disorders
+      cd: { // cognitive disorder: one of 7 cognitive disorders
         type: Sequelize.STRING,
         default: ''
       },
@@ -33,7 +33,7 @@ const UserJournalModel = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         default: ''
       },
-      acronym: {
+      pronunciation: {
         type: Sequelize.STRING,
         default: ''
       },
