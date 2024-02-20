@@ -189,7 +189,7 @@ export const UpdateProfile = async (req, res) => {
 
 
             if (typeof (req.file) !== 'undefined') {
-                console.log("Have Profile Image")
+                // console.log("Have Profile Image")
                 const fileContent = req.file.buffer;
                 const fieldname = req.file.fieldname;
                 const s3 = new S3({
@@ -210,12 +210,12 @@ export const UpdateProfile = async (req, res) => {
 
                 const result = s3.upload(params, async (err, d) => {
                     if (err) {
-                        console.log("error file upload")
+                        // console.log("error file upload")
                         return null
                         //   res.send({ status: false, message: "Image not uploaded " + err, data: null });
                     }
                     else {
-                        console.log("File uploaded " + d.Location)
+                        // console.log("File uploaded " + d.Location)
                         // return d.Location;
                         user.profile_image = d.Location;
                         let saved = await user.save();

@@ -22,6 +22,7 @@ import GoalModel from "./goal.model.js";
 import UserGoalModel from "./usergoals.model.js";
 import UserCheckinModel from "./checkin.model.js";
 import UserJournalModel from "./userjournal.model.js";
+import WeeklySnapshotModel from "./weeklysnapshot.model.js";
 
 
 
@@ -37,6 +38,10 @@ db.goal.hasMany(db.userGoalModel, {onDelete: 'CASCADE', hooks: true})
 db.userJournalModel = UserJournalModel(sequelize, Sequelize);
 db.userJournalModel.belongsTo(db.user);
 db.user.hasMany(db.userJournalModel, {onDelete: 'CASCADE', hooks: true});
+
+db.weeklySnapshotModel = WeeklySnapshotModel(sequelize, Sequelize);
+db.weeklySnapshotModel.belongsTo(db.user);
+// db.us
 
 
 db.userCheckinModel = UserCheckinModel(sequelize, Sequelize);
