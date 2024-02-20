@@ -22,49 +22,6 @@ import dotenv from 'dotenv'
 dotenv.config();
 
 
-const upload = multer();
-
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => cb(null, "./uploads"), // cb -> callback
-//   filename: (req, file, cb) => {
-//     const uniqueName = `${Date.now()}-${Math.round(
-//       Math.random() * 1e9
-//     )}${path.extname(file.originalname)}`;
-//     cb(null, uniqueName);
-//   },
-// });
-
-const uploadImg = upload.single("image");//multer({storage: storage}).single('image');
-
-
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-
-
-import db from "./models/index.js";
-import journalRouter from "./routes/journal.router.js";
-
-db.sequelize.authenticate().then(() => {
-  // console.log("Connected to the database!");
-})
-  .catch(err => {
-    // console.log("Cannot connect to the database!", err);
-    process.exit();
-  });
-
-// sync
-db.sequelize.sync({ alter: true })//{alter: true}
-
-
-
-app.use("/api/users", uploadImg, userRouter);
-app.use("/api/journal", journalRouter)
-// app.use("/api/plaid", verifyJwtToken, plaidRouter);//verifyJwtToken
-// app.use('/api/loans', verifyJwtToken, loanRouter);
-// app.use("/api/houses", verifyJwtToken, houseRouter);
 
 
 let number = 0// "/2 * * * Monday"
@@ -187,19 +144,16 @@ const job = nodeCron.schedule("*/10 0-2 * * Sunday", async function fetchPending
 
 });
 
-// job.start();
+job.start();
 
 
-// //run job to get Daily quotes
-// const quoteJob = nodeCron.schedule("*/2 0-2 * * *", async function fetchPendingBankTransactions() {
-//   // const currentDate = new Date();
-//   let time = moment()
-//   console.log("Quote Crone Job Running at time ", time);
-//   GenerateQuote();
-// })
-// quoteJob.start();
-
-
-const server = app.listen(process.env.Port, () => {
-  //console.log("Started listening on " + process.env.Port);
+//run job to get Daily quotes
+const quoteJob = nodeCron.schedule("*/2 0-2 * * *", async function fetchPendingBankTransactions() {
+  // const currentDate = new Date();
+  let time = moment()
+  console.log("Quote Crone Job Running at time ", time);
+  GenerateQuote();
 })
+quoteJob.start();
+
+
