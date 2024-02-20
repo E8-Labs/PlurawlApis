@@ -39,6 +39,13 @@ async function getUserData(user, currentUser = null) {
         ],
     });
 
+    let today = moment().format("DD MM YYYY");
+    let quote = await db.dailyQuoteModel.findOne({
+        where: {
+            date: today
+        }
+    })
+
     // let houses = await db.HouseModel.findOne({where: {
     //     UserId: user.id,
     // }});
@@ -136,7 +143,8 @@ lastMonday.setDate(lastSunday.getDate() - 6);
         provider_name: user.provider_name,
         points: user.points,
         lastcheckin: checkin,
-        lastWeekVibe: lastWeekVibe
+        lastWeekVibe: lastWeekVibe,
+        quote_of_day: quote,
     }
 
 

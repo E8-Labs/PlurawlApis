@@ -4,6 +4,9 @@ import JWT from "jsonwebtoken";
 import bcrypt from 'bcrypt';
 import multer from "multer";
 import path from "path";
+import moment from "moment-timezone";
+import axios from "axios";
+import chalk from "chalk";
 // import { fetchOrCreateUserToken } from "./plaid.controller.js";
 // const fs = require("fs");
 // var Jimp = require("jimp");
@@ -161,10 +164,10 @@ export const CheckIn = (req, res) => {
                     let u = await UserProfileFullResource(user);
                     res.send({ status: true, message: "User Checkedin ", data: u })
                 })
-                .catch((error) => {
+                    .catch((error) => {
 
-                })
-                
+                    })
+
             }
             else {
                 res.send({ status: false, message: "No Profile found", data: null })
@@ -379,4 +382,79 @@ export const GetUsers = (req, res) => {
     })
 }
 
+
+export const GenerateQuote = async () => {
+    //check if quote exists for today
+    let today = moment().format("DD MM YYYY");
+    let quote = await db.dailyQuoteModel.findOne({
+        where: {
+            date: today
+        }
+    })
+    if (!quote) {
+        console.log("Generating quote since no quote exists today");
+        let messageData = []
+        // console.log("Sending this summary to api ", summary);
+        messageData.push({
+            role: "system",
+            content: `Generate a daily quote for of max 100 characters. 
+            Make it a json object like this {quote: Quote of the day, timestamp: Time here in Month Day Year Format}. Only generate json object and no extra text.`, // summary will go here if the summary is created.
+
+        });
+
+        //   messageData.push({
+        //     role: "user",
+        //     content: message // this data is being sent to chatgpt so only message should be sent
+        //   });
+        let APIKEY = process.env.AIKey;
+        // APIKEY = "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"
+        console.log(APIKEY)
+        const headers = {}
+        const data = {
+            model: "gpt-4-1106-preview",
+            // temperature: 1.2,
+            messages: messageData,
+            // max_tokens: 1000,
+        }
+        // setMessages(old => [...old, {message: "Loading....", from: "gpt", id: 0, type: MessageType.Loading}])
+        try {
+            const result = await axios.post("https://api.openai.com/v1/chat/completions", data, {
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${APIKEY}`
+                }
+            });
+            // console.log(result.data.data)
+            if (result.status === 200) {
+                let gptMessage = result.data.choices[0].message.content;
+                gptMessage = gptMessage.replace(new RegExp("```json", 'g'), '');
+                gptMessage = gptMessage.replace(new RegExp("```", 'g'), '');
+                gptMessage = gptMessage.replace(new RegExp("\n", 'g'), '');
+                console.log(chalk.green(JSON.stringify(gptMessage)))
+                // return ""
+                let json = JSON.parse(gptMessage)
+                //add to the database here
+                let data = {
+                    date: today,
+                    quote: json.quote,
+
+                }
+                let created = await db.dailyQuoteModel.create(data)
+                return gptMessage
+            }
+            else {
+                console.log(chalk.red("Error in gpt response"))
+                // return ""
+            }
+        }
+        catch (error) {
+            console.log("Exception gpt", error)
+        }
+
+        // return ""
+    }
+    else {
+        console.log("Quote already exists today")
+    }
+}
 

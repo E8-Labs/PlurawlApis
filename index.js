@@ -7,8 +7,9 @@ import nodeCron from "node-cron";
 import chalk from "chalk";
 import moment from "moment-timezone";
 
+import { GenerateQuote } from "./controllers/user.controller.js";
 
-import { getJournalsVibeInAWeek, getWeeklyDates, getJournalsInAWeek, GetSnapshotFromJournals } from "./controllers/journal.controller.js";
+import { getWeeklyDates, getJournalsInAWeek, GetSnapshotFromJournals } from "./controllers/journal.controller.js";
 
 // import plaidRouter from "./routes/plaid.router.js";
 // import loanRouter from "./routes/loan.router.js";
@@ -187,6 +188,16 @@ const job = nodeCron.schedule("*/10 0-2 * * Sunday", async function fetchPending
 });
 
 job.start();
+
+
+//run job to get Daily quotes
+const quoteJob = nodeCron.schedule("*/2 0-2 * * *", async function fetchPendingBankTransactions() {
+  // const currentDate = new Date();
+  let time = moment()
+  console.log("Quote Crone Job Running at time ", time);
+  GenerateQuote();
+})
+quoteJob.start();
 
 
 const server = app.listen(process.env.Port, () => {

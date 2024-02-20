@@ -23,6 +23,7 @@ import UserGoalModel from "./usergoals.model.js";
 import UserCheckinModel from "./checkin.model.js";
 import UserJournalModel from "./userjournal.model.js";
 import WeeklySnapshotModel from "./weeklysnapshot.model.js";
+import DailyQuoteModel from "./dailyquote.model.js";
 
 
 
@@ -41,6 +42,8 @@ db.user.hasMany(db.userJournalModel, {onDelete: 'CASCADE', hooks: true});
 
 db.weeklySnapshotModel = WeeklySnapshotModel(sequelize, Sequelize);
 db.weeklySnapshotModel.belongsTo(db.user);
+
+db.dailyQuoteModel = DailyQuoteModel(sequelize, Sequelize);
 // db.us
 
 
