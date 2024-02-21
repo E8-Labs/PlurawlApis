@@ -8,6 +8,7 @@ import chalk from "chalk";
 import moment from "moment-timezone";
 
 import { GenerateQuote } from "./controllers/user.controller.js";
+import db from "./models/index.js";
 
 import { getWeeklyDates, getJournalsInAWeek, GetSnapshotFromJournals } from "./controllers/journal.controller.js";
 
