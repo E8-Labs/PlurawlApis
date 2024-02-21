@@ -18,7 +18,7 @@ const UserJournalModel = (sequelize, Sequelize) => {
         default: ''
       },
       snapshot: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(5000),
         default: ''
       },
       mood: {

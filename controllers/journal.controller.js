@@ -51,7 +51,7 @@ export const AddJournal = async (req, res) => {
                             acronym: req.body.pronunciation,
                             UserId: user.id,
                             type: CheckInTypes.TypeJournal, // checkintypes
-                            userJournalId: result.id
+                            UserJournalId: result.id
                         }
 
                         let added = addCheckin(checkinData);
@@ -160,14 +160,32 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     }
 
 
+    let checkinCondition = {
+        createdAt: {
+            [Op.between]: [lastMonday, lastSunday]
+        },
+    }
+    if(userid != null){
+        checkinCondition = {
+            createdAt: {
+                [Op.between]: [lastMonday, lastSunday]
+            },
+            UserId: userid,
+        }
+    }
+    let checkins = await db.userCheckinModel.findAll({
+        where: checkinCondition
+    })
+
+
     var lastWeekVibe = {
         journals: journals, totalJournals: journals.length, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
-        lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2
+        lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, checkins: checkins
     }
     // console.log("Vibe is ", lastWeekVibe)
-    if (journals.length == 0) {
-        return null
-    }
+    // if (journals.length == 0) {
+    //     return null
+    // }
     return lastWeekVibe
 }
 
