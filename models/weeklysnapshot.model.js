@@ -21,7 +21,7 @@ const WeeklySnapshotModel = (sequelize, Sequelize) => {
         default: ''
       },
       snapshot: {
-        type: Sequelize.STRING(1000),
+        type: Sequelize.STRING(10000),
         default: ''
       },
     },
