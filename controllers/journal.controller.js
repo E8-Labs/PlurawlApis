@@ -183,9 +183,9 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
         lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, checkins: checkins
     }
     // console.log("Vibe is ", lastWeekVibe)
-    // if (journals.length == 0) {
-    //     return null
-    // }
+    if (journals.length == 0) {
+        return null
+    }
     return lastWeekVibe
 }
 
