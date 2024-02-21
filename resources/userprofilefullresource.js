@@ -130,6 +130,7 @@ lastMonday.setDate(lastSunday.getDate() - 6);
         name: user.firstname,
         profile_image: user.profile_image,
         email: user.email,
+        name: user.name,
         state: user.state,
         role: user.role,
         city: user.city,
