@@ -30,7 +30,7 @@ const UserJournalModel = (sequelize, Sequelize) => {
         default: ''
       },
       description: {
-        type: Sequelize.STRING(5000),
+        type: Sequelize.STRING(3000),
         default: ''
       },
       pronunciation: {

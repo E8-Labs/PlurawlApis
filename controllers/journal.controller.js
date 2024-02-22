@@ -322,3 +322,141 @@ export const GetSnapshotFromJournals = async (text) => {
 
     return ""
 }
+
+
+
+
+export const analyzeJournal = async (req, res) => {
+    setShowIndicator(true)
+    let text = `Depending on the following journal written by user give me the mood of the writer from one of these:  Moods: "High energy, Pleasant", "High energy, Unpleasant", "Low energy, Pleasant", "Low energy, unpleasant" And also give me a proper feeling in one word that best describes the paragraph and falls under the mood selected above. Also give me the acronym for this feeling and a little description describing the meaning to the user of that word. Include how we can pronounce this feeling word as well. This is the paragraph: ${inputValue} Now give me a snapshot of the conversation which is a small description that tells how the user feels and what is mood and energy is. Do mention the mood and feeling in the paragraph and give me appropriate information that i can use to highligh those words or sentences in the snapshot using react native.
+    
+    It should also provide me one of the following 7 cognitive distortions (CD). List of Cognitive distortions, Blame, Filtering, Polarized Thinking, Personalization, Fortune-Telling, Negative Emotional reasoning, 
+    
+    Now the response should be a json object with the following keys: 
+    
+    {
+        mood: Hight energy, Pleasant
+        feeling: {
+            title: Anxious,
+            acronym: acronym here,
+            description: Description goes here,
+        pronunciation: “how to pronounce”
+        },
+        snapshot: Snapshot of the conversation,
+        cd: this is cognitive distortions,
+        texthighlight:{
+            // info about highlighting text here
+        },
+    comments:"Further comments you want to add
+    }
+
+    in the texthighlight key, only give me a list(array of strings) of words and sentences that should be highlighted.
+    Make sure that the response string is just a json object and no extra text. If you want to add additional info. Then add it inside the comment key in the json object. 
+    `
+    let messageData = []
+    messageData.push({
+        role: "user",
+        content: text,
+    })
+
+    const APIKEY = process.env.AIKey;
+    // console.log(APIKEY)
+    // console.log(messageData)
+    const headers = {}
+    const data = {
+        model: "gpt-4-1106-preview",
+        messages: messageData,
+        // max_tokens: 1000,
+    }
+
+    try {
+        console.log("Creating snapshot")
+        const result = await axios.post("https://api.openai.com/v1/chat/completions", data, {
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${APIKEY}`
+            }
+        });
+
+        // console.log("Api result is ", result)
+        if (result.status === 200) {
+            let gptMessage = result.data.choices[0].message.content;
+            gptMessage = gptMessage.replace('```', '');
+            gptMessage = gptMessage.replace('json', '');
+            gptMessage = gptMessage.replace('```', '');
+            // console.log("GPT Response is  ", gptMessage)
+            let json = JSON.parse(gptMessage)
+            console.log("Json obejct is ", json)
+            setSnapShot(json)
+            setShowModal(true)
+            setShowIndicator(false)
+            // return gptMessage;
+        }
+        else {
+            setShowIndicator(false)
+            return null;
+        }
+    }
+    catch (error) {
+        setShowIndicator(false)
+        console.log("Exception in open ai call ", error)
+    }
+
+}
+
+
+export const GenerateListOfMoods = async(req, res) => {
+    console.log("Fetching moods from gpt")
+    let userMood = req.mood
+    let messageData = [];
+    messageData.push({
+        role: "user",
+        content: `Generate me a list of 10 single word moods that fall under this category. Category: ${userMood}.
+        Make sure the list is a javascript object list and there is nothing extra on the list so that i can parse it easily in the code. 
+Each javascript object should consist of the following keys:
+{
+feeling: "feeling for the category goes here",
+"description": "description of the feeling word",
+pronunciation: "How to pronounce the word"
+}  Just give me a json object and no extra text out of the json object so that i can parse it to json in code .Don't add any extra text other than the json object.` // this data is being sent to chatgpt so only message should be sent
+    });
+    const APIKEY = process.env.AIKey;
+    // console.log(APIKEY)
+    // console.log(messageData)
+    const headers = {}
+    const data = {
+        model: "gpt-4-1106-preview",
+        messages: messageData,
+        // max_tokens: 1000,
+    }
+    try {
+        const result = await axios.post("https://api.openai.com/v1/chat/completions", data, {
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${APIKEY}`
+            }
+        });
+
+        console.log("Api result is ", result)
+        if (result.status === 200) {
+            let gptMessage = result.data.choices[0].message.content;
+            gptMessage = gptMessage.replace('```', '');
+            gptMessage = gptMessage.replace('json', '');
+            gptMessage = gptMessage.replace('```', '');
+            console.log("List of moods is ", gptMessage)
+            let listOfMoods = JSON.parse(gptMessage)
+            // setMoods(listOfMoods)
+            // setShowIndicater(false)
+            console.log("Moods array is ", listOfMoods)
+            res.send({status: true, message: "Moods", data: listOfMoods})
+            // return gptMessage;
+        }
+        else {
+            res.send({status: false, message: "Moods", data: null})
+        }
+    }
+    catch (error) {
+        console.log("Exception in open ai call ", error)
+        res.send({status: false, message: "Moods", data: error})
+    }
+}
