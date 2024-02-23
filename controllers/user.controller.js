@@ -21,7 +21,7 @@ import UserProfileFullResource from "../resources/userprofilefullresource.js";
 
 export const RegisterUser = async (req, res) => {
 
-
+console.log("Checking user")
     // res.send({data: {text: "kanjar Students"}, message: "Chawal Students", status: true})
 
     const alreadyUser = await User.findOne({

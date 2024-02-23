@@ -48,11 +48,11 @@ import db from "./models/index.js";
 import journalRouter from "./routes/journal.router.js";
 
 db.sequelize.authenticate().then(() => {
-  // console.log("Connected to the database!");
+  console.log("Connected to the database!");
 })
   .catch(err => {
-    // console.log("Cannot connect to the database!", err);
-    process.exit();
+    console.log("Cannot connect to the database!", err);
+    // process.exit();
   });
 
 // sync

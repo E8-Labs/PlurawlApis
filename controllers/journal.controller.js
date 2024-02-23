@@ -326,9 +326,10 @@ export const GetSnapshotFromJournals = async (text) => {
 
 
 
-export const analyzeJournal = async (req, res) => {
-    setShowIndicator(true)
-    let text = `Depending on the following journal written by user give me the mood of the writer from one of these:  Moods: "High energy, Pleasant", "High energy, Unpleasant", "Low energy, Pleasant", "Low energy, unpleasant" And also give me a proper feeling in one word that best describes the paragraph and falls under the mood selected above. Also give me the acronym for this feeling and a little description describing the meaning to the user of that word. Include how we can pronounce this feeling word as well. This is the paragraph: ${inputValue} Now give me a snapshot of the conversation which is a small description that tells how the user feels and what is mood and energy is. Do mention the mood and feeling in the paragraph and give me appropriate information that i can use to highligh those words or sentences in the snapshot using react native.
+export const AnalyzeJournal = async (req, res) => {
+    // setShowIndicator(true)
+    let paragraph = req.body.paragraph;
+    let text = `Depending on the following journal written by user give me the mood of the writer from one of these:  Moods: "High energy, Pleasant", "High energy, Unpleasant", "Low energy, Pleasant", "Low energy, unpleasant" And also give me a proper feeling in one word that best describes the paragraph and falls under the mood selected above. Also give me the acronym for this feeling and a little description describing the meaning to the user of that word. Include how we can pronounce this feeling word as well. This is the paragraph: ${paragraph} Now give me a snapshot of the conversation which is a small description that tells how the user feels and what is mood and energy is. Do mention the mood and feeling in the paragraph and give me appropriate information that i can use to highligh those words or sentences in the snapshot using react native.
     
     It should also provide me one of the following 7 cognitive distortions (CD). List of Cognitive distortions, Blame, Filtering, Polarized Thinking, Personalization, Fortune-Telling, Negative Emotional reasoning, 
     
@@ -387,19 +388,15 @@ export const analyzeJournal = async (req, res) => {
             // console.log("GPT Response is  ", gptMessage)
             let json = JSON.parse(gptMessage)
             console.log("Json obejct is ", json)
-            setSnapShot(json)
-            setShowModal(true)
-            setShowIndicator(false)
+            res.send({status: true, data: json, message: "Snapshot"})
             // return gptMessage;
         }
         else {
-            setShowIndicator(false)
-            return null;
+            res.send({status: false, message: "Snapshot not obtained", data: null})
         }
     }
     catch (error) {
-        setShowIndicator(false)
-        console.log("Exception in open ai call ", error)
+        res.send({status: false, message: "snapshot exception", data: error})
     }
 
 }
