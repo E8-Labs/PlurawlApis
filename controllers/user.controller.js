@@ -128,7 +128,8 @@ export const LoginUser = async (req, res) => {
             if (result) {
                 JWT.sign({ user }, process.env.SecretJwtKey, { expiresIn: '365d' }, async (error, token) => {
                     if (error) {
-
+                        console.log(error)
+                        res.send({ data: error, status: false, message: "Soome error occurred" });
                     }
                     else {
                         let u = await UserProfileFullResource(user);
