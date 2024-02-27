@@ -14,4 +14,4 @@ export const verifyJwtToken = (req, response, next)=>{
     }
 }
 
-// module.exports = {verifyJwtToken};
+export default verifyJwtToken;

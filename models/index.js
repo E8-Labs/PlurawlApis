@@ -32,6 +32,9 @@ import UserJournalModel from "./userjournal.model.js";
 import WeeklySnapshotModel from "./weeklysnapshot.model.js";
 import DailyQuoteModel from "./dailyquote.model.js";
 
+import chatModel from "./chat/chat.model.js";
+import messageModel from "./chat/message.model.js";
+
 
 
 db.user = UserModel(sequelize, Sequelize);
@@ -60,6 +63,15 @@ db.user.hasMany(db.userCheckinModel, {onDelete: 'CASCADE', hooks: true});
 
 db.userCheckinModel.belongsTo(db.userJournalModel);
 db.userJournalModel.hasOne(db.userCheckinModel);
+
+
+//chat
+db.chatModel = chatModel(sequelize, Sequelize);
+db.chatModel.belongsTo(db.user);
+db.chatModel.belongsTo(db.userJournalModel);
+
+db.messageModel = messageModel(sequelize, Sequelize);
+db.messageModel.belongsTo(db.chatModel);
 
 
 export default db;
