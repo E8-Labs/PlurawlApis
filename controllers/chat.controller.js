@@ -28,19 +28,41 @@ export const CreateChat = async (req, res) => {
         if (authData){
             console.log("User in chat is ")
             console.log(authData)
+
+            let cd = null
+            if(typeof(req.body.cd) !== 'undefined'){
+                cd = req.body.cd
+            }
+            let snapshot = null
+            if(typeof(req.body.snapshot) !== 'undefined'){
+                snapshot = req.body.snapshot
+            }
             try{
                 const result = await db.sequelize.transaction(async (t) => {
                     const promptid = req.body.promptId;
                 const userid = authData.user.id;
                 
                     const chatData = {
-                        title: "",
-                        description: "",
-                        lastMessage: "",
+                        title: req.body.title,
                         UserId: userid,
+                        snapshot: snapshot,
+                        cd: cd
                     }
                     
                     let chatCreated = await Chat.create(chatData, { transaction: t })
+                    if(chatCreated){
+                        if(cd){
+                            let cdText = `What do you think is causing you to use ${cd}?`
+                            const m1 = await db.messageModel.create({
+                                message: cdText,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+                                ChatId: chatCreated.id,
+                                from: "gpt",
+                                type: "text",
+                                title: "",
+                            }, { transaction: t });
+
+                        }
+                    }
                     res.send({message: "Chat created", data: chatCreated, status: true});
                     
                 
@@ -56,6 +78,14 @@ export const CreateChat = async (req, res) => {
             res.send({status: false, message: "Unauthenticated user", data: null})
         }
     })
+}
+
+
+function GenerateFirstMessageForCD (chat, message){
+    let messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: message}]
+                                    if(chat.snapshot !== null){
+                                        messagesData.splice(0, 0, {role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${m.message}. Now user will respond. Reply accordingly by keeping inside the scope of the journal context.`})
+                                    }
 }
 
 export const UpdateChat = async(req, res) =>{
@@ -124,40 +154,7 @@ async function sendQueryToGpt (message, messageData){
                 }
 }
 
-//not being used
-async function sendQueryToRememberApi(chatid, messageData){
-    let url = "https://remembrall.dev/api/openai/v1/chat/completions"
-    console.log("Remember Key ", process.env.RememberAllKey)
-    console.log("Chatid ", chatid)
-    console.log("Messages", messageData)
-    const APIKEY = process.env.AIKey;
-    const data = {
-        model: "gpt-4",
-        // temperature: 1.2,
-        messages: messageData,
-        max_tokens: 400,
-    }
-    
-    
-    const result =  await axios.post("https://remembrall.dev/api/openai/v1/chat/completions", data, {
-        headers: {
-            'content-type': 'application/json',
-            'Authorization': `Bearer ${APIKEY}`,
-            "x-gp-api-key" : `${process.env.RememberAllKey}`,
-            "x-gp-remember": `${chatid}`
-        }
-    });
-    
-    console.log(result)
-    
-    if(result.status === 200){
-        let gptMessage = result.data.choices[0].message.content;
-        return gptMessage;
-    }
-    else{
-        return null;
-    }
-}
+
 
 
 export const SendMessage = async(req, res) => {
@@ -204,10 +201,16 @@ export const SendMessage = async(req, res) => {
                                         let m = dbmessages[i]
                                         messagesData.push({role: m.from === "me" ? "user" : "system", content: m.message})
                                     }
+                                    if(chat.snapshot !== null){
+                                        messagesData.splice(0, 0, {role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${m.message}. The further conversation follows.`})
+                                    }
                                 }
                                 else{
                                     console.log("No messages, new chat")
                                     messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: message}]
+                                    if(chat.snapshot !== null){
+                                        messagesData.splice(0, 0, {role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${m.message}. Now user will respond. Reply accordingly by keeping inside the scope of the journal context.`})
+                                    }
                                     // messagesData = [{role: "user", content: messages[0].message}]
                                 }
                             // }
@@ -315,7 +318,7 @@ export const GetMessages = async(req, res) => {
         if(authData){
             const userid = authData.user.id;
             const chatid = req.query.chatid;
-            const chat = await Chat.findByPk(chatid);
+            const chat = await db.chatModel.findByPk(chatid);
             if(chat){
                 const offset = Number(req.query.offset || 0);
                 const messages = await Message.findAll({
@@ -323,10 +326,10 @@ export const GetMessages = async(req, res) => {
                         ChatId: chatid
                     },
                     offset: offset,
-                    limit: 20,
+                    limit: 100,
                 });
                 if(messages){
-                    res.send({status: true, message: "Messages ", data: await MessageResource(messages)});
+                    res.send({status: true, message: "Messages ", data: await messages});
                 }
                 else{
                     res.send({status: false, message: "error sending message", data: null})
@@ -334,7 +337,9 @@ export const GetMessages = async(req, res) => {
 
             }
             else{
+                console.log("Not such chat", chatid)
                 // no such chat exists
+                res.send({status: false, message: "No such chat", data: null})
             }
         }
         else{

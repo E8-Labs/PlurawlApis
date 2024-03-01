@@ -4,17 +4,19 @@ let chatModel = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         default: ''
       },
-      description: {
-        type: Sequelize.STRING(1000)
-      },
+      // description: {
+      //   type: Sequelize.STRING(200)
+      // },
       
-      lastMessage: {
+      // lastMessage: {
+      //   type: Sequelize.STRING(5000)
+      // },
+      snapshot: { // snapshot of journal
         type: Sequelize.STRING(5000)
       },
-      summary: {
-        type: Sequelize.STRING(5000)
+      cd: { // cd of journal
+        type: Sequelize.STRING(50)
       },
-      
       
     });
     // Chat.belongsTo(User);

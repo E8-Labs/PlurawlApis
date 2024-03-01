@@ -39,9 +39,10 @@ export const AddJournal = async (req, res) => {
             let data = req.body;
             let user = authData.user;
             data.UserId = user.id;
+            let chatid = req.body.chatid;
             // data.cod = req.body.cd;
             try {
-                db.userJournalModel.create(data).then((result) => {
+                db.userJournalModel.create(data).then( async (result) => {
 
                     if (req.body.save_as_checkin === true) {
                         let checkinData = {
@@ -57,13 +58,22 @@ export const AddJournal = async (req, res) => {
                         let added = addCheckin(checkinData);
 
                     }
+                    if(result){
+                        // set Journal Id to chat.
+                        let chat = await db.chatModel.findByPk(chatid)
+                        chat.UserJournalId = result.id
+                        let chatSaved = await chat.save();
+                        console.log("Chat Saved ", chatSaved)
+                    }
                     res.send({ status: true, message: "Journal added", data: result })
                 })
                     .catch((error) => {
+                        console.log(error)
                         res.send({ status: true, message: "Journal not added", data: error })
                     })
             }
             catch (error) {
+                console.log("Try ", error)
                 res.send({ status: true, message: "Journal not added", data: error })
             }
         }
