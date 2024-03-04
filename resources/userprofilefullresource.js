@@ -1,6 +1,7 @@
 import db from "../models/index.js";
 import CheckInTypes from "../models/checkintype.js";
 import CheckinMoods from "../models/checkinmoods.js";
+import { getJournalsInAWeek, getWeeklyDates } from "../controllers/journal.controller.js";
 
 import moment from "moment-timezone";
 // import LoanStatus from "../../models/loanstatus.js";
@@ -46,31 +47,20 @@ async function getUserData(user, currentUser = null) {
         }
     })
 
-    // let houses = await db.HouseModel.findOne({where: {
-    //     UserId: user.id,
-    // }});
-
-
-    // let currentAciveLoan = await db.LoanModel.findOne({where: {
-    //     loan_status:{
-    //         [Op.or]: [LoanStatus.StatusApproved, LoanStatus.StatusPending]
-    //     }
-    // }})
-    // let loanRes = null
-    // if(currentAciveLoan){
-    //     loanRes = await UserLoanFullResource(currentAciveLoan)
-    // }
-
-    //last week vibe
-    // Get the current date
+    
     const originalDate = new Date();
     const currentDate = new Date(originalDate.getFullYear(), originalDate.getMonth(), originalDate.getDate());
 
 // Calculate the start and end date of the last week
 const lastSunday = new Date(currentDate);
-lastSunday.setDate(currentDate.getDate() - ((currentDate.getDay() + 6) % 7));
+console.log(`Date Calc${currentDate.getDate()} - ${currentDate.getDay()}`);
+lastSunday.setDate(currentDate.getDate() - (currentDate.getDay()));
 const lastMonday = new Date(lastSunday);
 lastMonday.setDate(lastSunday.getDate() - 6);
+console.log("Last Sunday is ", lastSunday)
+console.log("Last Monday is ", lastMonday)
+
+let journals = await getJournalsInAWeek(lastMonday, lastSunday, user.id)
 
     // Query to retrieve data for the last week
     let checkins = await db.userCheckinModel.findAll({
@@ -121,9 +111,11 @@ lastMonday.setDate(lastSunday.getDate() - 6);
         mostCheckedInMood = CheckinMoods.MoodHeup;
     }
 
-
-    var lastWeekVibe = {checkins: [], startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood, 
-        lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2}
+    var lastWeekVibe = null
+    if(journals.length > 0 || checkins.length > 0){
+        lastWeekVibe = {checkins: [], journals: journals, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood, 
+            lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2}
+    }
 
     const UserFullResource = {
         id: user.id,

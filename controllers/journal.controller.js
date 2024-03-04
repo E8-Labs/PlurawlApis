@@ -206,7 +206,7 @@ export const getWeeklyDates = (numberOfWeeks = 30) => {
 
     // Calculate the start and end date of the last week
     let lastSunday = new Date(currentDate);
-    lastSunday.setDate(currentDate.getDate() - ((currentDate.getDay() + 6) % 7));
+    lastSunday.setDate(currentDate.getDate() - currentDate.getDay());
     let lastMonday = new Date(lastSunday);
     lastMonday.setDate(lastSunday.getDate() - 6);
 
