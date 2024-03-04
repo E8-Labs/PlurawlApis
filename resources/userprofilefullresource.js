@@ -112,10 +112,22 @@ let journals = await getJournalsInAWeek(lastMonday, lastSunday, user.id)
     }
 
     var lastWeekVibe = null
-    if(journals.length > 0 || checkins.length > 0){
+    // if(journals.length > 0 || checkins.length > 0){
         lastWeekVibe = {checkins: [], journals: journals, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood, 
             lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2}
-    }
+    // }
+
+    let year = moment(lastSunday).format("YYYY");
+    console.log(`FInding ${year} ${dateSt2} ${dateSt1}`)
+    let snapshot = await db.weeklySnapshotModel.findOne({
+        where:{
+            sunday: dateSt2,
+            monday: dateSt1,
+            year: year,
+            UserId: user.id,
+        }
+    })
+    lastWeekVibe.snapshot = snapshot;
 
     const UserFullResource = {
         id: user.id,
