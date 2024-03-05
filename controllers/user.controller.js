@@ -268,6 +268,9 @@ export const UpdateProfile = async (req, res) => {
                 if (typeof req.body.name !== 'undefined') {
                     user.name = req.body.name;
                 }
+                if (typeof req.body.industry !== 'undefined') {
+                    user.industry = req.body.industry;
+                }
 
                 const saved = await user.save();
 

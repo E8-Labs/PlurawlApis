@@ -144,6 +144,7 @@ async function getUserData(user, currentUser = null) {
         role: user.role,
         city: user.city,
         company: user.company,
+        industry: user.industry,
         title: user.title,
         race: user.race,
         lgbtq: user.lgbtq,
