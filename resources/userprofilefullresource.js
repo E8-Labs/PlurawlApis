@@ -47,20 +47,20 @@ async function getUserData(user, currentUser = null) {
         }
     })
 
-    
+
     const originalDate = new Date();
     const currentDate = new Date(originalDate.getFullYear(), originalDate.getMonth(), originalDate.getDate());
 
-// Calculate the start and end date of the last week
-const lastSunday = new Date(currentDate);
-console.log(`Date Calc${currentDate.getDate()} - ${currentDate.getDay()}`);
-lastSunday.setDate(currentDate.getDate() - (currentDate.getDay()));
-const lastMonday = new Date(lastSunday);
-lastMonday.setDate(lastSunday.getDate() - 6);
-console.log("Last Sunday is ", lastSunday)
-console.log("Last Monday is ", lastMonday)
+    // Calculate the start and end date of the last week
+    const lastSunday = new Date(currentDate);
+    console.log(`Date Calc${currentDate.getDate()} - ${currentDate.getDay()}`);
+    lastSunday.setDate(currentDate.getDate() - (currentDate.getDay()));
+    const lastMonday = new Date(lastSunday);
+    lastMonday.setDate(lastSunday.getDate() - 6);
+    console.log("Last Sunday is ", lastSunday)
+    console.log("Last Monday is ", lastMonday)
 
-let journals = await getJournalsInAWeek(lastMonday, lastSunday, user.id)
+    let journals = await getJournalsInAWeek(lastMonday, lastSunday, user.id)
 
     // Query to retrieve data for the last week
     let checkins = await db.userCheckinModel.findAll({
@@ -79,55 +79,60 @@ let journals = await getJournalsInAWeek(lastMonday, lastSunday, user.id)
     // });
     let dateSt1 = moment(lastMonday).format("MMM DD")
     let dateSt2 = moment(lastSunday).format("MMM DD")
-    
+
     var lep = 0
     var hep = 0
     var leup = 0
     var heup = 0
-    for(let i = 0; i < checkins.length; i++){
+    for (let i = 0; i < checkins.length; i++) {
         let cin = checkins[i];
-        if(cin.mood === CheckinMoods.MoodHep){
+        if (cin.mood === CheckinMoods.MoodHep) {
             hep = hep + 1
         }
-        if(cin.mood === CheckinMoods.MoodLep){
+        if (cin.mood === CheckinMoods.MoodLep) {
             lep = lep + 1
         }
-        if(cin.mood === CheckinMoods.MoodLeup){
+        if (cin.mood === CheckinMoods.MoodLeup) {
             leup = leup + 1
         }
-        if(cin.mood === CheckinMoods.MoodHeup){
+        if (cin.mood === CheckinMoods.MoodHeup) {
             heup = heup + 1
         }
     }
 
     var mostCheckedInMood = CheckinMoods.MoodHep;
-    if(lep > hep && lep < leup && lep >> heup){
+    if (lep > hep && lep < leup && lep >> heup) {
         mostCheckedInMood = CheckinMoods.MoodLep;
     }
-    else if(leup > hep && leup < lep && leup >> heup){
+    else if (leup > hep && leup < lep && leup >> heup) {
         mostCheckedInMood = CheckinMoods.MoodLeup;
     }
-    else if(heup > hep && heup < lep && heup >> leup){
+    else if (heup > hep && heup < lep && heup >> leup) {
         mostCheckedInMood = CheckinMoods.MoodHeup;
     }
 
     var lastWeekVibe = null
-    if(journals.length > 0 || checkins.length > 0){
-        lastWeekVibe = {checkins: [], journals: journals, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood, 
-            lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2}
+    if (journals.length > 0 || checkins.length > 0) {
+        lastWeekVibe = {
+            checkins: [], journals: journals, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
+            lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2
+        }
+
+        let year = moment(lastSunday).format("YYYY");
+        console.log(`FInding ${year} ${dateSt2} ${dateSt1}`)
+        let snapshot = await db.weeklySnapshotModel.findOne({
+            where: {
+                sunday: dateSt2,
+                monday: dateSt1,
+                year: year,
+                UserId: user.id,
+            }
+        })
+        lastWeekVibe.snapshot = snapshot;
     }
 
-    let year = moment(lastSunday).format("YYYY");
-    console.log(`FInding ${year} ${dateSt2} ${dateSt1}`)
-    let snapshot = await db.weeklySnapshotModel.findOne({
-        where:{
-            sunday: dateSt2,
-            monday: dateSt1,
-            year: year,
-            UserId: user.id,
-        }
-    })
-    lastWeekVibe.snapshot = snapshot;
+
+
 
     const UserFullResource = {
         id: user.id,
