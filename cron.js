@@ -149,7 +149,7 @@ job.start();
 
 
 //run job to get Daily quotes
-const quoteJob = nodeCron.schedule("*/2 0-2 * * *", async function fetchPendingBankTransactions() {
+const quoteJob = nodeCron.schedule("*/2 0-20 * * *", async function fetchPendingBankTransactions() {
   // const currentDate = new Date();
   let time = moment()
   console.log("Quote Crone Job Running at time ", time);
