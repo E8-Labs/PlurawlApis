@@ -467,3 +467,80 @@ pronunciation: "How to pronounce the word"
         res.send({status: false, message: "Moods", data: error})
     }
 }
+
+
+export const GetCalendarEventPrompt = async (req, res) => {
+    
+    let text = "Generate a motivational prompt from the following list of events from my calendar that tells me to get ready for the upcoming meetings and events. Response should be a string and it should only contain 100 characters of text from the above events summary."
+    if (typeof(req.query.eventTitle) !== 'undefined') {
+    //   text = `Generate a motivational prompt from the following list of events from my calendar that tells me to get ready for the upcoming meetings and events, 
+    // Event Title : ${event[0].title} at ${event[0].startDate}
+    // Notes: ${event[0].notes}.
+    
+    // Response should be a string and it should only contain 100 characters of text from the above events summary.
+    // Don't include any extra text. The prompt should be 100 characters.`
+
+
+
+    text = `Use the calendar event “${req.query.eventTitle}” to generate positive affirmations for the user. The output should be no more than X number of characters. For example, if the event name is “Product Demo with Shawn” create positive affirmations like the following:
+
+    “You got this! “Event Name” coming up soon” 
+    
+    “Breath to prep for “event name”
+    
+    "Ace it at 'Product Demo with Shawn'!"
+    (Under 75 characters)
+    "You're ready! 'Product Demo with Shawn' will be great."
+    
+    Response should be a string and it should only contain 100 characters of text from the above events summary.
+    Don't include any extra text. The prompt should not exceed 150 characters at max.
+    `
+    }
+    let messageData = []
+    messageData.push({
+      role: "user",
+      content: text,
+    })
+
+    const APIKEY = process.env.AIKey;
+    // console.log(APIKEY)
+    // console.log(messageData)
+    const data = {
+      model: "gpt-4-1106-preview",
+      messages: messageData,
+      // max_tokens: 1000,
+    }
+
+    try {
+      console.log("Creating snapshot")
+      const result = await axios.post("https://api.openai.com/v1/chat/completions", data, {
+        headers: {
+          'content-type': 'application/json',
+          'Authorization': `Bearer ${APIKEY}`
+        }
+      });
+
+      // console.log("Api result is ", result)
+      if (result.status === 200) {
+        let gptMessage = result.data.choices[0].message.content;
+        // gptMessage = gptMessage.replace('```json', '');
+        // gptMessage = gptMessage.replace('json', '');
+        // gptMessage = gptMessage.replace('```', '');
+        console.log("GPT Response is  ", gptMessage)
+         res.send({data: gptMessage, status: true, message: "Prompt generated"});
+
+        // return gptMessage;
+      }
+      else {
+        console.log("error message in open ai call ", json.messsage)
+        res.send({data: "", status: false, message: "Prompt not generated"});
+      }
+    }
+    catch (error) {
+        res.send({data: "", status: false, message: "Prompt not generated", error: error});
+      console.log("Exception in open ai call ", error)
+    }
+  };
+
+
+
