@@ -23,6 +23,10 @@ const UserModel = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         default: ''
       },
+      industry: {
+        type: Sequelize.STRING,
+        default: ''
+      },
       city: {
         type: Sequelize.STRING,
         default: ''
