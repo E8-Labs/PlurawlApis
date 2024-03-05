@@ -202,14 +202,14 @@ export const SendMessage = async(req, res) => {
                                         messagesData.push({role: m.from === "me" ? "user" : "system", content: m.message})
                                     }
                                     if(chat.snapshot !== null){
-                                        messagesData.splice(0, 0, {role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${m.message}. The further conversation follows.`})
+                                        messagesData.splice(0, 0, {role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${chat.snapshot}. The further conversation follows.`})
                                     }
                                 }
                                 else{
                                     console.log("No messages, new chat")
                                     messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: message}]
                                     if(chat.snapshot !== null){
-                                        messagesData.splice(0, 0, {role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${m.message}. Now user will respond. Reply accordingly by keeping inside the scope of the journal context.`})
+                                        messagesData.splice(0, 0, {role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${chat.snapshot}. Now user will respond. Reply accordingly by keeping inside the scope of the journal context.`})
                                     }
                                     // messagesData = [{role: "user", content: messages[0].message}]
                                 }

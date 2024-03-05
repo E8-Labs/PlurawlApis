@@ -122,8 +122,6 @@ const job = nodeCron.schedule("*/10 0-2 * * Sunday", async function fetchPending
         let ujs = UserVibes[`${uid}`]
         ujs.push(j)
         UserVibes[uid] = ujs
-
-
       } else {
         console.log(`Key with UserId ${uid} does not exist.`);
         UserVibes[uid] = [j]
