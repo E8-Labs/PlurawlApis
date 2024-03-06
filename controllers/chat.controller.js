@@ -61,6 +61,7 @@ export const CreateChat = async (req, res) => {
                                 type: "text",
                                 title: "",
                             }, { transaction: t });
+                            res.send({ message: "Chat created", data: chatCreated, status: true });
 
                         }
                         else if (typeof (req.body.type) !== 'undefined') {
@@ -68,16 +69,21 @@ export const CreateChat = async (req, res) => {
                             if (type === "AIChat") {
                                 //started from the main screen dashboard
                                 //this will lead to  entry of journal through chat
-                              let messages = await GenerateFirstMessageForAIChat(chatCreated, authData.user);
-                              if(messages){
-
-                              }
+                              GenerateFirstMessageForAIChat(chatCreated, authData.user, (messages)=>{
+                                if(messages){
+                                    res.send({ message: "Chat created", data: chatCreated, status: true });
+                                  }
+                                  else{
+                                    res.send({ message: "Chat created", data: chatCreated, status: true });
+                                  }
+                              })
+                              
 
                             }
                         }
 
                     }
-                    res.send({ message: "Chat created", data: chatCreated, status: true });
+                    
 
 
                 })
@@ -95,7 +101,7 @@ export const CreateChat = async (req, res) => {
 }
 
 
-async function GenerateFirstMessageForAIChat(chat, user) {
+async function GenerateFirstMessageForAIChat(chat, user, callback) {
     let name = user.name;
     let cdText = `You're an advanced AI self discovery coach and people engage with you to checkin and journal about their life. 
 
@@ -146,12 +152,13 @@ async function GenerateFirstMessageForAIChat(chat, user) {
 
 
                 // await t.commit();
-                return [m1, m2]
+
+                callback( [m1, m2])
             })
 
         }
         else {
-            return null
+            callback(null)
         }
 
     })
