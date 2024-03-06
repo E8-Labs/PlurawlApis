@@ -27,7 +27,7 @@ dotenv.config();
 
 let number = 0// "/2 * * * Monday"
 //*/10 0-1 * * Sunday
-const job = nodeCron.schedule("*/10 0-20 * * Sunday, Monday", async function fetchPendingBankTransactions() {
+const job = nodeCron.schedule("*/1 0-20 * * 0-6", async function fetchPendingBankTransactions() {
   // Download the latest info on the transactions and update database accordingly
   console.log(chalk.green("generate context here "));
   // return
