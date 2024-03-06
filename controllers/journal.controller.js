@@ -544,3 +544,60 @@ export const GetCalendarEventPrompt = async (req, res) => {
 
 
 
+
+
+  export const GetInsights = (req, res) => {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (authData) {
+            let user = authData.user;
+            console.log("Getting insights for user ", user.name);
+            //get data for the last month for now
+            getCheckinsForLast30Days(user).then(dateCheckins => {
+                console.log(dateCheckins); // Output the result
+                res.send({data: dateCheckins, status: true, message: "Data obtained"});
+              }).catch(error => {
+                console.error('Error fetching check-ins:', error);
+                res.send({data: null, status: false, message: "Some error", error: error});
+              });
+
+        }
+        else{
+            res.send({data: null, status: false, message: "Unauthorized access"});
+        }
+    })
+  }
+
+
+
+async function getCheckinsForLast30Days(user) {
+  const dateCheckins = []; // Array to hold the check-ins for each date
+
+  // Generate dates for the last 30 days
+  for (let i = 0; i < 30; i++) {
+    const date = moment().subtract(i, 'days').format('YYYY-MM-DD'); // Get date i days ago
+    const startDate = moment(date).startOf('day').toDate(); // Start of day
+    const endDate = moment(date).endOf('day').toDate(); // End of day
+
+    // Fetch check-ins for the current date
+    const checkins = await db.userCheckinModel.findAll({
+      where: {
+        createdAt: {
+          [db.Sequelize.Op.gte]: startDate,
+          [db.Sequelize.Op.lt]: endDate
+        },
+        UserId: user.id
+      }
+    });
+
+    // Store the date and its check-ins in the array
+    dateCheckins.push({
+      date,
+      checkins
+    });
+  }
+
+  return dateCheckins; // Return the array of dates and their corresponding check-ins
+}
+
+// Call the function and handle the promise as needed
+
