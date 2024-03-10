@@ -209,15 +209,22 @@ export const getWeeklyDates = (numberOfWeeks = 30) => {
     lastSunday.setDate(currentDate.getDate() - currentDate.getDay());
     let lastMonday = new Date(lastSunday);
     lastMonday.setDate(lastSunday.getDate() - 6);
+
+    lastMonday.setUTCHours(0,0,0,0)
+    lastSunday.setUTCHours(23,59,59,999)
+
+
     console.log( "Last Sunday Date", currentDate.getDate())
     // return
     let dates = []
     if(lastSunday.getDate() !== currentDate.getDate){
         let thisWeekMonday = new Date(lastMonday)
-        thisWeekMonday.setDate(lastSunday.getDate() + 1) // get this ongoing week's monday
-        let todayDate = new Date()
-        todayDate.setDate(thisWeekMonday.getDate() + 1)
 
+        thisWeekMonday.setDate(lastSunday.getDate() + 1) // get this ongoing week's monday
+        thisWeekMonday.setUTCHours(0,0,0,0)
+        let todayDate = new Date()
+        todayDate.setDate(thisWeekMonday.getDate() + 7)
+        todayDate.setUTCHours(23,59,59,999)
         console.log("This week is ongoing ", { monday: thisWeekMonday, sunday: todayDate })
         dates.push({ monday: thisWeekMonday, sunday: todayDate })
     }
