@@ -216,6 +216,7 @@ export const getWeeklyDates = (numberOfWeeks = 30) => {
         let thisWeekMonday = new Date(lastMonday)
         thisWeekMonday.setDate(lastSunday.getDate() + 1) // get this ongoing week's monday
         let todayDate = new Date()
+        todayDate.setDate(thisWeekMonday.getDate() + 1)
 
         console.log("This week is ongoing ", { monday: thisWeekMonday, sunday: todayDate })
         dates.push({ monday: thisWeekMonday, sunday: todayDate })
