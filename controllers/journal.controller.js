@@ -209,8 +209,19 @@ export const getWeeklyDates = (numberOfWeeks = 30) => {
     lastSunday.setDate(currentDate.getDate() - currentDate.getDay());
     let lastMonday = new Date(lastSunday);
     lastMonday.setDate(lastSunday.getDate() - 6);
+    console.log( "Last Sunday Date", currentDate.getDate())
+    // return
+    let dates = []
+    if(lastSunday.getDate() !== currentDate.getDate){
+        let thisWeekMonday = new Date(lastMonday)
+        thisWeekMonday.setDate(lastSunday.getDate() + 1) // get this ongoing week's monday
+        let todayDate = new Date()
 
-    let dates = [{ monday: lastMonday, sunday: lastSunday }]
+        console.log("This week is ongoing ", { monday: thisWeekMonday, sunday: todayDate })
+        dates.push({ monday: thisWeekMonday, sunday: todayDate })
+    }
+
+    dates.push({ monday: lastMonday, sunday: lastSunday })
     for (let i = 0; i < numberOfWeeks; i++) { // last 10 weeks
         let sunday = new Date(lastMonday)
         let monday = new Date(sunday)
@@ -227,13 +238,20 @@ export const getWeeklyDates = (numberOfWeeks = 30) => {
 
 export const GetJournals = (req, res) => {
     let dates = getWeeklyDates(30);
-    console.log("Total Dates ", dates);
+    const originalDate = new Date();
+    const currentDate = new Date(originalDate.getFullYear(), originalDate.getMonth(), originalDate.getDate());
+    // Calculate the start and end date of the last week
+    let lastSunday = new Date(currentDate);
+    lastSunday.setDate(currentDate.getDate() - currentDate.getDay());
+    // dates.slice(0, 0, { monday: originalDate, sunday: lastSunday })
+    console.log("Total Dates ", dates.length);
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
         if (authData) {
             let user = authData.user;
             let userid = user.id;
             var journals = []
             for (let i = 0; i < dates.length; i++) {
+                console.log("Fetching for date ", dates[i])
                 let d = dates[i]
                 let vibe = await getJournalsVibeInAWeek(d.monday, d.sunday, user.id)
                 if (vibe) {
