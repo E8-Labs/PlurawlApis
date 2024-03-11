@@ -68,9 +68,9 @@ export const CreateChat = async (req, res) => {
                             res.send({ message: "Chat created", data: chatCreated, status: true });
 
                         }
-                        else if (typeof (req.body.type) !== 'undefined') {
-                            let type = req.body.type;
-                            if (type === "AIChat") {
+                        else if (typeof (req.body.chattype) !== 'undefined') {
+                            // let type = req.body.type;
+                            if (chattype === "AIChat") {
                                 //started from the main screen dashboard
                                 //this will lead to  entry of journal through chat
                               GenerateFirstMessageForAIChat(chatCreated, authData.user, (messages)=>{
