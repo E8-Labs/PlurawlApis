@@ -4,9 +4,9 @@ let chatModel = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         default: ''
       },
-      // description: {
-      //   type: Sequelize.STRING(200)
-      // },
+      type: {
+        type: Sequelize.STRING(200)
+      },
       
       // lastMessage: {
       //   type: Sequelize.STRING(5000)

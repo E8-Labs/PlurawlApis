@@ -29,6 +29,10 @@ export const CreateChat = async (req, res) => {
             console.log("User in chat is ")
             console.log(authData)
 
+            let chattype = "journal"
+            if (typeof (req.body.chattype) !== 'undefined') {
+                chattype = req.body.chattype
+            }
             let cd = null
             if (typeof (req.body.cd) !== 'undefined') {
                 cd = req.body.cd
@@ -47,7 +51,7 @@ export const CreateChat = async (req, res) => {
                         UserId: userid,
                         snapshot: snapshot,
                         cd: cd,
-                        // type: "journal"
+                        type: chattype
                     }
 
                     let chatCreated = await Chat.create(chatData, { transaction: t })
