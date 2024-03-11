@@ -40,6 +40,11 @@ export const AddJournal = async (req, res) => {
             let user = authData.user;
             data.UserId = user.id;
             let chatid = req.body.chatid;
+
+            let type = CheckInTypes.TypeJournal;
+            if(typeof(req.body.type) !== 'undefined'){
+                type = req.body.type;
+            }
             // data.cod = req.body.cd;
             try {
                 db.userJournalModel.create(data).then( async (result) => {
@@ -51,7 +56,7 @@ export const AddJournal = async (req, res) => {
                             description: req.body.description,
                             acronym: req.body.pronunciation,
                             UserId: user.id,
-                            type: CheckInTypes.TypeJournal, // checkintypes
+                            type: type, // checkintypes
                             UserJournalId: result.id
                         }
 
@@ -85,7 +90,7 @@ export const AddJournal = async (req, res) => {
 }
 
 
-export const getJournalsInAWeek = async (lastMonday, lastSunday, userid = null) => {
+export const getJournalsInAWeek = async (lastMonday, lastSunday, userid = null, type = null) => {
 
 
     // Query to retrieve data for the last week
@@ -95,11 +100,25 @@ export const getJournalsInAWeek = async (lastMonday, lastSunday, userid = null) 
         }
     }
     if (userid !== null) {
-        condition = {
-            createdAt: {
-                [Op.between]: [lastMonday, lastSunday]
-            },
-            UserId: userid
+        if(type === null){ // if null then fetch all except drafts
+            condition = {
+                createdAt: {
+                    [Op.between]: [lastMonday, lastSunday]
+                },
+                type: {
+                    [Op.ne]: 'draft'
+                },
+                UserId: userid
+            }
+        }
+        else{ //if type is provided then only fetch that type | always drafts
+            condition = {
+                createdAt: {
+                    [Op.between]: [lastMonday, lastSunday]
+                },
+                type: type,
+                UserId: userid
+            }
         }
     }
 
@@ -122,11 +141,25 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
             [Op.between]: [lastMonday, lastSunday]
         }
     }
+    let draftCondition = {
+        createdAt: {
+            [Op.between]: [lastMonday, lastSunday]
+        },
+        type: 'draft'
+    }
     if (userid !== null) {
         condition = {
             createdAt: {
                 [Op.between]: [lastMonday, lastSunday]
             },
+            UserId: userid
+        }
+
+        draftCondition = {
+            createdAt: {
+                [Op.between]: [lastMonday, lastSunday]
+            },
+            type: 'draft',
             UserId: userid
         }
     }
@@ -135,6 +168,31 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     let journals = await db.userJournalModel.findAll({
         where: condition
     })
+
+
+    let drafts = await db.userJournalModel.findAll({
+        where: draftCondition
+    })
+
+    let chatCondition = {
+        createdAt: {
+            [Op.between]: [lastMonday, lastSunday]
+        },
+    }
+    if(userid !== null){
+        chatCondition = {
+            createdAt: {
+                [Op.between]: [lastMonday, lastSunday]
+            },
+            UserId: userid
+        }
+    }
+
+    //get chats in a week
+    let chats = db.chatModel.findAll({
+        where: chatCondition
+    })
+
     let dateSt1 = moment(lastMonday).format("MMM DD")
     let dateSt2 = moment(lastSunday).format("MMM DD")
 
@@ -183,13 +241,14 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
             UserId: userid,
         }
     }
+
     let checkins = await db.userCheckinModel.findAll({
         where: checkinCondition
     })
 
 
     var lastWeekVibe = {
-        journals: journals, totalJournals: journals.length, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
+        journals: journals, chats: chats, drafts: drafts, totalJournals: journals.length, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
         lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, checkins: checkins
     }
     // console.log("Vibe is ", lastWeekVibe)

@@ -10,7 +10,7 @@ const UserJournalModel = (sequelize, Sequelize) => {
       },
       type: {
         type: Sequelize.STRING,
-        values: ["manual", 'aichat', 'journal'], // mood can be set via these functions
+        values: ["manual", 'aichat', 'journal', 'draft'], // mood can be set via these functions
         default: 'manual'
       },
       cd: { // cognitive disorder: one of 7 cognitive disorders
