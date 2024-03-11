@@ -42,12 +42,12 @@ export const AddJournal = async (req, res) => {
             let chatid = req.body.chatid;
 
             let type = CheckInTypes.TypeJournal;
-            if(typeof(req.body.type) !== 'undefined'){
+            if (typeof (req.body.type) !== 'undefined') {
                 type = req.body.type;
             }
             // data.cod = req.body.cd;
             try {
-                db.userJournalModel.create(data).then( async (result) => {
+                db.userJournalModel.create(data).then(async (result) => {
 
                     if (req.body.save_as_checkin === true) {
                         let checkinData = {
@@ -63,12 +63,14 @@ export const AddJournal = async (req, res) => {
                         let added = addCheckin(checkinData);
 
                     }
-                    if(result){
+                    if (result) {
                         // set Journal Id to chat.
-                        let chat = await db.chatModel.findByPk(chatid)
-                        chat.UserJournalId = result.id
-                        let chatSaved = await chat.save();
-                        console.log("Chat Saved ", chatSaved)
+                        if (typeof (req.body.chatid) !== 'undefined') {
+                            let chat = await db.chatModel.findByPk(chatid)
+                            chat.UserJournalId = result.id
+                            let chatSaved = await chat.save();
+                            console.log("Chat Saved ", chatSaved)
+                        }
                     }
                     res.send({ status: true, message: "Journal added", data: result })
                 })
@@ -100,7 +102,7 @@ export const getJournalsInAWeek = async (lastMonday, lastSunday, userid = null, 
         }
     }
     if (userid !== null) {
-        if(type === null){ // if null then fetch all except drafts
+        if (type === null) { // if null then fetch all except drafts
             condition = {
                 createdAt: {
                     [Op.between]: [lastMonday, lastSunday]
@@ -111,7 +113,7 @@ export const getJournalsInAWeek = async (lastMonday, lastSunday, userid = null, 
                 UserId: userid
             }
         }
-        else{ //if type is provided then only fetch that type | always drafts
+        else { //if type is provided then only fetch that type | always drafts
             condition = {
                 createdAt: {
                     [Op.between]: [lastMonday, lastSunday]
@@ -179,7 +181,7 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
             [Op.between]: [lastMonday, lastSunday]
         },
     }
-    if(userid !== null){
+    if (userid !== null) {
         chatCondition = {
             createdAt: {
                 [Op.between]: [lastMonday, lastSunday]
@@ -233,7 +235,7 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
             [Op.between]: [lastMonday, lastSunday]
         },
     }
-    if(userid != null){
+    if (userid != null) {
         checkinCondition = {
             createdAt: {
                 [Op.between]: [lastMonday, lastSunday]
@@ -269,21 +271,21 @@ export const getWeeklyDates = (numberOfWeeks = 30) => {
     let lastMonday = new Date(lastSunday);
     lastMonday.setDate(lastSunday.getDate() - 6);
 
-    lastMonday.setUTCHours(0,0,0,0)
-    lastSunday.setUTCHours(23,59,59,999)
+    lastMonday.setUTCHours(0, 0, 0, 0)
+    lastSunday.setUTCHours(23, 59, 59, 999)
 
 
-    console.log( "Last Sunday Date", currentDate.getDate())
+    console.log("Last Sunday Date", currentDate.getDate())
     // return
     let dates = []
-    if(lastSunday.getDate() !== currentDate.getDate){
+    if (lastSunday.getDate() !== currentDate.getDate) {
         let thisWeekMonday = new Date(lastMonday)
 
         thisWeekMonday.setDate(lastSunday.getDate() + 1) // get this ongoing week's monday
-        thisWeekMonday.setUTCHours(0,0,0,0)
+        thisWeekMonday.setUTCHours(0, 0, 0, 0)
         let todayDate = new Date()
         todayDate.setDate(thisWeekMonday.getDate() + 7)
-        todayDate.setUTCHours(23,59,59,999)
+        todayDate.setUTCHours(23, 59, 59, 999)
         console.log("This week is ongoing ", { monday: thisWeekMonday, sunday: todayDate })
         dates.push({ monday: thisWeekMonday, sunday: todayDate })
     }
@@ -331,7 +333,7 @@ export const GetJournals = (req, res) => {
                     console.log(dateSt2)
 
                     let snapshot = await db.weeklySnapshotModel.findOne({
-                        where:{
+                        where: {
                             sunday: dateSt2,
                             monday: dateSt1,
                             year: year,
@@ -355,7 +357,7 @@ export const GetSnapshotFromJournals = async (text) => {
     // let gptMe = "{\n  \"mood\": \"Low energy, Pleasant\",\n  \"snapshot\": \"Over the past week, I have been grappling with feelings of doubt and anxiety about my tech project. Despite receiving positive feedback and even having companies pay for my work, the launch of a similar product by Apple and the dominance of companies like Calm and Headspace in the market have left me questioning my ability to compete. The critical inner voice has been persistent, undermining my confidence and making me fear that no one will download my app. Nonetheless, there's a part of me that yearns to shift to a positive mindset and to see myself as confident and capable, as a thought leader in my field. Amidst these conflicting emotions, there remains an undercurrent of bliss, possibly reflecting the intrinsic satisfaction I get from working on this project despite the external doubts.\"\n}"
     // gptMe = gptMe.replace(new RegExp("\n", 'g'), '');
     // return gptMe
-// console.log("creating snapshot for text " + text)
+    // console.log("creating snapshot for text " + text)
 
     let messageData = []
     // console.log("Sending this summary to api ", summary);
@@ -399,9 +401,9 @@ export const GetSnapshotFromJournals = async (text) => {
         // console.log(result.data.data)
         if (result.status === 200) {
             let gptMessage = result.data.choices[0].message.content;
-             gptMessage = gptMessage.replace(new RegExp("```json", 'g'), '');
-             gptMessage = gptMessage.replace(new RegExp("```", 'g'), '');
-             gptMessage = gptMessage.replace(new RegExp("\n", 'g'), '');
+            gptMessage = gptMessage.replace(new RegExp("```json", 'g'), '');
+            gptMessage = gptMessage.replace(new RegExp("```", 'g'), '');
+            gptMessage = gptMessage.replace(new RegExp("\n", 'g'), '');
             console.log(chalk.green(JSON.stringify(gptMessage)))
             // return ""
             return gptMessage
@@ -411,8 +413,8 @@ export const GetSnapshotFromJournals = async (text) => {
             return ""
         }
     }
-    catch(error){
-        console.log("Exception gpt", error )
+    catch (error) {
+        console.log("Exception gpt", error)
     }
 
     return ""
@@ -483,21 +485,21 @@ export const AnalyzeJournal = async (req, res) => {
             // console.log("GPT Response is  ", gptMessage)
             let json = JSON.parse(gptMessage)
             console.log("Json obejct is ", json)
-            res.send({status: true, data: json, message: "Snapshot"})
+            res.send({ status: true, data: json, message: "Snapshot" })
             // return gptMessage;
         }
         else {
-            res.send({status: false, message: "Snapshot not obtained", data: null})
+            res.send({ status: false, message: "Snapshot not obtained", data: null })
         }
     }
     catch (error) {
-        res.send({status: false, message: "snapshot exception", data: error})
+        res.send({ status: false, message: "snapshot exception", data: error })
     }
 
 }
 
 
-export const GenerateListOfMoods = async(req, res) => {
+export const GenerateListOfMoods = async (req, res) => {
     console.log("Fetching moods from gpt")
     let userMood = req.mood
     let messageData = [];
@@ -540,34 +542,34 @@ pronunciation: "How to pronounce the word"
             // setMoods(listOfMoods)
             // setShowIndicater(false)
             console.log("Moods array is ", listOfMoods)
-            res.send({status: true, message: "Moods", data: listOfMoods})
+            res.send({ status: true, message: "Moods", data: listOfMoods })
             // return gptMessage;
         }
         else {
-            res.send({status: false, message: "Moods", data: null})
+            res.send({ status: false, message: "Moods", data: null })
         }
     }
     catch (error) {
         console.log("Exception in open ai call ", error)
-        res.send({status: false, message: "Moods", data: error})
+        res.send({ status: false, message: "Moods", data: error })
     }
 }
 
 
 export const GetCalendarEventPrompt = async (req, res) => {
-    
+
     let text = "Generate a motivational prompt from the following list of events from my calendar that tells me to get ready for the upcoming meetings and events. Response should be a string and it should only contain 100 characters of text from the above events summary."
-    if (typeof(req.query.eventTitle) !== 'undefined') {
-    //   text = `Generate a motivational prompt from the following list of events from my calendar that tells me to get ready for the upcoming meetings and events, 
-    // Event Title : ${event[0].title} at ${event[0].startDate}
-    // Notes: ${event[0].notes}.
-    
-    // Response should be a string and it should only contain 100 characters of text from the above events summary.
-    // Don't include any extra text. The prompt should be 100 characters.`
+    if (typeof (req.query.eventTitle) !== 'undefined') {
+        //   text = `Generate a motivational prompt from the following list of events from my calendar that tells me to get ready for the upcoming meetings and events, 
+        // Event Title : ${event[0].title} at ${event[0].startDate}
+        // Notes: ${event[0].notes}.
+
+        // Response should be a string and it should only contain 100 characters of text from the above events summary.
+        // Don't include any extra text. The prompt should be 100 characters.`
 
 
 
-    text = `Use the calendar event “${req.query.eventTitle}” to generate positive affirmations for the user. The output should be no more than X number of characters. For example, if the event name is “Product Demo with Shawn” create positive affirmations like the following:
+        text = `Use the calendar event “${req.query.eventTitle}” to generate positive affirmations for the user. The output should be no more than X number of characters. For example, if the event name is “Product Demo with Shawn” create positive affirmations like the following:
 
     “You got this! “Event Name” coming up soon” 
     
@@ -583,55 +585,55 @@ export const GetCalendarEventPrompt = async (req, res) => {
     }
     let messageData = []
     messageData.push({
-      role: "user",
-      content: text,
+        role: "user",
+        content: text,
     })
 
     const APIKEY = process.env.AIKey;
     // console.log(APIKEY)
     // console.log(messageData)
     const data = {
-      model: "gpt-4-1106-preview",
-      messages: messageData,
-      // max_tokens: 1000,
+        model: "gpt-4-1106-preview",
+        messages: messageData,
+        // max_tokens: 1000,
     }
 
     try {
-      console.log("Creating snapshot")
-      const result = await axios.post("https://api.openai.com/v1/chat/completions", data, {
-        headers: {
-          'content-type': 'application/json',
-          'Authorization': `Bearer ${APIKEY}`
+        console.log("Creating snapshot")
+        const result = await axios.post("https://api.openai.com/v1/chat/completions", data, {
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${APIKEY}`
+            }
+        });
+
+        // console.log("Api result is ", result)
+        if (result.status === 200) {
+            let gptMessage = result.data.choices[0].message.content;
+            // gptMessage = gptMessage.replace('```json', '');
+            // gptMessage = gptMessage.replace('json', '');
+            // gptMessage = gptMessage.replace('```', '');
+            console.log("GPT Response is  ", gptMessage)
+            res.send({ data: gptMessage, status: true, message: "Prompt generated" });
+
+            // return gptMessage;
         }
-      });
-
-      // console.log("Api result is ", result)
-      if (result.status === 200) {
-        let gptMessage = result.data.choices[0].message.content;
-        // gptMessage = gptMessage.replace('```json', '');
-        // gptMessage = gptMessage.replace('json', '');
-        // gptMessage = gptMessage.replace('```', '');
-        console.log("GPT Response is  ", gptMessage)
-         res.send({data: gptMessage, status: true, message: "Prompt generated"});
-
-        // return gptMessage;
-      }
-      else {
-        console.log("error message in open ai call ", json.messsage)
-        res.send({data: "", status: false, message: "Prompt not generated"});
-      }
+        else {
+            console.log("error message in open ai call ", json.messsage)
+            res.send({ data: "", status: false, message: "Prompt not generated" });
+        }
     }
     catch (error) {
-        res.send({data: "", status: false, message: "Prompt not generated", error: error});
-      console.log("Exception in open ai call ", error)
+        res.send({ data: "", status: false, message: "Prompt not generated", error: error });
+        console.log("Exception in open ai call ", error)
     }
-  };
+};
 
 
 
 
 
-  export const GetInsights = (req, res) => {
+export const GetInsights = (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
         if (authData) {
             let user = authData.user;
@@ -639,49 +641,49 @@ export const GetCalendarEventPrompt = async (req, res) => {
             //get data for the last month for now
             getCheckinsForLast30Days(user).then(dateCheckins => {
                 console.log(dateCheckins); // Output the result
-                res.send({data: dateCheckins, status: true, message: "Data obtained"});
-              }).catch(error => {
+                res.send({ data: dateCheckins, status: true, message: "Data obtained" });
+            }).catch(error => {
                 console.error('Error fetching check-ins:', error);
-                res.send({data: null, status: false, message: "Some error", error: error});
-              });
+                res.send({ data: null, status: false, message: "Some error", error: error });
+            });
 
         }
-        else{
-            res.send({data: null, status: false, message: "Unauthorized access"});
+        else {
+            res.send({ data: null, status: false, message: "Unauthorized access" });
         }
     })
-  }
+}
 
 
 
 async function getCheckinsForLast30Days(user) {
-  const dateCheckins = []; // Array to hold the check-ins for each date
+    const dateCheckins = []; // Array to hold the check-ins for each date
 
-  // Generate dates for the last 30 days
-  for (let i = 0; i < 30; i++) {
-    const date = moment().subtract(i, 'days').format('YYYY-MM-DD'); // Get date i days ago
-    const startDate = moment(date).startOf('day').toDate(); // Start of day
-    const endDate = moment(date).endOf('day').toDate(); // End of day
+    // Generate dates for the last 30 days
+    for (let i = 0; i < 30; i++) {
+        const date = moment().subtract(i, 'days').format('YYYY-MM-DD'); // Get date i days ago
+        const startDate = moment(date).startOf('day').toDate(); // Start of day
+        const endDate = moment(date).endOf('day').toDate(); // End of day
 
-    // Fetch check-ins for the current date
-    const checkins = await db.userCheckinModel.findAll({
-      where: {
-        createdAt: {
-          [db.Sequelize.Op.gte]: startDate,
-          [db.Sequelize.Op.lt]: endDate
-        },
-        UserId: user.id
-      }
-    });
+        // Fetch check-ins for the current date
+        const checkins = await db.userCheckinModel.findAll({
+            where: {
+                createdAt: {
+                    [db.Sequelize.Op.gte]: startDate,
+                    [db.Sequelize.Op.lt]: endDate
+                },
+                UserId: user.id
+            }
+        });
 
-    // Store the date and its check-ins in the array
-    dateCheckins.push({
-      date,
-      checkins
-    });
-  }
+        // Store the date and its check-ins in the array
+        dateCheckins.push({
+            date,
+            checkins
+        });
+    }
 
-  return dateCheckins; // Return the array of dates and their corresponding check-ins
+    return dateCheckins; // Return the array of dates and their corresponding check-ins
 }
 
 // Call the function and handle the promise as needed
