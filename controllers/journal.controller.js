@@ -45,6 +45,13 @@ export const AddJournal = async (req, res) => {
             if (typeof (req.body.type) !== 'undefined') {
                 type = req.body.type;
             }
+            let createdAt = moment()
+            if(typeof(req.body.created_at) !== 'undefined'){
+                createdAt = req.body.created_at
+            }
+            data.createdAt = createdAt
+            data.updatedAt = createdAt
+            console.log("Created at ", createdAt)
             // data.cod = req.body.cd;
             try {
                 db.userJournalModel.create(data).then(async (result) => {
@@ -57,7 +64,9 @@ export const AddJournal = async (req, res) => {
                             acronym: req.body.pronunciation,
                             UserId: user.id,
                             type: type, // checkintypes
-                            UserJournalId: result.id
+                            UserJournalId: result.id,
+                            createdAt: createdAt,
+                            updatedAt: createdAt
                         }
 
                         let added = addCheckin(checkinData);

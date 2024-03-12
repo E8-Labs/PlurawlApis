@@ -34,6 +34,7 @@ import DailyQuoteModel from "./dailyquote.model.js";
 
 import chatModel from "./chat/chat.model.js";
 import messageModel from "./chat/message.model.js";
+import SpotifySongModel from "./spotifysong.model.js";
 
 
 
@@ -73,5 +74,9 @@ db.chatModel.belongsTo(db.userJournalModel);
 db.messageModel = messageModel(sequelize, Sequelize);
 db.messageModel.belongsTo(db.chatModel);
 
+
+db.spotifySongModel = SpotifySongModel(sequelize, Sequelize);
+db.spotifySongModel.belongsTo(db.user);
+db.user.hasMany(db.spotifySongModel);
 
 export default db;

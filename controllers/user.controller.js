@@ -465,3 +465,22 @@ export const GenerateQuote = async () => {
     }
 }
 
+
+export const UploadTracks = (req, res) => {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (authData) {
+            //console.log("Auth data ", authData)
+            let userid = authData.user.id;
+            let tracks = req.body.tracks
+            console.log("Tracks to be saved", tracks)
+            //every track has an id, artImage, preview_url & title
+            let InsertObj = await db.spotifySongModel.bulkCreate(tracks);
+            console.log("Created ", InsertObj)
+            res.send({status: true, message: "Songs added", data: InsertObj})
+
+        }
+        else {
+            res.send({ status: false, message: "Unauthenticated user", data: null })
+        }
+    })
+}
