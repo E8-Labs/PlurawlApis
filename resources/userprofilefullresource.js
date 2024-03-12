@@ -131,7 +131,15 @@ async function getUserData(user, currentUser = null) {
         lastWeekVibe.snapshot = snapshot;
     }
 
-
+let haveJournals = false
+let myJournals = await db.userJournalModel.findAll({
+    where: {
+        UserId: user.id
+    }
+})
+if(myJournals){
+    haveJournals = true;
+}
 
 
     const UserFullResource = {
@@ -156,6 +164,7 @@ async function getUserData(user, currentUser = null) {
         lastcheckin: checkin,
         lastWeekVibe: lastWeekVibe,
         quote_of_day: quote,
+        have_journals: haveJournals,
     }
 
 
