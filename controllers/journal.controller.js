@@ -510,7 +510,7 @@ export const AnalyzeJournal = async (req, res) => {
 
 export const GenerateListOfMoods = async (req, res) => {
     console.log("Fetching moods from gpt")
-    let userMood = req.mood
+    let userMood = req.query.mood
     let messageData = [];
     messageData.push({
         role: "user",
