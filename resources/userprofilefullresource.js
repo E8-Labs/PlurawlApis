@@ -137,8 +137,11 @@ let myJournals = await db.userJournalModel.findAll({
         UserId: user.id
     }
 })
+console.log("Have Journals ", myJournals)
 if(myJournals){
-    haveJournals = true;
+    if(myJournals.length > 0){
+        haveJournals = true;
+    }
 }
 
 
