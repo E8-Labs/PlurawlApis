@@ -104,6 +104,92 @@ console.log("Checking user")
 }
 
 
+export const SocialLogin = async(req, res) => {
+    console.log("Checking user")
+    // res.send({data: {text: "kanjar Students"}, message: "Chawal Students", status: true})
+
+    const alreadyUser = await User.findOne({
+        where: {
+            provider_id: req.body.provider_id
+        }
+    })
+    if (alreadyUser) {
+        JWT.sign({ alreadyUser }, process.env.SecretJwtKey, { expiresIn: '365d' }, async (error, token) => {
+            if (error) {
+                console.log(error)
+                res.send({ data: error, status: false, message: "Soome error occurred" });
+            }
+            else {
+                let u = await UserProfileFullResource(alreadyUser);
+                res.send({ data: { user: u, token: token }, status: true, message: "Logged in" });
+            }
+        })
+        // res.send({ status: false, message: "Email already taken ", data: null });
+    }
+    else {
+        // //console.log("Hello bro")
+        // res.send("Hello")
+        
+            var userData = {
+                name: req.body.name,
+                email: req.body.email,
+                profile_image: req.body.profile_image,
+                password: req.body.provider_id,
+                role: UserRole.RoleUser,
+                points: 0,
+                provider_name: req.body.provider_name,
+                provider_id: req.body.provider_id
+            };
+            const salt = await bcrypt.genSalt(10);
+            const hashed = await bcrypt.hash(req.body.provider_id, salt);
+            userData.password = hashed;
+
+            try {
+                User.create(userData).then(async data => {
+                    //console.log("User created ", data.id)
+                    // let userToken = fetchOrCreateUserToken(data);
+                    //console.log("User Token created in Register ", userToken)
+                    let user = data
+                    JWT.sign({ user }, process.env.SecretJwtKey, { expiresIn: '365d' }, async (err, token) => {
+                        if (err) {
+                            //console.log("Error signing")
+                            res.send({ status: false, message: "Error Token " + err, data: null });
+                        }
+                        else {
+                            //console.log("signed creating user")
+                            let u = await UserProfileFullResource(data);
+                            res.send({ status: true, message: "User registered", data: { user: u, token: token } })
+
+                        }
+                    })
+
+
+                }).catch(error => {
+                    //console.log("User not created")
+                    //console.log(error)
+                    res.send({
+                        message:
+                            err.message || "Some error occurred while creating the user.",
+                        status: false,
+                        data: null
+                    });
+                })
+            }
+            catch (error) {
+                //console.log("Exception ", error)
+                //console.log("User not created")
+                //console.log(error)
+                res.send({
+                    message:
+                        err.message || "Some error occurred while creating the user.",
+                    status: false,
+                    data: null
+                });
+            }
+    }
+}
+
+
 export const LoginUser = async (req, res) => {
     // res.send("Hello Login")
     //console.log("Login " + req.body.email);
