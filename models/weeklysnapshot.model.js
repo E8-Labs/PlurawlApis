@@ -24,6 +24,14 @@ const WeeklySnapshotModel = (sequelize, Sequelize) => {
         type: Sequelize.STRING(10000),
         default: ''
       },
+      tip: {
+        type: Sequelize.STRING(500),
+        default: ''
+      },
+      reflectionQuestion: {
+        type: Sequelize.STRING(100),
+        default: ''
+      },
     },
     {
         indexes: [

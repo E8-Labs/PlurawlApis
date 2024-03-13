@@ -122,7 +122,7 @@ async function GenerateFirstMessageForAIChat(chat, user, callback) {
     So the instruction is, using the outline above, act as one's advanced therapist, have them check in first if they agree to checkin first then start their journal. Otherwise, just allow them to journal and engage and address what they’ve written about Oh and your name is Plurawl, don't forget to introduce yourself.
     
     It should feel like a conversation, so don't word vomit and ask a lot of questions at once.. ask one question at a time and make it feel like you're chatting.
-    Keep response within 500 words.
+    Keep response within 300 words.
     `
     // const m1 = await db.messageModel.create({
     //     message: cdText,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
@@ -200,7 +200,7 @@ async function sendQueryToGpt(message, messageData) {
     // console.log("Sending this summary to api ", summary);
     messageData.push({
         role: "system",
-        content: "You're a helpful assistant. So reply me keeping in context the whole data provided. Keep the response short and make it complete response.", // summary will go here if the summary is created.
+        content: "You're a helpful assistant. So reply me keeping in context the whole data provided. Keep the response short and make it complete response. keep all of your responses within 300 words or less.", // summary will go here if the summary is created.
     });
 
     messageData.push({

@@ -27,7 +27,7 @@ dotenv.config();
 
 let number = 0// "/2 * * * Monday"
 //*/10 0-1 * * Sunday
-const job = nodeCron.schedule("*/10 0-2 * * 0", async function fetchPendingBankTransactions() {
+const job = nodeCron.schedule("*/20 0-1 * * 0", async function fetchPendingBankTransactions() {
   // Download the latest info on the transactions and update database accordingly
   console.log(chalk.green("generate context here "));
   // return
@@ -104,6 +104,7 @@ const job = nodeCron.schedule("*/10 0-2 * * 0", async function fetchPendingBankT
         if (snapshot !== "") {
           console.log("Valid Snapshot")
           let jsonSnap = JSON.parse(snapshot)
+          console.log(jsonSnap)
           let obj = {
             monday: dateSt1,
             sunday: dateSt2,
@@ -111,6 +112,8 @@ const job = nodeCron.schedule("*/10 0-2 * * 0", async function fetchPendingBankT
             year: year,
             date: dateSt1Full + " - " + dateSt2Full,
             snapshot: jsonSnap.snapshot,
+            tip: jsonSnap.tip,
+            reflectionQuestion: jsonSnap.question,
             UserId: u
           }
           console.log(chalk.yellow("Have Snapshot"))
@@ -155,6 +158,6 @@ const quoteJob = nodeCron.schedule("*/2 0-10 * * *", async function fetchPending
   console.log("Quote Crone Job Running at time ", time);
   GenerateQuote();
 })
-quoteJob.start();
+// quoteJob.start();
 
 

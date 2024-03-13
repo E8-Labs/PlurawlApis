@@ -377,8 +377,8 @@ export const GetSnapshotFromJournals = async (text) => {
         Moods: High energy, Pleasant or High energy, Unpleasant or Low energy, Pleasant or Low energy, Unpleasant.
         
         Give the response in a json object. The response should not contain any piece of text other than the json object itself.
-        The json object should be as follows. 
-        {mood: High energy, Pleasant, snapshot: snapshot of the week goes here.}
+        The json object should be as follows. Also create a relfection question based on the summary of the week.
+        {mood: High energy, Pleasant, snapshot: snapshot of the week goes here., tip: Tip for the week to improve my mood or any other suggestion in context of my journals, question: 20 words reflection question here}
         
         The weekly journals are as below. Don't include any word like json or anything like that.
         ${text}`, // summary will go here if the summary is created.
@@ -648,9 +648,39 @@ export const GetInsights = (req, res) => {
             let user = authData.user;
             console.log("Getting insights for user ", user.name);
             //get data for the last month for now
-            getCheckinsForLast30Days(user).then(dateCheckins => {
+            getCheckinsForLast60Days(user).then(dateCheckins => {
                 console.log(dateCheckins); // Output the result
-                res.send({ data: dateCheckins, status: true, message: "Data obtained" });
+                let hep = 0;
+                let lep = 0;
+                let heup = 0;
+                let leup = 0;
+
+                for(let i = 0; i < dateCheckins.length; i++){
+                    let chkin = dateCheckins[i];
+                    let checkins = chkin.checkins;
+                    if(checkins.length > 0){
+                        for(let j = 0; j < checkins.length; j++){
+                            let item = checkins[j];
+                            if (item.mood === CheckinMoods.MoodHep) {
+                                hep = hep + 1
+                            }
+                            if (item.mood === CheckinMoods.MoodLep) {
+                                lep = lep + 1
+                            }
+                            if (item.mood === CheckinMoods.MoodLeup) {
+                                leup = leup + 1
+                            }
+                            if (item.mood === CheckinMoods.MoodHeup) {
+                                heup = heup + 1
+                            }
+                        }
+                    }
+                }
+
+                let totalMoods = lep + leup + hep + heup;
+
+
+                res.send({ data: {checkins: dateCheckins, total: totalMoods, lep: lep / totalMoods * 100, hep: hep / totalMoods * 100, leup: leup / totalMoods * 100, heup: heup / totalMoods * 100,}, status: true, message: "Data obtained" });
             }).catch(error => {
                 console.error('Error fetching check-ins:', error);
                 res.send({ data: null, status: false, message: "Some error", error: error });
@@ -665,11 +695,11 @@ export const GetInsights = (req, res) => {
 
 
 
-async function getCheckinsForLast30Days(user) {
+async function getCheckinsForLast60Days(user) {
     const dateCheckins = []; // Array to hold the check-ins for each date
 
     // Generate dates for the last 30 days
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 60; i++) {
         const date = moment().subtract(i, 'days').format('YYYY-MM-DD'); // Get date i days ago
         const startDate = moment(date).startOf('day').toDate(); // Start of day
         const endDate = moment(date).endOf('day').toDate(); // End of day
