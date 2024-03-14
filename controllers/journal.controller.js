@@ -200,8 +200,30 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     }
 
     //get chats in a week
-    let chats = db.chatModel.findAll({
+    let chats = await db.chatModel.findAll({
         where: chatCondition
+    })
+
+
+
+    let songsCondition = {
+        createdAt: {
+            [Op.between]: [lastMonday, lastSunday]
+        },
+    }
+    if (userid !== null) {
+        songsCondition = {
+            createdAt: {
+                [Op.between]: [lastMonday, lastSunday]
+            },
+            UserId: userid
+        }
+    }
+
+    //get chats in a week
+    let songs = await db.spotifySongModel.findAll({
+        where: songsCondition,
+        limit: 5
     })
 
     let dateSt1 = moment(lastMonday).format("MMM DD")
@@ -260,7 +282,7 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
 
     var lastWeekVibe = {
         journals: journals, chats: chats, drafts: drafts, totalJournals: journals.length, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
-        lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, checkins: checkins
+        lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, checkins: checkins, tracks: songs
     }
     // console.log("Vibe is ", lastWeekVibe)
     if (journals.length == 0) {
