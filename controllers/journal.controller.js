@@ -457,10 +457,10 @@ export const GetSnapshotFromJournals = async (text) => {
 export const AnalyzeJournal = async (req, res) => {
     // setShowIndicator(true)
     let paragraph = req.body.paragraph;
-    let text = `Depending on the following journal written by user give me the mood of the writer from one of these:  Moods: "High energy, Pleasant", "High energy, Unpleasant", "Low energy, Pleasant", "Low energy, unpleasant" And also give me a proper feeling in one word that best describes the paragraph and falls under the mood selected above. Also give me the acronym for this feeling and a little description describing the meaning to the user of that word. Include how we can pronounce this feeling word as well. This is the paragraph: ${paragraph} Now give me a snapshot of the conversation which is a small description that tells how the user feels and what is mood and energy is. Do mention the mood and feeling in the paragraph and give me appropriate information that i can use to highligh those words or sentences in the snapshot using react native.
+    let text = `Depending on the following journal written by me give me the mood of the writer from one of these:  Moods: "High energy, Pleasant", "High energy, Unpleasant", "Low energy, Pleasant", "Low energy, unpleasant" And also give me a proper feeling in one word that best describes the paragraph and falls under the mood selected above. Also give me the acronym for this feeling and a little description describing the meaning of that word. Include how we can pronounce this feeling word as well. This is the paragraph: ${paragraph} Now give me a snapshot of the conversation which is a small description that tells how i am feeling and what is mood and energy is. Do mention the mood and feeling in the paragraph and give me appropriate information that i can use to highlight those words or sentences in the snapshot using react native.
     
     It should also provide me one of the following 7 cognitive distortions (CD). List of Cognitive distortions, Blame, Filtering, Polarized Thinking, Personalization, Fortune-Telling, Negative Emotional reasoning, 
-    
+    Also add the hightlight sentences for the snapshot separately. These should be to highlight words or sentences from the generated summary.
     Now the response should be a json object with the following keys: 
     
     {
@@ -472,10 +472,11 @@ export const AnalyzeJournal = async (req, res) => {
         pronunciation: “how to pronounce”
         },
         snapshot: Snapshot of the conversation,
+        snapshotTextHighlights: [Array of words],
         cd: this is cognitive distortions,
-        texthighlight:{
+        texthighlight:[
             // info about highlighting text here
-        },
+        ],
     comments:"Further comments you want to add
     }
 

@@ -490,7 +490,7 @@ export const GenerateQuote = async () => {
         // console.log("Sending this summary to api ", summary);
         messageData.push({
             role: "system",
-            content: `Generate a daily quote for of max 100 characters. 
+            content: `Generate a daily quote for of max 200 characters. 
             Make it a json object like this {quote: Quote of the day, timestamp: Time here in Month Day Year Format}. Only generate json object and no extra text.`, // summary will go here if the summary is created.
 
         });
