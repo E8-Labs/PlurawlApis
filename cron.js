@@ -27,7 +27,7 @@ dotenv.config();
 
 let number = 0// "/2 * * * Monday"
 //*/10 0-1 * * Sunday
-const job = nodeCron.schedule("*/2 0-12 * * 0-2", async function fetchPendingBankTransactions() {
+const job = nodeCron.schedule("*/1 0-23 * * 0-6", async function fetchPendingBankTransactions() {
   // Download the latest info on the transactions and update database accordingly
   console.log(chalk.green("generate context here "));
   // return
@@ -158,6 +158,6 @@ const quoteJob = nodeCron.schedule("*/2 0-10 * * *", async function fetchPending
   console.log("Quote Crone Job Running at time ", time);
   GenerateQuote();
 })
-// quoteJob.start();
+quoteJob.start();
 
 
