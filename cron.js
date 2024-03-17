@@ -161,9 +161,9 @@ async function fetchWeeklySnapshots() {
   number = number + 5;
 
 };
-const job = nodeCron.schedule("*/59 0-23 * * 0-6", fetchWeeklySnapshots)
+const job = nodeCron.schedule("*/20 0-20 * * 0-3", fetchWeeklySnapshots)
 
-// job.start();
+job.start();
 
 
 //run job to get Daily quotes
@@ -173,6 +173,6 @@ const quoteJob = nodeCron.schedule("*/2 0-10 * * *", async function fetchPending
   console.log("Quote Crone Job Running at time ", time);
   GenerateQuote();
 })
-// quoteJob.start();
+quoteJob.start();
 
-export {fetchWeeklySnapshots}
+// export {fetchWeeklySnapshots}
