@@ -27,7 +27,7 @@ dotenv.config();
 
 let number = 0// "/2 * * * Monday"
 //*/10 0-1 * * Sunday
-const job = nodeCron.schedule("*/1 0-23 * * 0-6", async function fetchPendingBankTransactions() {
+async function fetchWeeklySnapshots() {
   // Download the latest info on the transactions and update database accordingly
   console.log(chalk.green("generate context here "));
   // return
@@ -52,6 +52,17 @@ const job = nodeCron.schedule("*/1 0-23 * * 0-6", async function fetchPendingBan
     let dateSt1 = moment(d.monday).format("MMM DD")
     let dateSt2 = moment(d.sunday).format("MMM DD")
 
+    // let created = await db.weeklySnapshotModel.findAll({
+    //   where: {
+    //     monday: dateSt1,
+    //     sunday: dateSt2,
+    //     year: year
+    //   }
+    // })
+    // if(created && created.length > 0){
+    //   return
+    // }
+
     //get users who have created a journal in the past week
     let UserVibes = {}
     let snapshotText = {} // for every user
@@ -68,6 +79,7 @@ const job = nodeCron.schedule("*/1 0-23 * * 0-6", async function fetchPendingBan
         snapshotText[`${uid}`] = t;
       }
       else {
+        // console.log("Pushing uid dont exist already")
         users.push(uid)
         let t = `Date: ${j.createdAt} ${j.title} \n ${j.detail} \n Mood: ${j.mood} \nFeeling: ${j.feeling}`;
         snapshotText[`${uid}`] = t;
@@ -75,23 +87,23 @@ const job = nodeCron.schedule("*/1 0-23 * * 0-6", async function fetchPendingBan
 
 
       if (UserVibes.hasOwnProperty(`${uid}`)) {
-        console.log(`Key with UserId ${uid} exists.`);
+        // console.log(`Key with UserId ${uid} exists.`);
         let ujs = UserVibes[`${uid}`]
         ujs.push(j)
         UserVibes[uid] = ujs
 
 
       } else {
-        console.log(`Key with UserId ${uid} does not exist.`);
+        // console.log(`Key with UserId ${uid} does not exist.`);
         UserVibes[uid] = [j]
       }
     }
-
-    console.log("Generating Snapshot")
+    console.log("Users ", users)
+    // console.log("Generating Snapshot")
     if (users.length > 0) {
-      console.log("Generating Snapshot 2" )
+      // console.log("Generating Snapshot 2" )
       for (let i = 0; i < users.length; i++) {
-        console.log("Generating Snapshot loop ", i)
+        // console.log("Generating Snapshot loop ", i)
         let u = users[i]
         let t = snapshotText[`${u}`];
         
@@ -104,7 +116,7 @@ const job = nodeCron.schedule("*/1 0-23 * * 0-6", async function fetchPendingBan
         if (snapshot !== "") {
           console.log("Valid Snapshot")
           let jsonSnap = JSON.parse(snapshot)
-          console.log(jsonSnap)
+          // console.log(jsonSnap)
           let obj = {
             monday: dateSt1,
             sunday: dateSt2,
@@ -116,11 +128,13 @@ const job = nodeCron.schedule("*/1 0-23 * * 0-6", async function fetchPendingBan
             reflectionQuestion: jsonSnap.question,
             UserId: u
           }
-          console.log(chalk.yellow("Have Snapshot"))
-          // console.log(JSON.stringify(obj))
+          console.log("------------------------------------")
+          console.log(chalk.yellow("Have Snapshot For User"))
+          console.log(u)
+          console.log("------------------------------------")
 
         db.weeklySnapshotModel.create(obj).then((result)=>{
-          console.log("Saved Snapshot ", result)
+          console.log("Saved Snapshot ")
         })
         .catch((error)=>{
           console.log("Error creating DB Snapshot ", error)
@@ -146,9 +160,10 @@ const job = nodeCron.schedule("*/1 0-23 * * 0-6", async function fetchPendingBan
   }
   number = number + 5;
 
-});
+};
+const job = nodeCron.schedule("*/59 0-23 * * 0-6", fetchWeeklySnapshots)
 
-job.start();
+// job.start();
 
 
 //run job to get Daily quotes
@@ -158,6 +173,6 @@ const quoteJob = nodeCron.schedule("*/2 0-10 * * *", async function fetchPending
   console.log("Quote Crone Job Running at time ", time);
   GenerateQuote();
 })
-quoteJob.start();
+// quoteJob.start();
 
-
+export {fetchWeeklySnapshots}

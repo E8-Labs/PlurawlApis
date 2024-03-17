@@ -400,7 +400,7 @@ export const GetSnapshotFromJournals = async (text) => {
         
         Give the response in a json object. The response should not contain any piece of text other than the json object itself.
         The json object should be as follows. Also create a relfection question based on the summary of the week.
-        {mood: High energy, Pleasant, snapshot: snapshot of the week goes here., tip: Tip for the week to improve my mood or any other suggestion in context of my journals, question: 20 words reflection question here}
+        {mood: High energy, Pleasant, snapshot: snapshot of the week goes here., tip: Tip for the week to improve my mood or any other suggestion in context of my journals. No more than 150 words, question: 20 words reflection question here}
         
         The weekly journals are as below. Don't include any word like json or anything like that.
         ${text}`, // summary will go here if the summary is created.
