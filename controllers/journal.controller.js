@@ -46,7 +46,7 @@ export const AddJournal = async (req, res) => {
                 type = req.body.type;
             }
             let createdAt = moment()
-            if(typeof(req.body.created_at) !== 'undefined'){
+            if (typeof (req.body.created_at) !== 'undefined') {
                 createdAt = req.body.created_at
             }
             data.createdAt = createdAt
@@ -150,18 +150,24 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     let condition = {
         createdAt: {
             [Op.between]: [lastMonday, lastSunday]
-        }
+        },
+        type: "journal"
     }
     let draftCondition = {
         createdAt: {
             [Op.between]: [lastMonday, lastSunday]
         },
-        type: 'draft'
+        type: {
+            [Op.ne]: 'draft'
+        }
     }
     if (userid !== null) {
         condition = {
             createdAt: {
                 [Op.between]: [lastMonday, lastSunday]
+            },
+            type: {
+                [Op.ne]: 'draft'
             },
             UserId: userid
         }
@@ -678,11 +684,11 @@ export const GetInsights = (req, res) => {
                 let heup = 0;
                 let leup = 0;
 
-                for(let i = 0; i < dateCheckins.length; i++){
+                for (let i = 0; i < dateCheckins.length; i++) {
                     let chkin = dateCheckins[i];
                     let checkins = chkin.checkins;
-                    if(checkins.length > 0){
-                        for(let j = 0; j < checkins.length; j++){
+                    if (checkins.length > 0) {
+                        for (let j = 0; j < checkins.length; j++) {
                             let item = checkins[j];
                             if (item.mood === CheckinMoods.MoodHep) {
                                 hep = hep + 1
@@ -703,7 +709,7 @@ export const GetInsights = (req, res) => {
                 let totalMoods = lep + leup + hep + heup;
 
 
-                res.send({ data: {checkins: dateCheckins, total: totalMoods, lep: lep / totalMoods * 100, hep: hep / totalMoods * 100, leup: leup / totalMoods * 100, heup: heup / totalMoods * 100,}, status: true, message: "Data obtained" });
+                res.send({ data: { checkins: dateCheckins, total: totalMoods, lep: lep / totalMoods * 100, hep: hep / totalMoods * 100, leup: leup / totalMoods * 100, heup: heup / totalMoods * 100, }, status: true, message: "Data obtained" });
             }).catch(error => {
                 console.error('Error fetching check-ins:', error);
                 res.send({ data: null, status: false, message: "Some error", error: error });
