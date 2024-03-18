@@ -1,0 +1,68 @@
+import db from "../models/index.js";
+import CheckInTypes from "../models/checkintype.js";
+// import CheckinMoods from "../models/checkinmoods.js";
+// import { getJournalsInAWeek, getWeeklyDates } from "../controllers/journal.controller.js";
+
+import moment from "moment-timezone";
+// import LoanStatus from "../../models/loanstatus.js";
+// import PlaidTokenTypes from "../../models/plaidtokentypes.js";
+// import UserLoanFullResource from "../loan/loan.resource.js";
+const Op = db.Sequelize.Op;
+
+const JournalResource = async (user) => {
+    if (!Array.isArray(user)) {
+        //console.log("Not array")
+        return await getUserData(user);
+    }
+    else {
+        //console.log("Is array")
+        const data = []
+        for (let i = 0; i < user.length; i++) {
+            const p = await getUserData(user[i])
+            //console.log("Adding to index " + i)
+            data.push(p);
+        }
+
+        return data;
+    }
+}
+
+async function getUserData(user) {
+
+
+    // let checkin = await db.userCheckinModel.findOne({
+    //     where: {
+    //         UserId: user.id,
+    //         type: CheckInTypes.TypeJournal,
+    //         JournalId: user.id
+    //     },
+    //     order: [
+    //         ['createdAt', 'DESC'],
+    //     ],
+    // });
+
+    
+
+    const UserFullResource = {
+        id: user.id,
+        title: user.title,
+        detail: user.detail,
+        type: user.type,
+        cd: user.cd,
+        snapshpt: user.snapshpt,
+        mood: user.mood,
+        feeling: user.feeling,
+        description: user.description,
+        // industry: user.industry,
+        pronunciation: user.pronunciation,
+        UserId: user.UserId,
+    //    checkin: checkin,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+    }
+
+
+    return UserFullResource;
+}
+
+export default JournalResource;

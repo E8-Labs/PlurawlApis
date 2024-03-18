@@ -21,6 +21,7 @@ import UserRole from "../models/userrole.js";
 import UserProfileFullResource from "../resources/userprofilefullresource.js";
 import CheckInTypes from "../models/checkintype.js";
 import chalk from "chalk";
+import JournalResource from "../resources/journal.resource.js";
 
 function addCheckin(data) {
 
@@ -185,12 +186,12 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     let journals = await db.userJournalModel.findAll({
         where: condition
     })
-
+    // let journals = await JournalResource(js)
 
     let drafts = await db.userJournalModel.findAll({
         where: draftCondition
     })
-
+    // let drafts = await JournalResource(dfs)
     let chatCondition = {
         createdAt: {
             [Op.between]: [lastMonday, lastSunday]
@@ -211,6 +212,7 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     })
 
 
+    console.log("Chats", chats)
 
     let songsCondition = {
         createdAt: {
@@ -290,8 +292,9 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
         journals: journals, chats: chats, drafts: drafts, totalJournals: journals.length, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
         lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, checkins: checkins, tracks: songs
     }
-    // console.log("Vibe is ", lastWeekVibe)
-    if (journals.length == 0) {
+    
+    console.log(chalk.red("Vibe is ", JSON.stringify(lastWeekVibe)))
+    if (journals.length == 0 && drafts.length == 0) {
         return null
     }
     return lastWeekVibe
@@ -361,6 +364,7 @@ export const GetJournals = (req, res) => {
                 let d = dates[i]
                 let vibe = await getJournalsVibeInAWeek(d.monday, d.sunday, user.id)
                 if (vibe) {
+                    console.log("Vibe exists ")
                     let dateSt1 = moment(d.monday).format("MMM DD")
                     let dateSt2 = moment(d.sunday).format("MMM DD")
                     let year = moment(d.sunday).format("YYYY");
@@ -379,6 +383,9 @@ export const GetJournals = (req, res) => {
                     })
                     vibe.snapshot = snapshot;
                     journals.push(vibe);
+                }
+                else{
+                    console.log("Vibe doesn't exist ")
                 }
             }
 
