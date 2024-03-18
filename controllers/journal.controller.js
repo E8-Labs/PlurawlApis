@@ -152,7 +152,9 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
         createdAt: {
             [Op.between]: [lastMonday, lastSunday]
         },
-        type: "journal"
+        type: {
+            [Op.ne]: 'draft'
+        }
     }
     let draftCondition = {
         createdAt: {
