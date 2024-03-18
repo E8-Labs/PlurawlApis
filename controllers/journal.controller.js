@@ -152,26 +152,29 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
         createdAt: {
             [Op.between]: [lastMonday, lastSunday]
         },
-        type: {
-            [Op.ne]: 'draft'
-        }
+        [Op.or]: [
+            { type: { [Op.ne]: 'draft' } }, // type not equal to 'draft'
+            { type: { [Op.is]: null } }     // type is NULL
+          ],
     }
     let draftCondition = {
         createdAt: {
             [Op.between]: [lastMonday, lastSunday]
         },
-        type: {
-            [Op.ne]: 'draft'
-        }
+        [Op.and]: [
+            { type: { [Op.eq]: 'draft' } }, // type not equal to 'draft'
+            { type: { [Op.not]: null } }     // type is not NULL
+          ],
     }
     if (userid !== null) {
         condition = {
             createdAt: {
                 [Op.between]: [lastMonday, lastSunday]
             },
-            type: {
-                [Op.ne]: 'draft'
-            },
+            [Op.or]: [
+                { type: { [Op.ne]: 'draft' } }, // type not equal to 'draft'
+                { type: { [Op.is]: null } }     // type is NULL
+              ],
             UserId: userid
         }
 
@@ -179,7 +182,10 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
             createdAt: {
                 [Op.between]: [lastMonday, lastSunday]
             },
-            type: 'draft',
+            [Op.and]: [
+                { type: { [Op.eq]: 'draft' } }, // type not equal to 'draft'
+                { type: { [Op.not]: null } }     // type is not NULL
+              ],
             UserId: userid
         }
     }
