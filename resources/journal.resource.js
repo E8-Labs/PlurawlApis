@@ -41,8 +41,11 @@ async function getUserData(user) {
     //     ],
     // });
 
-    
+    let th = user.textHighlights !== null ? user.textHighlights.split(" ### ") : []
+    let snapth = user.snapshotTextHighlights !== null ? user.snapshotTextHighlights.split(" ### ") : []
 
+console.log(`Hightlights ${user.id}`)
+console.log(th)
     const UserFullResource = {
         id: user.id,
         title: user.title,
@@ -56,7 +59,9 @@ async function getUserData(user) {
         // industry: user.industry,
         pronunciation: user.pronunciation,
         UserId: user.UserId,
-    //    checkin: checkin,
+        //    checkin: checkin,
+        textHighlights: th,
+        snapshotTextHighlights: snapth,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
     }

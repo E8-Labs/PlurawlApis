@@ -40,6 +40,25 @@ export const AddJournal = async (req, res) => {
             let data = req.body;
             let user = authData.user;
             data.UserId = user.id;
+
+            let texthighlights = data.texthighlight;
+            let textHightlightText = ""
+            let separator = ""
+            for(let i = 0; i < texthighlights.length; i++){
+                textHightlightText = textHightlightText + separator + texthighlights[i]
+                separator = " ### "
+            }
+            data.textHighlights = textHightlightText
+
+
+            separator = ""
+            let snapshotTextHighlights = data.snapshotTextHighlights;
+            let snapshottextHightlightText = ""
+            for(let i = 0; i < snapshotTextHighlights.length; i++){
+                snapshottextHightlightText = snapshottextHightlightText + separator + snapshotTextHighlights[i]
+                separator = " ### "
+            }
+            data.snapshotTextHighlights = snapshottextHightlightText
             let chatid = req.body.chatid;
 
             let type = CheckInTypes.TypeJournal;
@@ -82,7 +101,8 @@ export const AddJournal = async (req, res) => {
                             console.log("Chat Saved ", chatSaved)
                         }
                     }
-                    res.send({ status: true, message: "Journal added", data: result })
+                    let j = await JournalResource(result)
+                    res.send({ status: true, message: "Journal added", data: j })
                 })
                     .catch((error) => {
                         console.log(error)
@@ -139,9 +159,9 @@ export const getJournalsInAWeek = async (lastMonday, lastSunday, userid = null, 
         where: condition
     })
 
+    let js = await JournalResource(journals)
 
-
-    return journals
+    return js
 }
 
 export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = null) => {
@@ -191,10 +211,10 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     }
 
 
-    let journals = await db.userJournalModel.findAll({
+    let js = await db.userJournalModel.findAll({
         where: condition
     })
-    // let journals = await JournalResource(js)
+    let journals = await JournalResource(js)
 
     let drafts = await db.userJournalModel.findAll({
         where: draftCondition
@@ -249,8 +269,8 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     var hep = 0
     var leup = 0
     var heup = 0
-    for (let i = 0; i < journals.length; i++) {
-        let cin = journals[i];
+    for (let i = 0; i < js.length; i++) {
+        let cin = js[i];
         if (cin.mood === CheckinMoods.MoodHep) {
             hep = hep + 1
         }
@@ -295,14 +315,15 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
         where: checkinCondition
     })
 
-
+// console.log("Kalar Kahar ka bandar ")
+// console.log(journals)
     var lastWeekVibe = {
         journals: journals, chats: chats, drafts: drafts, totalJournals: journals.length, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
         lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, checkins: checkins, tracks: songs
     }
     
     console.log(chalk.red("Vibe is ", JSON.stringify(lastWeekVibe)))
-    if (journals.length == 0 && drafts.length == 0) {
+    if (js.length == 0 && drafts.length == 0) {
         return null
     }
     return lastWeekVibe
@@ -320,14 +341,14 @@ function generateWeeklyDates(numberOfWeeks = 30) {
     for (let i = 0; i < numberOfWeeks; i++) { // Generate dates for 4 weeks only
         // Calculate Monday and Sunday for each week
         let monday = currentDate.clone().startOf('isoWeek');
-        // monday = monday.add(1, 'day')
+        // monday = monday.add(1, 'day') // enable it on local. On server it works differently
         let sunday = currentDate.clone().endOf('isoWeek');
 
         // Add the dates to the array
         dates.push({ monday: monday.toDate(), sunday: sunday.toDate() });
 
         // Move to the next week
-        currentDate = monday.subtract(1, 'day');
+        currentDate = monday.subtract(1, 'day'); // sub two days for local 1 for server
     }
 
     return dates; // Reverse the array to have the dates in chronological order
