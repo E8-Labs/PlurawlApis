@@ -308,46 +308,79 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     return lastWeekVibe
 }
 
+function generateWeeklyDates(numberOfWeeks = 30) {
+    const dates = [];
+    let currentDate = moment().startOf('week'); // Start from the beginning of the current week
+    console.log("Start of current week date is ", currentDate)
+    let m = currentDate.add(1, 'day')
+    let s = moment()
+    // dates.push({ monday: m.toDate(), sunday: s.toDate() })
+
+
+    for (let i = 0; i < numberOfWeeks; i++) { // Generate dates for 4 weeks only
+        // Calculate Monday and Sunday for each week
+        let monday = currentDate.clone().startOf('isoWeek');
+        monday = monday.add(1, 'day')
+        let sunday = currentDate.clone().endOf('isoWeek');
+
+        // Add the dates to the array
+        dates.push({ monday: monday.toDate(), sunday: sunday.toDate() });
+
+        // Move to the next week
+        currentDate = monday.subtract(2, 'day');
+    }
+
+    return dates; // Reverse the array to have the dates in chronological order
+}
 
 export const getWeeklyDates = (numberOfWeeks = 30) => {
+    let weekdates = generateWeeklyDates(30);
+// console.log(weekdates)
+    return weekdates;
     const originalDate = new Date();
     const currentDate = new Date(originalDate.getFullYear(), originalDate.getMonth(), originalDate.getDate());
-
+ //monday - sunday
     // Calculate the start and end date of the last week
-    let lastSunday = new Date(currentDate);
-    lastSunday.setDate(currentDate.getDate() - currentDate.getDay());
-    let lastMonday = new Date(lastSunday);
-    lastMonday.setDate(lastSunday.getDate() - 6);
+    let lastSunday = new Date(currentDate); //current date
+    // lastSunday.setDate(currentDate.getDate() - currentDate.getDay());
+    let lastMonday = new Date(originalDate.getFullYear(), originalDate.getMonth(), originalDate.getDate() - (currentDate.getDay() - 1));
+    // lastMonday.setDate(lastSunday.getDate() - (currentDate.getDay() - 1));
 
     lastMonday.setUTCHours(0, 0, 0, 0)
     lastSunday.setUTCHours(23, 59, 59, 999)
 
-
-    console.log("Last Sunday Date", currentDate.getDate())
+    console.log("Current  ", currentDate.getDay())
+    console.log("Last Sunday Date", lastSunday)
+    console.log("Last Mon Date", lastMonday)
     // return
     let dates = []
-    if (lastSunday.getDate() !== currentDate.getDate) {
-        let thisWeekMonday = new Date(lastMonday)
+    // if (lastSunday.getDate() !== currentDate.getDate) {
+    //     let thisWeekMonday = new Date(lastMonday)
 
-        thisWeekMonday.setDate(lastSunday.getDate() + 1) // get this ongoing week's monday
-        thisWeekMonday.setUTCHours(0, 0, 0, 0)
-        let todayDate = new Date()
-        todayDate.setDate(thisWeekMonday.getDate() + 7)
-        todayDate.setUTCHours(23, 59, 59, 999)
-        console.log("This week is ongoing ", { monday: thisWeekMonday, sunday: todayDate })
-        dates.push({ monday: thisWeekMonday, sunday: todayDate })
-    }
+    //     thisWeekMonday.setDate(lastSunday.getDate() + 1) // get this ongoing week's monday
+    //     thisWeekMonday.setUTCHours(0, 0, 0, 0)
+    //     let todayDate = new Date()
+    //     todayDate.setDate(thisWeekMonday.getDate() + 7)
+    //     todayDate.setUTCHours(23, 59, 59, 999)
+    //     console.log("This week is ongoing ", { monday: thisWeekMonday, sunday: todayDate })
+    //     dates.push({ monday: thisWeekMonday, sunday: todayDate })
+    // }
 
     dates.push({ monday: lastMonday, sunday: lastSunday })
     for (let i = 0; i < numberOfWeeks; i++) { // last 10 weeks
-        let sunday = new Date(lastMonday)
-        let monday = new Date(sunday)
-
-        monday.setDate(sunday.getDate() - 6)
-
-        lastSunday = sunday
-        lastMonday = monday
+        
+        let monday = new Date(lastMonday.getFullYear(), lastMonday.getMonth(), lastMonday.getDate() - 7);
+        let sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+        
+        // lastMonday.setDate(lastMonday.getDate() - 7)
+        // lastSunday.setDate(lastMonday.getDate() + 6)
+        // lastSunday = sunday
+        // lastMonday = monday
+        monday.setUTCHours(1, 3, 0, 0)
+        sunday.setUTCHours(23, 59, 59, 999)
         dates.push({ monday: monday, sunday: sunday })
+        lastMonday = new Date(monday)
+        lastSunday = new Date(sunday)
     }
 
     return dates;
@@ -771,3 +804,172 @@ async function getCheckinsForLast60Days(user) {
 
 // Call the function and handle the promise as needed
 
+
+
+
+// Cron Job 
+function getMDDateFormat(date) {
+    //2024-03-18T19:00:00.000Z
+    console.log("COnverting date ", date)
+    const month = date.getMonth(); // Month starts from 0, so add 1 to get the correct month
+    const day = date.getUTCDate();
+  
+    const formattedDay = day < 10 ? '0' + day : day;
+  
+    // Construct the MM dd string
+    // const formattedDate = formattedMonth + ' ' + formattedDay;
+    let Months = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    console.log("Here now", day)
+    let d = Months[month] + " " + formattedDay
+    console.log("Formated ", d)
+    return d
+  }
+  
+  function getMDYDateFormat(date) {
+    //2024-03-18T19:00:00.000Z
+    console.log("COnverting date ", date)
+    const month = date.getMonth(); // Month starts from 0, so add 1 to get the correct month
+    const day = date.getUTCDate();
+    const year = date.getYear();
+  
+    const formattedDay = day < 10 ? '0' + day : day;
+  
+    // Construct the MM dd string
+    // const formattedDate = formattedMonth + ' ' + formattedDay;
+    let Months = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    console.log("Here now", day)
+    let d = Months[month] + " " + formattedDay + " " + year
+    console.log("Formated ", d)
+    return d
+  }
+  export async function fetchWeeklySnapshots() {
+    // Download the latest info on the transactions and update database accordingly
+    console.log(chalk.green("generate context here "));
+    // return
+    let lastTwoWeekDates = getWeeklyDates(2);
+    console.log("Dates ")
+    // return
+    console.log(lastTwoWeekDates)
+    // return
+    for (let i = 0; i < lastTwoWeekDates.length; i++) {
+      let d = lastTwoWeekDates[i];
+      // console.log("Dates ", d)
+      let dateSt1Full = ""
+      let dateSt2Full = ""
+      let year = ""
+      let m = moment(d.monday)
+      let s = moment(m.sunday)
+      try {
+        dateSt1Full = getMDYDateFormat(d.monday)//m.format("MMM DD YYYY")
+        dateSt2Full = getMDYDateFormat(d.sunday)//s.format("MMM DD YYYY")
+  
+        year = m.format("YYYY")
+      }
+      catch (error) {
+        console.log("Exception ", error)
+      }
+  
+      let dateSt1 = getMDDateFormat(d.monday)//m.format("MMM DD")
+      let dateSt2 = getMDDateFormat(d.sunday)//s.format("MMM DD")
+      console.log("#################################################################")
+      console.log("Converting date ", { monday: d.monday, sunday: d.sunday })
+      console.log(`M ${dateSt1} - S ${dateSt2}`)
+      console.log("#################################################################")
+      //get users who have created a journal in the past week
+        let UserVibes = {}
+        let snapshotText = {} // for every user
+        let journals = await getJournalsInAWeek(d.monday, d.sunday, null)
+        let users = []
+        // console.log("Journals ", journals.length)
+        for (let i = 0; i < journals.length; i++) {
+          let j = journals[i];
+          let uid = j.UserId;
+  
+          if (snapshotText.hasOwnProperty(`${uid}`)) {
+            let t = snapshotText[`${uid}`];
+            t = `${t} \n Date: ${j.createdAt} ${j.title} \n ${j.detail} \n Mood: ${j.mood} \nFeeling: ${j.feeling}`;
+            snapshotText[`${uid}`] = t;
+          }
+          else {
+            // console.log("Pushing uid dont exist already")
+            users.push(uid)
+            let t = `Date: ${j.createdAt} ${j.title} \n ${j.detail} \n Mood: ${j.mood} \nFeeling: ${j.feeling}`;
+            snapshotText[`${uid}`] = t;
+          }
+  
+  
+          if (UserVibes.hasOwnProperty(`${uid}`)) {
+            // console.log(`Key with UserId ${uid} exists.`);
+            let ujs = UserVibes[`${uid}`]
+            ujs.push(j)
+            UserVibes[uid] = ujs
+  
+  
+          } else {
+            // console.log(`Key with UserId ${uid} does not exist.`);
+            UserVibes[uid] = [j]
+          }
+        }
+        console.log("Users ", users)
+        // console.log("Generating Snapshot")
+        if (users.length > 0) {
+          // console.log("Generating Snapshot 2" )
+          for (let i = 0; i < users.length; i++) {
+            // console.log("Generating Snapshot loop ", i)
+            let u = users[i]
+            let t = snapshotText[`${u}`];
+  
+            let snapshot = await GetSnapshotFromJournals(t);
+  
+            // console.log("Snapshot generated is ", snapshot)
+            try{
+  
+  
+            if (snapshot !== "") {
+              console.log("Valid Snapshot")
+              let jsonSnap = JSON.parse(snapshot)
+              // console.log(jsonSnap)
+              let obj = {
+                monday: dateSt1,
+                sunday: dateSt2,
+                mood: jsonSnap.mood,
+                year: year,
+                date: dateSt1Full + " - " + dateSt2Full,
+                snapshot: jsonSnap.snapshot,
+                tip: jsonSnap.tip,
+                reflectionQuestion: jsonSnap.question,
+                UserId: u
+              }
+              console.log("------------------------------------")
+              console.log(chalk.yellow("Have Snapshot For User"))
+              console.log(u)
+              console.log("------------------------------------")
+  
+            db.weeklySnapshotModel.create(obj).then((result)=>{
+              console.log("Saved Snapshot ")
+            })
+            .catch((error)=>{
+              console.log("Error creating DB Snapshot ", error)
+            })
+            }
+  
+            }
+            catch(error){
+              console.log("Exception Parse ", error)
+            }
+          }
+        }
+        // console.log("User Vibes ")
+        // console.log(JSON.stringify(UserVibes))
+  
+  
+        // console.log(chalk.yellow("for week "));
+        // console.log(chalk.yellow(JSON.stringify(d)));
+  
+  
+  
+        //get the journals of this week.
+    }//for loop ends here
+    // number = number + 5;
+  
+  };
