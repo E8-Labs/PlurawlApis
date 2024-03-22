@@ -320,14 +320,14 @@ function generateWeeklyDates(numberOfWeeks = 30) {
     for (let i = 0; i < numberOfWeeks; i++) { // Generate dates for 4 weeks only
         // Calculate Monday and Sunday for each week
         let monday = currentDate.clone().startOf('isoWeek');
-        monday = monday.add(1, 'day')
+        // monday = monday.add(1, 'day')
         let sunday = currentDate.clone().endOf('isoWeek');
 
         // Add the dates to the array
         dates.push({ monday: monday.toDate(), sunday: sunday.toDate() });
 
         // Move to the next week
-        currentDate = monday.subtract(2, 'day');
+        currentDate = monday.subtract(1, 'day');
     }
 
     return dates; // Reverse the array to have the dates in chronological order
