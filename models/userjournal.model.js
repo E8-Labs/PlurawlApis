@@ -18,7 +18,7 @@ const UserJournalModel = (sequelize, Sequelize) => {
         default: ''
       },
       snapshot: {
-        type: Sequelize.STRING(5000),
+        type: Sequelize.STRING(3000),
         default: ''
       },
       mood: {
@@ -30,7 +30,7 @@ const UserJournalModel = (sequelize, Sequelize) => {
         default: ''
       },
       description: {
-        type: Sequelize.STRING(2000),
+        type: Sequelize.STRING(1500),
         default: ''
       },
       pronunciation: {
@@ -38,11 +38,11 @@ const UserJournalModel = (sequelize, Sequelize) => {
         default: ''
       },
       snapshotTextHighlights: {
-        type: Sequelize.STRING(1000),
+        type: Sequelize.STRING(500),
         default: ''
       },
       textHighlights: {
-        type: Sequelize.STRING(1000),
+        type: Sequelize.STRING(500),
         default: ''
       },
     },
