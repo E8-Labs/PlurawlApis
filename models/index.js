@@ -1,5 +1,5 @@
 import dbConfig from "../config/db.config.js";
-
+import passwordresetcodeModel from "./passwordresetcode.model.js";
 
 import  Sequelize from "sequelize";
 console.log("Connecting DB")
@@ -78,5 +78,7 @@ db.messageModel.belongsTo(db.chatModel);
 db.spotifySongModel = SpotifySongModel(sequelize, Sequelize);
 db.spotifySongModel.belongsTo(db.user);
 db.user.hasMany(db.spotifySongModel);
+
+db.passwordResetCode = passwordresetcodeModel(sequelize, Sequelize);
 
 export default db;
