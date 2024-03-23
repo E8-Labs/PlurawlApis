@@ -5,6 +5,7 @@ import multer from "multer";
 import path from "path";
 import moment from "moment-timezone";
 import axios from "axios";
+import chalk from 'chalk';
 
 // import { Pinecone } from "@pinecone-database/pinecone";
 
@@ -123,7 +124,7 @@ async function GenerateFirstMessageForAIChat(chat, user, callback) {
     So the instruction is, first introduce yourself, then greet the user. Using the outline above, act as one's advanced therapist, have them check in first if they agree to checkin, then start their journal entry. Otherwise, just allow them to journal and engage and address what they’ve written about Oh and your name is Plurawl, don't forget to introduce yourself.
     
     It should feel like a conversation, so ask one question at a time, don't word vomit and ask a lot of questions at once.. make it feel like you're chatting.
-    Keep response within 300 words.
+    Keep response within 200 words.
     `
     // const m1 = await db.messageModel.create({
     //     message: cdText,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
@@ -197,12 +198,12 @@ export const UpdateChat = async (req, res) => {
 async function sendQueryToGpt(message, messageData) {
     console.log("Sending Message " + message)
 
-
+console.log(messageData)
     // console.log("Sending this summary to api ", summary);
-    messageData.push({
-        role: "system",
-        content: "You're a helpful assistant. So reply me keeping in context the whole data provided. Keep the response short and make it complete response. keep all of your responses within 300 words or less.", // summary will go here if the summary is created.
-    });
+    // messageData.push({
+    //     role: "system",
+    //     content: "You're a helpful assistant. So reply me keeping in context the whole data provided. Keep the response short and make it complete response. keep all of your responses within 300 words or less.", // summary will go here if the summary is created.
+    // });
 
     messageData.push({
         role: "user",
@@ -267,22 +268,27 @@ export const SendMessage = async (req, res) => {
                     //     messagesData = [{role: "user", content: "generate summary of previous conversation"}, {role: "system", content: summary}, {role: "user", content: message}]
                     // }
                     // else{
+                        //Repeat introduction was because of the message order. The first message would be sent last 
+                        //to gpt so it would consider that an instruction and greet again.
                     const dbmessages = await db.messageModel.findAll({
                         where: {
                             ChatId: chatid
                         },
                         limit: 50,
                         order: [
-                            ["id", "DESC"]
+                            ["id", "ASC"]
                         ]
                     });
                     if (dbmessages.length > 0) {
                         // messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: messages[0].message}]
                         console.log("Messages are in db")
+                        // console.log("################################################################")
                         for (let i = 0; i < dbmessages.length; i++) {
                             let m = dbmessages[i]
+                            // console.log(chalk.green(`Message ${m.from}-${m.id} | ${m.message}`))
                             messagesData.push({ role: m.from === "me" ? "user" : "system", content: m.message })
                         }
+                        // console.log("################################################################")
                         if (chat.snapshot !== null) {
                             messagesData.splice(0, 0, { role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${chat.snapshot}. The further conversation follows.` })
                         }
