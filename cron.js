@@ -29,8 +29,9 @@ let number = 0// "/2 * * * Monday"
 //*/10 0-1 * * Sunday
 
 
-//"*/20 0-20 * * 0-3"
-const job = nodeCron.schedule("*/30 0-20 * * 0-1", fetchWeeklySnapshots)
+//"*/30 0-20 * * 1" // actual
+//'*/5 * * * *'
+const job = nodeCron.schedule('*/15 * * * * *', fetchWeeklySnapshots)
 
 job.start();
 

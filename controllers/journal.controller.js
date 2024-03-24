@@ -329,9 +329,16 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     return lastWeekVibe
 }
 
-function generateWeeklyDates(numberOfWeeks = 30) {
+
+
+export const getWeeklyDates = (numberOfWeeks = 30, includeCurrentWeek = true) => {
     const dates = [];
     let currentDate = moment().startOf('week'); // Start from the beginning of the current week
+    if(!includeCurrentWeek){
+        //if don't want to include current week then pass includeCurrentWeek = false else true
+        currentDate = currentDate.subtract(1, 'day');
+    }
+    
     console.log("Start of current week date is ", currentDate)
     let m = currentDate.add(1, 'day')
     let s = moment()
@@ -345,70 +352,18 @@ function generateWeeklyDates(numberOfWeeks = 30) {
         let sunday = currentDate.clone().endOf('isoWeek');
 
         // Add the dates to the array
-        dates.push({ monday: monday.toDate(), sunday: sunday.toDate() });
+        dates.push({ monday: monday.toDate(), sunday: sunday.toDate()});
 
         // Move to the next week
         currentDate = monday.subtract(1, 'day'); // sub two days for local 1 for server
     }
 
     return dates; // Reverse the array to have the dates in chronological order
-}
-
-export const getWeeklyDates = (numberOfWeeks = 30) => {
-    let weekdates = generateWeeklyDates(30);
-// console.log(weekdates)
-    return weekdates;
-    const originalDate = new Date();
-    const currentDate = new Date(originalDate.getFullYear(), originalDate.getMonth(), originalDate.getDate());
- //monday - sunday
-    // Calculate the start and end date of the last week
-    let lastSunday = new Date(currentDate); //current date
-    // lastSunday.setDate(currentDate.getDate() - currentDate.getDay());
-    let lastMonday = new Date(originalDate.getFullYear(), originalDate.getMonth(), originalDate.getDate() - (currentDate.getDay() - 1));
-    // lastMonday.setDate(lastSunday.getDate() - (currentDate.getDay() - 1));
-
-    lastMonday.setUTCHours(0, 0, 0, 0)
-    lastSunday.setUTCHours(23, 59, 59, 999)
-
-    console.log("Current  ", currentDate.getDay())
-    console.log("Last Sunday Date", lastSunday)
-    console.log("Last Mon Date", lastMonday)
-    // return
-    let dates = []
-    // if (lastSunday.getDate() !== currentDate.getDate) {
-    //     let thisWeekMonday = new Date(lastMonday)
-
-    //     thisWeekMonday.setDate(lastSunday.getDate() + 1) // get this ongoing week's monday
-    //     thisWeekMonday.setUTCHours(0, 0, 0, 0)
-    //     let todayDate = new Date()
-    //     todayDate.setDate(thisWeekMonday.getDate() + 7)
-    //     todayDate.setUTCHours(23, 59, 59, 999)
-    //     console.log("This week is ongoing ", { monday: thisWeekMonday, sunday: todayDate })
-    //     dates.push({ monday: thisWeekMonday, sunday: todayDate })
-    // }
-
-    dates.push({ monday: lastMonday, sunday: lastSunday })
-    for (let i = 0; i < numberOfWeeks; i++) { // last 10 weeks
-        
-        let monday = new Date(lastMonday.getFullYear(), lastMonday.getMonth(), lastMonday.getDate() - 7);
-        let sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
-        
-        // lastMonday.setDate(lastMonday.getDate() - 7)
-        // lastSunday.setDate(lastMonday.getDate() + 6)
-        // lastSunday = sunday
-        // lastMonday = monday
-        monday.setUTCHours(1, 3, 0, 0)
-        sunday.setUTCHours(23, 59, 59, 999)
-        dates.push({ monday: monday, sunday: sunday })
-        lastMonday = new Date(monday)
-        lastSunday = new Date(sunday)
-    }
-
-    return dates;
+    
 }
 
 export const GetJournals = (req, res) => {
-    let dates = getWeeklyDates(30);
+    let dates = getWeeklyDates(30, false);
     const originalDate = new Date();
     const currentDate = new Date(originalDate.getFullYear(), originalDate.getMonth(), originalDate.getDate());
     // Calculate the start and end date of the last week
@@ -867,7 +822,7 @@ function getMDDateFormat(date) {
     // Download the latest info on the transactions and update database accordingly
     console.log(chalk.green("generate context here "));
     // return
-    let lastTwoWeekDates = getWeeklyDates(2);
+    let lastTwoWeekDates = getWeeklyDates(30, true);
     console.log("Dates ")
     // return
     console.log(lastTwoWeekDates)
