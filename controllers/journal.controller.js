@@ -465,7 +465,7 @@ export const GetSnapshotFromJournals = async (text) => {
             gptMessage = gptMessage.replace(new RegExp("```json", 'g'), '');
             gptMessage = gptMessage.replace(new RegExp("```", 'g'), '');
             gptMessage = gptMessage.replace(new RegExp("\n", 'g'), '');
-            console.log(chalk.green(JSON.stringify(gptMessage)))
+            // console.log(chalk.green(JSON.stringify(gptMessage)))
             // return ""
             return gptMessage
         }
@@ -820,12 +820,12 @@ function getMDDateFormat(date) {
   }
   export async function fetchWeeklySnapshots() {
     // Download the latest info on the transactions and update database accordingly
-    console.log(chalk.green("generate context here "));
+    console.log(chalk.green("Cron Job Weekly Snapshot Running On ", new Date()));
     // return
     let lastTwoWeekDates = getWeeklyDates(30, true);
     console.log("Dates ")
     // return
-    console.log(lastTwoWeekDates)
+    // console.log(lastTwoWeekDates)
     // return
     for (let i = 0; i < lastTwoWeekDates.length; i++) {
       let d = lastTwoWeekDates[i];
@@ -847,10 +847,10 @@ function getMDDateFormat(date) {
   
       let dateSt1 = getMDDateFormat(d.monday)//m.format("MMM DD")
       let dateSt2 = getMDDateFormat(d.sunday)//s.format("MMM DD")
-      console.log("#################################################################")
-      console.log("Converting date ", { monday: d.monday, sunday: d.sunday })
-      console.log(`M ${dateSt1} - S ${dateSt2}`)
-      console.log("#################################################################")
+    //   console.log("#################################################################")
+    //   console.log("Converting date ", { monday: d.monday, sunday: d.sunday })
+    //   console.log(`M ${dateSt1} - S ${dateSt2}`)
+    //   console.log("#################################################################")
       //get users who have created a journal in the past week
         let UserVibes = {}
         let snapshotText = {} // for every user
@@ -916,10 +916,10 @@ function getMDDateFormat(date) {
                 reflectionQuestion: jsonSnap.question,
                 UserId: u
               }
-              console.log("------------------------------------")
-              console.log(chalk.yellow("Have Snapshot For User"))
-              console.log(u)
-              console.log("------------------------------------")
+            //   console.log("------------------------------------")
+            //   console.log(chalk.yellow("Have Snapshot For User"))
+            //   console.log(u)
+            //   console.log("------------------------------------")
   
             db.weeklySnapshotModel.create(obj).then((result)=>{
               console.log("Saved Snapshot ")
