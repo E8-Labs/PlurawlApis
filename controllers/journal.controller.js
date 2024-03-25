@@ -363,7 +363,7 @@ export const getWeeklyDates = (numberOfWeeks = 30, includeCurrentWeek = true) =>
 }
 
 export const GetJournals = (req, res) => {
-    let dates = getWeeklyDates(30, false);
+    let dates = getWeeklyDates(30, true);
     const originalDate = new Date();
     const currentDate = new Date(originalDate.getFullYear(), originalDate.getMonth(), originalDate.getDate());
     // Calculate the start and end date of the last week
@@ -822,7 +822,7 @@ function getMDDateFormat(date) {
     // Download the latest info on the transactions and update database accordingly
     console.log(chalk.green("Cron Job Weekly Snapshot Running On ", new Date()));
     // return
-    let lastTwoWeekDates = getWeeklyDates(30, true);
+    let lastTwoWeekDates = getWeeklyDates(30, false);
     console.log("Dates ")
     // return
     // console.log(lastTwoWeekDates)
