@@ -236,7 +236,7 @@ export const LoginUser = async (req, res) => {
 export const CheckIn = (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
         if (authData) {
-            //console.log("Auth data ", authData)
+            console.log("Auth data ", authData)
             let userid = authData.user.id;
             const user = await User.findByPk(userid);
             if (user) {
@@ -253,7 +253,8 @@ export const CheckIn = (req, res) => {
                     res.send({ status: true, message: "User Checkedin ", data: u })
                 })
                     .catch((error) => {
-
+                        console.log("Error is ", error)
+                        res.send({ status: true, message: "User CheckIn error ", data: null, error: error })
                     })
 
             }
