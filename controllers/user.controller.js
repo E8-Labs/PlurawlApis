@@ -114,8 +114,10 @@ export const SocialLogin = async(req, res) => {
             provider_id: req.body.provider_id
         }
     })
+    
     if (alreadyUser) {
-        JWT.sign({ alreadyUser }, process.env.SecretJwtKey, { expiresIn: '365d' }, async (error, token) => {
+         let user = alreadyUser
+        JWT.sign({ user }, process.env.SecretJwtKey, { expiresIn: '365d' }, async (error, token) => {
             if (error) {
                 console.log(error)
                 res.send({ data: error, status: false, message: "Soome error occurred" });
