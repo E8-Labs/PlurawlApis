@@ -31,13 +31,13 @@ let number = 0// "/2 * * * Monday"
 
 //"*/30 0-20 * * 1" // actual
 //'*/5 * * * *'
-const job = nodeCron.schedule("*/10 0-10 * * 1", fetchWeeklySnapshots)
+const job = nodeCron.schedule("*/1 0-10 * * 0,1,2,3", fetchWeeklySnapshots)
 
 job.start();
 
 
 //run job to get Daily quotes
-const quoteJob = nodeCron.schedule("*/2 0-10 * * *", async function fetchPendingBankTransactions() {
+const quoteJob = nodeCron.schedule("*/2 0-1 * * *", async function fetchPendingBankTransactions() {
   // const currentDate = new Date();
   let time = moment()
   console.log("Quote Crone Job Running at time ", time);
