@@ -31,7 +31,7 @@ let number = 0// "/2 * * * Monday"
 
 //"*/30 0-20 * * 1" // actual
 //'*/5 * * * *'
-const job = nodeCron.schedule("*/1 0-10 * * 0,1,2,3", fetchWeeklySnapshots)
+const job = nodeCron.schedule("*/50 0-4 * * 0,1,2,3", fetchWeeklySnapshots)
 
 job.start();
 
