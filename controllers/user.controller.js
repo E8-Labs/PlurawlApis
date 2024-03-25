@@ -579,7 +579,7 @@ export const UploadTracks = (req, res) => {
 
 function generateRandomCode(length) {
     let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const characters = '0123456789';
     const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -619,11 +619,11 @@ export const SendPasswordResetEmail = (req, res) => {
       })
       // Setup email data with unicode symbols
       let mailOptions = {
-        from: '"America Finance" salman@e8-labs.com', // Sender address
+        from: '"Plurawl" salman@e8-labs.com', // Sender address
         to: email, // List of recipients
         subject: "Password Reset Code", // Subject line
         text: `${randomCode}`, // Plain text body
-        html: `<html><b>Hello,</b>This is your reset code.${randomCode} </html>`, // HTML body
+        html: `<html><b>Hello,${user.firstname}</b>This is your reset code. <b>${randomCode}</b> </html>`, // HTML body
       };
   
       // Send mail with defined transport object
