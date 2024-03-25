@@ -623,7 +623,7 @@ export const SendPasswordResetEmail = (req, res) => {
         to: email, // List of recipients
         subject: "Password Reset Code", // Subject line
         text: `${randomCode}`, // Plain text body
-        html: `<html><b>Hello,${user.firstname}</b>This is your reset code. <b>${randomCode}</b> </html>`, // HTML body
+        html: `<html><b>Hello,${user.name}</b>This is your reset code. <b>${randomCode}</b> </html>`, // HTML body
       };
   
       // Send mail with defined transport object
