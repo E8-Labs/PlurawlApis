@@ -112,11 +112,23 @@ async function getUserData(user, currentUser = null) {
     }
     let gif = GenerateRandomGif(mostCheckedInMood)
 
+    let chatCondition = {
+        createdAt: {
+            [Op.between]: [lastMonday, lastSunday]
+        },
+        UserId: user.id
+    }
+    let songs = await db.spotifySongModel.findAll({
+        where: songsCondition,
+        limit: 5
+    })
+
+
     var lastWeekVibe = null
     if (journals.length > 0 || checkins.length > 0) {
         lastWeekVibe = {
             checkins: [], journals: journals, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
-            lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, gif: gif
+            lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, gif: gif, tracks: songs
         }
 
         let year = moment(lastSunday).format("YYYY");
