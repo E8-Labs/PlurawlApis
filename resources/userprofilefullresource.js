@@ -1,6 +1,6 @@
 import db from "../models/index.js";
 import CheckInTypes from "../models/checkintype.js";
-import CheckinMoods from "../models/checkinmoods.js";
+import {CheckinMoods, GenerateRandomGif} from "../models/checkinmoods.js";
 import { getJournalsInAWeek, getWeeklyDates } from "../controllers/journal.controller.js";
 
 import moment from "moment-timezone";
@@ -110,12 +110,13 @@ async function getUserData(user, currentUser = null) {
     else if (heup > hep && heup < lep && heup >> leup) {
         mostCheckedInMood = CheckinMoods.MoodHeup;
     }
+    let gif = GenerateRandomGif(mostCheckedInMood)
 
     var lastWeekVibe = null
     if (journals.length > 0 || checkins.length > 0) {
         lastWeekVibe = {
             checkins: [], journals: journals, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
-            lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2
+            lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, gif: gif
         }
 
         let year = moment(lastSunday).format("YYYY");

@@ -7,7 +7,7 @@ import path from "path";
 import moment from "moment-timezone";
 import axios from "axios";
 
-import CheckinMoods from "../models/checkinmoods.js";
+import {CheckinMoods, GenerateRandomGif} from "../models/checkinmoods.js";
 // import { fetchOrCreateUserToken } from "./plaid.controller.js";
 // const fs = require("fs");
 // var Jimp = require("jimp");
@@ -317,9 +317,10 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
 
 // console.log("Kalar Kahar ka bandar ")
 // console.log(journals)
+let gif = GenerateRandomGif(mostCheckedInMood)
     var lastWeekVibe = {
         journals: journals, chats: chats, drafts: drafts, totalJournals: journals.length, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
-        lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, checkins: checkins, tracks: songs
+        lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, checkins: checkins, tracks: songs, gif: gif
     }
     
     console.log(chalk.red("Vibe is ", JSON.stringify(lastWeekVibe)))
@@ -567,7 +568,7 @@ export const GenerateListOfMoods = async (req, res) => {
     let messageData = [];
     messageData.push({
         role: "user",
-        content: `Generate me a list of 10 single word moods that fall under this category. Category: ${userMood}.
+        content: `Generate me a list of 12 single word moods that fall under this category. Category: ${userMood}.
         Make sure the list is a javascript object list and there is nothing extra on the list so that i can parse it easily in the code. 
 Each javascript object should consist of the following keys:
 {

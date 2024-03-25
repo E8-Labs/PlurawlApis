@@ -108,6 +108,9 @@ export const CreateChat = async (req, res) => {
 
 async function GenerateFirstMessageForAIChat(chat, user, callback) {
     let name = user.name;
+    if(name.length > 0){
+     name = name.split(" ")[0]
+    }
     let cdText = `You're an advanced AI self discovery coach and people engage with you to checkin and journal about their life. 
 
     Here are your instructions:
@@ -124,7 +127,7 @@ async function GenerateFirstMessageForAIChat(chat, user, callback) {
     So the instruction is, first introduce yourself, then greet the user. Using the outline above, act as one's advanced therapist, have them check in first if they agree to checkin, then start their journal entry. Otherwise, just allow them to journal and engage and address what they’ve written about Oh and your name is Plurawl, don't forget to introduce yourself.
     
     It should feel like a conversation, so ask one question at a time, don't word vomit and ask a lot of questions at once.. make it feel like you're chatting.
-    Keep response within 200 words.
+    Keep response within 100 words.
     `
     // const m1 = await db.messageModel.create({
     //     message: cdText,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
@@ -292,10 +295,12 @@ export const SendMessage = async (req, res) => {
                         if (chat.snapshot !== null) {
                             messagesData.splice(0, 0, { role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${chat.snapshot}. The further conversation follows.` })
                         }
+                        messagesData.splice(0, 0, { role: "system", content: `Keep your response within 100 words.` })
+                        
                     }
                     else {
                         console.log("No messages, new chat")
-                        messagesData = [{ role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user." }, { role: "user", content: message }]
+                        messagesData = [{ role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user. Keep your response within 100 words." }, { role: "user", content: message }]
                         if (chat.snapshot !== null) {
                             messagesData.splice(0, 0, { role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${chat.snapshot}. Now user will respond. Reply accordingly by keeping inside the scope of the journal context.` })
                         }
