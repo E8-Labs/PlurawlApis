@@ -112,7 +112,7 @@ async function getUserData(user, currentUser = null) {
     }
     let gif = GenerateRandomGif(mostCheckedInMood)
 
-    let chatCondition = {
+    let songsCondition = {
         createdAt: {
             [Op.between]: [lastMonday, lastSunday]
         },
