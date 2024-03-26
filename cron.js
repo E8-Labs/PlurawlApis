@@ -6,11 +6,12 @@ import userRouter from "./routes/user.router.js";
 import nodeCron from "node-cron";
 import chalk from "chalk";
 import moment from "moment-timezone";
+import { CheckinMoods } from "./models/checkinmoods.js";
 
 import { GenerateQuote } from "./controllers/user.controller.js";
 import db from "./models/index.js";
 
-import { getWeeklyDates, getJournalsInAWeek, GetSnapshotFromJournals, fetchWeeklySnapshots } from "./controllers/journal.controller.js";
+import { getWeeklyDates, getJournalsInAWeek, GetSnapshotFromJournals, fetchWeeklySnapshots, GetFeelingsromGpt } from "./controllers/journal.controller.js";
 
 // import plaidRouter from "./routes/plaid.router.js";
 // import loanRouter from "./routes/loan.router.js";
@@ -44,5 +45,43 @@ const quoteJob = nodeCron.schedule("*/30 0-1 * * *", async function fetchPending
   GenerateQuote();
 })
 quoteJob.start();
+
+//run job to get Daily quotes
+//'0 0 1-7/2 * *' // every two weeks
+
+let index = 0
+const moodJob = nodeCron.schedule('0 0 1-7/2 * *', async function fetchPendingBankTransactions() {
+  // const currentDate = new Date();
+  let time = moment()
+  console.log("Mood Cron Job Running at time ", time);
+ if(index === 0){
+  index += 1
+  console.log("Running api ")
+  let moodKeys = ["Low energy, Pleasant", "High energy, Pleasant", "Low energy, Unpleasant", "High energy, Unpleasant"]
+  for(let i = 0; i < moodKeys.length; i++){
+    let mood = moodKeys[i];
+    let feelings = await GetFeelingsromGpt(mood)
+    if(feelings && feelings.length > 0){
+      console.log("Adding feelings to db")
+      feelings.forEach(async (item)=> {
+        let saved = await db.checkinMoodModel.create({
+          feeling: item.feeling,
+          description: item.description,
+          pronunciation: item.pronunciation,
+          mood: mood
+        })
+
+      })
+    }
+    
+    // add to the database
+
+  }
+ }
+ else{
+
+ }
+})
+moodJob.start();
 
 // export {fetchWeeklySnapshots}

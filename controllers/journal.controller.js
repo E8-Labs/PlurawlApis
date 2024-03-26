@@ -561,14 +561,11 @@ export const AnalyzeJournal = async (req, res) => {
 
 }
 
-
-export const GenerateListOfMoods = async (req, res) => {
-    console.log("Fetching moods from gpt")
-    let userMood = req.query.mood
+export const GetFeelingsromGpt = async (mood) => {
     let messageData = [];
     messageData.push({
         role: "user",
-        content: `Generate me a list of 12 single word moods that fall under this category. Category: ${userMood}.
+        content: `Generate me a list of 18 single word moods that fall under this category. Category: ${mood}.
         Make sure the list is a javascript object list and there is nothing extra on the list so that i can parse it easily in the code. 
 Each javascript object should consist of the following keys:
 {
@@ -602,15 +599,38 @@ pronunciation: "How to pronounce the word"
             gptMessage = gptMessage.replace('```', '');
             console.log("List of moods is ", gptMessage)
             let listOfMoods = JSON.parse(gptMessage)
+            
             // setMoods(listOfMoods)
             // setShowIndicater(false)
             console.log("Moods array is ", listOfMoods)
-            res.send({ status: true, message: "Moods", data: listOfMoods })
+            return listOfMoods;
+            // res.send({ status: true, message: "Moods", data: listOfMoods })
             // return gptMessage;
         }
         else {
-            res.send({ status: false, message: "Moods", data: null })
+            return null
+            // res.send({ status: false, message: "Moods", data: null })
         }
+    }
+    catch (error) {
+        
+        console.log("Exception in open ai call ", error)
+        return null
+        // res.send({ status: false, message: "Moods", data: error })
+    }
+}
+
+export const GenerateListOfMoods = async (req, res) => {
+    console.log("Fetching moods from gpt")
+    
+    try {
+        let feelings = await db.checkinMoodModel.findAll({
+            where: {
+                mood: req.body.mood
+            }
+        })//await GetFeelingsromGpt(req.body.mood);
+        res.send({ status: true, message: "Moods", data: feelings })
+
     }
     catch (error) {
         console.log("Exception in open ai call ", error)
