@@ -626,7 +626,7 @@ export const GenerateListOfMoods = async (req, res) => {
     try {
         let feelings = await db.checkinMoodModel.findAll({
             where: {
-                mood: req.body.mood
+                mood: req.query.mood
             }
         })//await GetFeelingsromGpt(req.body.mood);
         res.send({ status: true, message: "Moods", data: feelings })
