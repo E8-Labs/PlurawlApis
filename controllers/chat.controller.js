@@ -240,7 +240,21 @@ console.log(messageData)
     }
 }
 
-
+function splitMessage(message) {
+    let wordsThreshold = 25
+    const words = message.split(' ');
+    if (words.length <= wordsThreshold) {
+        return [message]; // Return the original message as an array with one element
+    } else {
+        const firstPart = words.slice(0, wordsThreshold).join(' '); // Take the first 50 words
+        const remainingPart = words.slice(wordsThreshold).join(' '); // Take the remaining words
+        if (remainingPart.split(' ').length < 10) {
+            return [message]; // Return the original message as an array with one element
+        } else {
+            return [firstPart, remainingPart]; // Return two parts of the message as an array
+        }
+    }
+}
 
 
 export const SendMessage = async (req, res) => {
@@ -317,6 +331,7 @@ export const SendMessage = async (req, res) => {
                                     console.log("\n\nTransaction is commited \n\n")
                                 });
 
+                                let messageArray = []
                                 const m1 = await db.messageModel.create({
                                     message: message,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
                                     ChatId: chatid,
@@ -324,17 +339,43 @@ export const SendMessage = async (req, res) => {
                                     type: "text",
                                     title: "",
                                 }, { transaction: t });
-                                const m2 = await db.messageModel.create({
-                                    message: gptResponse,
-                                    ChatId: chatid,
-                                    from: "gpt",
-                                    type: "text"//messages[1].type
-                                }, { transaction: t });
+
+                                messageArray.push(m1)
+                                let messages = splitMessage(gptResponse);
+                                if(messages.length === 1){
+                                    const m2 = await db.messageModel.create({
+                                        message: messages[0],
+                                        ChatId: chatid,
+                                        from: "gpt",
+                                        type: "text"//messages[1].type
+                                    }, { transaction: t });
+                                    messageArray.push(m2)
+                                }
+                                else{
+                                    let mes1 = messages[0]
+                                    let mes2 = messages[1]
+                                    const m2 = await db.messageModel.create({
+                                        message: mes1,
+                                        ChatId: chatid,
+                                        from: "gpt",
+                                        type: "text"//messages[1].type
+                                    }, { transaction: t });
+                                    const m3 = await db.messageModel.create({
+                                        message: mes2,
+                                        ChatId: chatid,
+                                        from: "gpt",
+                                        type: "text"//messages[1].type
+                                    }, { transaction: t });
+
+                                    messageArray.push(m2)
+                                    messageArray.push(m3)
+                                }
+                                
 
 
 
                                 // await t.commit();
-                                res.send({ status: true, message: "Messages sent", data: { messages: [m1, m2], chat: chat } });
+                                res.send({ status: true, message: "Messages sent", data: { messages: messageArray, chat: chat } });
                             })
 
                         }
