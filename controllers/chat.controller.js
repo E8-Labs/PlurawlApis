@@ -241,7 +241,7 @@ console.log(messageData)
 }
 
 function splitMessage(message) {
-    let wordsThreshold = 25
+    let wordsThreshold = 50
     const words = message.split(' ');
     if (words.length <= wordsThreshold) {
         return [message]; // Return the original message as an array with one element
