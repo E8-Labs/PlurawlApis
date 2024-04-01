@@ -71,12 +71,7 @@ async function getUserData(user, currentUser = null) {
             UserId: user.id
         }
     })
-    // .then((result) => {
-    //     console.log(result);
-    //     checins = result;
-    // }).catch((error) => {
-    //     console.error('Error retrieving data:', error);
-    // });
+    
     let dateSt1 = moment(lastMonday).format("MMM DD")
     let dateSt2 = moment(lastSunday).format("MMM DD")
 
@@ -99,6 +94,24 @@ async function getUserData(user, currentUser = null) {
             heup = heup + 1
         }
     }
+
+    for (let i = 0; i < checkins.length; i++) {
+        let cin = checkins[i];
+        if (cin.mood === CheckinMoods.MoodHep) {
+            hep = hep + 1
+        }
+        if (cin.mood === CheckinMoods.MoodLep) {
+            lep = lep + 1
+        }
+        if (cin.mood === CheckinMoods.MoodLeup) {
+            leup = leup + 1
+        }
+        if (cin.mood === CheckinMoods.MoodHeup) {
+            heup = heup + 1
+        }
+    }
+
+    
 
     var mostCheckedInMood = CheckinMoods.MoodHep;
     if (lep > hep && lep < leup && lep >> heup) {
