@@ -265,6 +265,24 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     let dateSt1 = moment(lastMonday).format("MMM DD")
     let dateSt2 = moment(lastSunday).format("MMM DD")
 
+    let checkinCondition = {
+        createdAt: {
+            [Op.between]: [lastMonday, lastSunday]
+        },
+    }
+    if (userid != null) {
+        checkinCondition = {
+            createdAt: {
+                [Op.between]: [lastMonday, lastSunday]
+            },
+            UserId: userid,
+        }
+    }
+
+    let checkins = await db.userCheckinModel.findAll({
+        where: checkinCondition
+    })
+
     var lep = 0
     var hep = 0
     var leup = 0
@@ -285,35 +303,35 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
         }
     }
 
+    for (let i = 0; i < checkins.length; i++) {
+        let cin = checkins[i];
+        if (cin.mood === CheckinMoods.MoodHep) {
+            hep = hep + 1
+        }
+        if (cin.mood === CheckinMoods.MoodLep) {
+            lep = lep + 1
+        }
+        if (cin.mood === CheckinMoods.MoodLeup) {
+            leup = leup + 1
+        }
+        if (cin.mood === CheckinMoods.MoodHeup) {
+            heup = heup + 1
+        }
+    }
+
     var mostCheckedInMood = CheckinMoods.MoodHep;
-    if (lep > hep && lep < leup && lep >> heup) {
+    if (lep > hep && lep > leup && lep > heup) {
         mostCheckedInMood = CheckinMoods.MoodLep;
     }
-    else if (leup > hep && leup < lep && leup >> heup) {
+    else if (leup > hep && leup > lep && leup > heup) {
         mostCheckedInMood = CheckinMoods.MoodLeup;
     }
-    else if (heup > hep && heup < lep && heup >> leup) {
+    else if (heup > hep && heup > lep && heup > leup) {
         mostCheckedInMood = CheckinMoods.MoodHeup;
     }
 
 
-    let checkinCondition = {
-        createdAt: {
-            [Op.between]: [lastMonday, lastSunday]
-        },
-    }
-    if (userid != null) {
-        checkinCondition = {
-            createdAt: {
-                [Op.between]: [lastMonday, lastSunday]
-            },
-            UserId: userid,
-        }
-    }
-
-    let checkins = await db.userCheckinModel.findAll({
-        where: checkinCondition
-    })
+    
 
 // console.log("Kalar Kahar ka bandar ")
 // console.log(journals)
@@ -565,7 +583,8 @@ export const GetFeelingsromGpt = async (mood) => {
     let messageData = [];
     messageData.push({
         role: "user",
-        content: `Generate me a list of 18 single word moods that fall under this category. Category: ${mood}.
+        content: `Generate me a list of 30 single word moods that fall under this category. 80% of these words should be simple commonly used terms and 20%
+        should be complex vocabularies. Category: ${mood}. 
         Make sure the list is a javascript object list and there is nothing extra on the list so that i can parse it easily in the code. 
 Each javascript object should consist of the following keys:
 {
