@@ -114,13 +114,13 @@ async function getUserData(user, currentUser = null) {
     
 
     var mostCheckedInMood = CheckinMoods.MoodHep;
-    if (lep > hep && lep < leup && lep >> heup) {
+    if (lep > hep && lep > leup && lep > heup) {
         mostCheckedInMood = CheckinMoods.MoodLep;
     }
-    else if (leup > hep && leup < lep && leup >> heup) {
+    else if (leup > hep && leup > lep && leup > heup) {
         mostCheckedInMood = CheckinMoods.MoodLeup;
     }
-    else if (heup > hep && heup < lep && heup >> leup) {
+    else if (heup > hep && heup > lep && heup > leup) {
         mostCheckedInMood = CheckinMoods.MoodHeup;
     }
     let gif = GenerateRandomGif(mostCheckedInMood)
