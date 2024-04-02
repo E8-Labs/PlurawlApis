@@ -744,7 +744,7 @@ export const GetInsights = (req, res) => {
             let user = authData.user;
             console.log("Getting insights for user ", user.name);
             //get data for the last month for now
-            getCheckinsForLast60Days(user).then(dateCheckins => {
+            getCheckinsForLast60Days(user).then( async dateCheckins => {
                 console.log(dateCheckins); // Output the result
                 let hep = 0;
                 let lep = 0;
@@ -775,8 +775,22 @@ export const GetInsights = (req, res) => {
 
                 let totalMoods = lep + leup + hep + heup;
 
-
-                res.send({ data: { checkins: dateCheckins, total: totalMoods, lep: lep / totalMoods * 100, hep: hep / totalMoods * 100, leup: leup / totalMoods * 100, heup: heup / totalMoods * 100, }, status: true, message: "Data obtained" });
+                //Get Top 4 Feelings From Checkins
+                const topFeelings = await UserCheckin.findAll({
+                    attributes: ['feeling', [Sequelize.fn('COUNT', 'feeling'), 'count']],
+                    where: {
+                      createdAt: {
+                        [Sequelize.Op.gt]: Sequelize.literal('NOW() - INTERVAL 60 DAY'), // Filter for the last 60 days
+                      },
+                    },
+                    group: ['feeling'],
+                    order: [[Sequelize.literal('count'), 'DESC']], // Order by count in descending order
+                    limit: 4, // Limit the result to top 4 feelings
+                  });
+              
+                  console.log(topFeelings);
+                
+                res.send({ data: { checkins: dateCheckins, total: totalMoods, lep: lep / totalMoods * 100, hep: hep / totalMoods * 100, leup: leup / totalMoods * 100, heup: heup / totalMoods * 100, topFeelings: topFeelings}, status: true, message: "Data obtained" });
             }).catch(error => {
                 console.error('Error fetching check-ins:', error);
                 res.send({ data: null, status: false, message: "Some error", error: error });
