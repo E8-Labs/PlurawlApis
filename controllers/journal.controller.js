@@ -777,14 +777,14 @@ export const GetInsights = (req, res) => {
 
                 //Get Top 4 Feelings From Checkins
                 const topFeelings = await db.userCheckinModel.findAll({
-                    attributes: ['feeling', [Sequelize.fn('COUNT', 'feeling'), 'count']],
+                    attributes: ['feeling', [db.Sequelize.fn('COUNT', 'feeling'), 'count']],
                     where: {
                       createdAt: {
-                        [Sequelize.Op.gt]: Sequelize.literal('NOW() - INTERVAL 60 DAY'), // Filter for the last 60 days
+                        [db.Sequelize.Op.gt]: db.Sequelize.literal('NOW() - INTERVAL 60 DAY'), // Filter for the last 60 days
                       },
                     },
                     group: ['feeling'],
-                    order: [[Sequelize.literal('count'), 'DESC']], // Order by count in descending order
+                    order: [[db.Sequelize.literal('count'), 'DESC']], // Order by count in descending order
                     limit: 4, // Limit the result to top 4 feelings
                   });
               
