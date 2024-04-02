@@ -782,6 +782,7 @@ export const GetInsights = (req, res) => {
                       createdAt: {
                         [db.Sequelize.Op.gt]: db.Sequelize.literal('NOW() - INTERVAL 60 DAY'), // Filter for the last 60 days
                       },
+                      UserId: user.id
                     },
                     group: ['feeling'],
                     order: [[db.Sequelize.literal('count'), 'DESC']], // Order by count in descending order
