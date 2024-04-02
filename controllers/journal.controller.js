@@ -776,7 +776,7 @@ export const GetInsights = (req, res) => {
                 let totalMoods = lep + leup + hep + heup;
 
                 //Get Top 4 Feelings From Checkins
-                const topFeelings = await UserCheckin.findAll({
+                const topFeelings = await db.userCheckinModel.findAll({
                     attributes: ['feeling', [Sequelize.fn('COUNT', 'feeling'), 'count']],
                     where: {
                       createdAt: {
