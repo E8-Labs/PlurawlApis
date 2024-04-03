@@ -627,17 +627,21 @@ export const SendPasswordResetEmail = (req, res) => {
       };
   
       // Send mail with defined transport object
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          res.send({status: false, message: "Code not sent"})
-           console.log(error);
-        }
-        console.log('Message sent: %s', info.messageId);
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-        res.send({status: true, message: "Code sent"})
-        // Preview only available when sending through an Ethereal account
-        
-      });
+      try{
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              res.send({status: false, message: "Code not sent"})
+               console.log(error);
+            }
+            console.log('Message sent: %s', info.messageId);
+            console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+            res.send({status: true, message: "Code sent"})
+            
+          });
+      }
+      catch(error){
+        console.log("Exception ", error)
+      }
     }
     else {
       res.send({ status: false, data: null, message: "No such user" })
