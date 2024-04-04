@@ -3,7 +3,7 @@ const userRouter = express.Router();
 import {verifyJwtToken}  from "../middleware/jwtmiddleware.js";
 import {RegisterUser, LoginUser, GetUserProfile, UpdateProfile, 
     GetUsers, UpdateGoals, CheckIn, UploadTracks, SocialLogin,
-    SendPasswordResetEmail, ResetPassword} from "../controllers/user.controller.js";
+    SendPasswordResetEmail, ResetPassword, encrypt} from "../controllers/user.controller.js";
 
 
 
@@ -18,6 +18,7 @@ userRouter.get("/users", verifyJwtToken, GetUsers);
 userRouter.post("/upload_tracks", verifyJwtToken, UploadTracks);
 userRouter.post("/send_reset_email", SendPasswordResetEmail);
 userRouter.post("/update_password", ResetPassword);
+userRouter.post("/encrypt", encrypt);
 
 
 export default userRouter;

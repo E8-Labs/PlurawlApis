@@ -2,7 +2,7 @@ import db from "../models/index.js";
 import CheckInTypes from "../models/checkintype.js";
 // import CheckinMoods from "../models/checkinmoods.js";
 // import { getJournalsInAWeek, getWeeklyDates } from "../controllers/journal.controller.js";
-
+import crypto from 'crypto'
 import moment from "moment-timezone";
 // import LoanStatus from "../../models/loanstatus.js";
 // import PlaidTokenTypes from "../../models/plaidtokentypes.js";
@@ -44,12 +44,30 @@ async function getUserData(user) {
     let th = user.textHighlights !== null ? user.textHighlights.split(" ### ") : []
     let snapth = user.snapshotTextHighlights !== null ? user.snapshotTextHighlights.split(" ### ") : []
 
+    let algo = process.env.EncryptionAlgorithm;
+
+
+    let ownerUser = await db.user.findOne({
+        where: {
+            id: user.UserId
+        }
+    })
+    let key = ownerUser.enc_key;
+    let iv = ownerUser.enc_iv;
+    let decrypted = user.detail;
+    if(key && iv){
+        const decipher = crypto.createDecipheriv(algo, key, iv);
+        decrypted = decipher.update(user.detail, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+    }
+    
+
 console.log(`Hightlights ${user.id}`)
 console.log(th)
     const UserFullResource = {
         id: user.id,
         title: user.title,
-        detail: user.detail,
+        detail: user.decrypted,
         type: user.type,
         cd: user.cd,
         snapshot: user.snapshot,

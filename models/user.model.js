@@ -72,7 +72,15 @@ const UserModel = (sequelize, Sequelize) => {
       points: {
         type: Sequelize.INTEGER,
         default: 0
-      }
+      },
+      enc_key: {
+        type: Sequelize.BLOB,
+        allowNull: true
+      },
+      enc_iv: { //initialization vector
+        type: Sequelize.BLOB,
+        allowNull: true
+      },
       
     }, 
     // {

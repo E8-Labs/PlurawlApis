@@ -7,7 +7,9 @@ import path from "path";
 import moment from "moment-timezone";
 import axios from "axios";
 
-import {CheckinMoods, GenerateRandomGif} from "../models/checkinmoods.js";
+import crypto from 'crypto'
+
+import { CheckinMoods, GenerateRandomGif } from "../models/checkinmoods.js";
 // import { fetchOrCreateUserToken } from "./plaid.controller.js";
 // const fs = require("fs");
 // var Jimp = require("jimp");
@@ -37,14 +39,43 @@ function addCheckin(data) {
 export const AddJournal = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
         if (authData) {
+            let algo = process.env.EncryptionAlgorithm;
             let data = req.body;
-            let user = authData.user;
+
+            let user = await db.user.findOne({
+                where: {
+                    id: authData.user.id
+                }
+            });
             data.UserId = user.id;
+
+            //check encryption keys
+            let key = null
+            let iv = null
+            if (user.enc_key !== null && user.enc_iv !== null) {
+                key = user.enc_key;
+                iv = user.enc_iv;
+            }
+            else {
+
+                key = crypto.randomBytes(32);
+                iv = crypto.randomBytes(16);
+
+                db.user.update({
+                    enc_key: key,
+                    enc_iv: iv,
+                },
+                    {
+                        where: {
+                            id: user.id
+                        }
+                    })
+            }
 
             let texthighlights = data.texthighlight;
             let textHightlightText = ""
             let separator = ""
-            for(let i = 0; i < texthighlights.length; i++){
+            for (let i = 0; i < texthighlights.length; i++) {
                 textHightlightText = textHightlightText + separator + texthighlights[i]
                 separator = " ### "
             }
@@ -54,7 +85,7 @@ export const AddJournal = async (req, res) => {
             separator = ""
             let snapshotTextHighlights = data.snapshotTextHighlights;
             let snapshottextHightlightText = ""
-            for(let i = 0; i < snapshotTextHighlights.length; i++){
+            for (let i = 0; i < snapshotTextHighlights.length; i++) {
                 snapshottextHightlightText = snapshottextHightlightText + separator + snapshotTextHighlights[i]
                 separator = " ### "
             }
@@ -72,6 +103,15 @@ export const AddJournal = async (req, res) => {
             data.createdAt = createdAt
             data.updatedAt = createdAt
             console.log("Created at ", createdAt)
+
+            const cipher = crypto.createCipheriv(algo, key, iv);
+
+
+            let encrypted = cipher.update(data.detail, 'utf8', 'hex');
+            encrypted += cipher.final('hex');
+            console.log("Encrypted journal is ", encrypted)
+            data.detail = encrypted;
+            data.encrypted = true;
             // data.cod = req.body.cd;
             try {
                 db.userJournalModel.create(data).then(async (result) => {
@@ -175,7 +215,7 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
         [Op.or]: [
             { type: { [Op.ne]: 'draft' } }, // type not equal to 'draft'
             { type: { [Op.is]: null } }     // type is NULL
-          ],
+        ],
     }
     let draftCondition = {
         createdAt: {
@@ -184,7 +224,7 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
         [Op.and]: [
             { type: { [Op.eq]: 'draft' } }, // type not equal to 'draft'
             { type: { [Op.not]: null } }     // type is not NULL
-          ],
+        ],
     }
     if (userid !== null) {
         condition = {
@@ -194,7 +234,7 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
             [Op.or]: [
                 { type: { [Op.ne]: 'draft' } }, // type not equal to 'draft'
                 { type: { [Op.is]: null } }     // type is NULL
-              ],
+            ],
             UserId: userid
         }
 
@@ -205,7 +245,7 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
             [Op.and]: [
                 { type: { [Op.eq]: 'draft' } }, // type not equal to 'draft'
                 { type: { [Op.not]: null } }     // type is not NULL
-              ],
+            ],
             UserId: userid
         }
     }
@@ -331,16 +371,16 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     }
 
 
-    
 
-// console.log("Kalar Kahar ka bandar ")
-// console.log(journals)
-let gif = GenerateRandomGif(mostCheckedInMood)
+
+    // console.log("Kalar Kahar ka bandar ")
+    // console.log(journals)
+    let gif = GenerateRandomGif(mostCheckedInMood)
     var lastWeekVibe = {
         journals: journals, chats: chats, drafts: drafts, totalJournals: journals.length, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
         lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, checkins: checkins, tracks: songs, gif: gif
     }
-    
+
     console.log(chalk.red("Vibe is ", JSON.stringify(lastWeekVibe)))
     if (js.length == 0 && drafts.length == 0) {
         return null
@@ -353,11 +393,11 @@ let gif = GenerateRandomGif(mostCheckedInMood)
 export const getWeeklyDates = (numberOfWeeks = 30, includeCurrentWeek = true) => {
     const dates = [];
     let currentDate = moment().startOf('week'); // Start from the beginning of the current week
-    if(!includeCurrentWeek){
+    if (!includeCurrentWeek) {
         //if don't want to include current week then pass includeCurrentWeek = false else true
         currentDate = currentDate.subtract(1, 'day');
     }
-    
+
     console.log("Start of current week date is ", currentDate)
     let m = currentDate.add(1, 'day')
     let s = moment()
@@ -371,14 +411,14 @@ export const getWeeklyDates = (numberOfWeeks = 30, includeCurrentWeek = true) =>
         let sunday = currentDate.clone().endOf('isoWeek');
 
         // Add the dates to the array
-        dates.push({ monday: monday.toDate(), sunday: sunday.toDate()});
+        dates.push({ monday: monday.toDate(), sunday: sunday.toDate() });
 
         // Move to the next week
         currentDate = monday.subtract(1, 'day'); // sub two days for local 1 for server
     }
 
     return dates; // Reverse the array to have the dates in chronological order
-    
+
 }
 
 export const GetJournals = (req, res) => {
@@ -420,7 +460,7 @@ export const GetJournals = (req, res) => {
                     vibe.snapshot = snapshot;
                     journals.push(vibe);
                 }
-                else{
+                else {
                     console.log("Vibe doesn't exist ")
                 }
             }
@@ -438,6 +478,8 @@ export const GetSnapshotFromJournals = async (text) => {
     // gptMe = gptMe.replace(new RegExp("\n", 'g'), '');
     // return gptMe
     // console.log("creating snapshot for text " + text)
+
+
 
     let messageData = []
     // console.log("Sending this summary to api ", summary);
@@ -618,7 +660,7 @@ pronunciation: "How to pronounce the word"
             gptMessage = gptMessage.replace('```', '');
             console.log("List of moods is ", gptMessage)
             let listOfMoods = JSON.parse(gptMessage)
-            
+
             // setMoods(listOfMoods)
             // setShowIndicater(false)
             console.log("Moods array is ", listOfMoods)
@@ -632,7 +674,7 @@ pronunciation: "How to pronounce the word"
         }
     }
     catch (error) {
-        
+
         console.log("Exception in open ai call ", error)
         return null
         // res.send({ status: false, message: "Moods", data: error })
@@ -641,7 +683,7 @@ pronunciation: "How to pronounce the word"
 
 export const GenerateListOfMoods = async (req, res) => {
     console.log("Fetching moods from gpt")
-    
+
     try {
         let feelings = await db.checkinMoodModel.findAll({
             where: {
@@ -744,7 +786,7 @@ export const GetInsights = (req, res) => {
             let user = authData.user;
             console.log("Getting insights for user ", user.name);
             //get data for the last month for now
-            getCheckinsForLast60Days(user).then( async dateCheckins => {
+            getCheckinsForLast60Days(user).then(async dateCheckins => {
                 console.log(dateCheckins); // Output the result
                 let hep = 0;
                 let lep = 0;
@@ -779,19 +821,19 @@ export const GetInsights = (req, res) => {
                 const topFeelings = await db.userCheckinModel.findAll({
                     attributes: ['feeling', [db.Sequelize.fn('COUNT', 'feeling'), 'count']],
                     where: {
-                      createdAt: {
-                        [db.Sequelize.Op.gt]: db.Sequelize.literal('NOW() - INTERVAL 60 DAY'), // Filter for the last 60 days
-                      },
-                      UserId: user.id
+                        createdAt: {
+                            [db.Sequelize.Op.gt]: db.Sequelize.literal('NOW() - INTERVAL 60 DAY'), // Filter for the last 60 days
+                        },
+                        UserId: user.id
                     },
                     group: ['feeling'],
                     order: [[db.Sequelize.literal('count'), 'DESC']], // Order by count in descending order
                     limit: 4, // Limit the result to top 4 feelings
-                  });
-              
-                  console.log(topFeelings);
-                
-                res.send({ data: { checkins: dateCheckins, total: totalMoods, lep: lep / totalMoods * 100, hep: hep / totalMoods * 100, leup: leup / totalMoods * 100, heup: heup / totalMoods * 100, topFeelings: topFeelings}, status: true, message: "Data obtained" });
+                });
+
+                console.log(topFeelings);
+
+                res.send({ data: { checkins: dateCheckins, total: totalMoods, lep: lep / totalMoods * 100, hep: hep / totalMoods * 100, leup: leup / totalMoods * 100, heup: heup / totalMoods * 100, topFeelings: topFeelings }, status: true, message: "Data obtained" });
             }).catch(error => {
                 console.error('Error fetching check-ins:', error);
                 res.send({ data: null, status: false, message: "Some error", error: error });
@@ -847,9 +889,9 @@ function getMDDateFormat(date) {
     console.log("COnverting date ", date)
     const month = date.getMonth(); // Month starts from 0, so add 1 to get the correct month
     const day = date.getUTCDate();
-  
+
     const formattedDay = day < 10 ? '0' + day : day;
-  
+
     // Construct the MM dd string
     // const formattedDate = formattedMonth + ' ' + formattedDay;
     let Months = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -857,17 +899,17 @@ function getMDDateFormat(date) {
     let d = Months[month] + " " + formattedDay
     console.log("Formated ", d)
     return d
-  }
-  
-  function getMDYDateFormat(date) {
+}
+
+function getMDYDateFormat(date) {
     //2024-03-18T19:00:00.000Z
     console.log("COnverting date ", date)
     const month = date.getMonth(); // Month starts from 0, so add 1 to get the correct month
     const day = date.getUTCDate();
     const year = date.getYear();
-  
+
     const formattedDay = day < 10 ? '0' + day : day;
-  
+
     // Construct the MM dd string
     // const formattedDate = formattedMonth + ' ' + formattedDay;
     let Months = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -875,8 +917,8 @@ function getMDDateFormat(date) {
     let d = Months[month] + " " + formattedDay + " " + year
     console.log("Formated ", d)
     return d
-  }
-  export async function fetchWeeklySnapshots() {
+}
+export async function fetchWeeklySnapshots() {
     // Download the latest info on the transactions and update database accordingly
     console.log(chalk.green("Cron Job Weekly Snapshot Running On ", new Date()));
     // return
@@ -886,124 +928,124 @@ function getMDDateFormat(date) {
     // console.log(lastTwoWeekDates)
     // return
     for (let i = 0; i < lastTwoWeekDates.length; i++) {
-      let d = lastTwoWeekDates[i];
-      // console.log("Dates ", d)
-      let dateSt1Full = ""
-      let dateSt2Full = ""
-      let year = ""
-      let m = moment(d.monday)
-      let s = moment(m.sunday)
-      try {
-        dateSt1Full = getMDYDateFormat(d.monday)//m.format("MMM DD YYYY")
-        dateSt2Full = getMDYDateFormat(d.sunday)//s.format("MMM DD YYYY")
-  
-        year = m.format("YYYY")
-      }
-      catch (error) {
-        console.log("Exception ", error)
-      }
-  
-      let dateSt1 = getMDDateFormat(d.monday)//m.format("MMM DD")
-      let dateSt2 = getMDDateFormat(d.sunday)//s.format("MMM DD")
-    //   console.log("#################################################################")
-    //   console.log("Converting date ", { monday: d.monday, sunday: d.sunday })
-    //   console.log(`M ${dateSt1} - S ${dateSt2}`)
-    //   console.log("#################################################################")
-      //get users who have created a journal in the past week
+        let d = lastTwoWeekDates[i];
+        // console.log("Dates ", d)
+        let dateSt1Full = ""
+        let dateSt2Full = ""
+        let year = ""
+        let m = moment(d.monday)
+        let s = moment(m.sunday)
+        try {
+            dateSt1Full = getMDYDateFormat(d.monday)//m.format("MMM DD YYYY")
+            dateSt2Full = getMDYDateFormat(d.sunday)//s.format("MMM DD YYYY")
+
+            year = m.format("YYYY")
+        }
+        catch (error) {
+            console.log("Exception ", error)
+        }
+
+        let dateSt1 = getMDDateFormat(d.monday)//m.format("MMM DD")
+        let dateSt2 = getMDDateFormat(d.sunday)//s.format("MMM DD")
+        //   console.log("#################################################################")
+        //   console.log("Converting date ", { monday: d.monday, sunday: d.sunday })
+        //   console.log(`M ${dateSt1} - S ${dateSt2}`)
+        //   console.log("#################################################################")
+        //get users who have created a journal in the past week
         let UserVibes = {}
         let snapshotText = {} // for every user
         let journals = await getJournalsInAWeek(d.monday, d.sunday, null)
         let users = []
         // console.log("Journals ", journals.length)
         for (let i = 0; i < journals.length; i++) {
-          let j = journals[i];
-          let uid = j.UserId;
-  
-          if (snapshotText.hasOwnProperty(`${uid}`)) {
-            let t = snapshotText[`${uid}`];
-            t = `${t} \n Date: ${j.createdAt} ${j.title} \n ${j.detail} \n Mood: ${j.mood} \nFeeling: ${j.feeling}`;
-            snapshotText[`${uid}`] = t;
-          }
-          else {
-            // console.log("Pushing uid dont exist already")
-            users.push(uid)
-            let t = `Date: ${j.createdAt} ${j.title} \n ${j.detail} \n Mood: ${j.mood} \nFeeling: ${j.feeling}`;
-            snapshotText[`${uid}`] = t;
-          }
-  
-  
-          if (UserVibes.hasOwnProperty(`${uid}`)) {
-            // console.log(`Key with UserId ${uid} exists.`);
-            let ujs = UserVibes[`${uid}`]
-            ujs.push(j)
-            UserVibes[uid] = ujs
-  
-  
-          } else {
-            // console.log(`Key with UserId ${uid} does not exist.`);
-            UserVibes[uid] = [j]
-          }
+            let j = journals[i];
+            let uid = j.UserId;
+
+            if (snapshotText.hasOwnProperty(`${uid}`)) {
+                let t = snapshotText[`${uid}`];
+                t = `${t} \n Date: ${j.createdAt} ${j.title} \n ${j.detail} \n Mood: ${j.mood} \nFeeling: ${j.feeling}`;
+                snapshotText[`${uid}`] = t;
+            }
+            else {
+                // console.log("Pushing uid dont exist already")
+                users.push(uid)
+                let t = `Date: ${j.createdAt} ${j.title} \n ${j.detail} \n Mood: ${j.mood} \nFeeling: ${j.feeling}`;
+                snapshotText[`${uid}`] = t;
+            }
+
+
+            if (UserVibes.hasOwnProperty(`${uid}`)) {
+                // console.log(`Key with UserId ${uid} exists.`);
+                let ujs = UserVibes[`${uid}`]
+                ujs.push(j)
+                UserVibes[uid] = ujs
+
+
+            } else {
+                // console.log(`Key with UserId ${uid} does not exist.`);
+                UserVibes[uid] = [j]
+            }
         }
         console.log("Users ", users)
         // console.log("Generating Snapshot")
         if (users.length > 0) {
-          // console.log("Generating Snapshot 2" )
-          for (let i = 0; i < users.length; i++) {
-            // console.log("Generating Snapshot loop ", i)
-            let u = users[i]
-            let t = snapshotText[`${u}`];
-  
-            let snapshot = await GetSnapshotFromJournals(t);
-  
-            // console.log("Snapshot generated is ", snapshot)
-            try{
-  
-  
-            if (snapshot !== "") {
-              console.log("Valid Snapshot")
-              let jsonSnap = JSON.parse(snapshot)
-              // console.log(jsonSnap)
-              let obj = {
-                monday: dateSt1,
-                sunday: dateSt2,
-                mood: jsonSnap.mood,
-                year: year,
-                date: dateSt1Full + " - " + dateSt2Full,
-                snapshot: jsonSnap.snapshot,
-                tip: jsonSnap.tip,
-                reflectionQuestion: jsonSnap.question,
-                UserId: u
-              }
-            //   console.log("------------------------------------")
-            //   console.log(chalk.yellow("Have Snapshot For User"))
-            //   console.log(u)
-            //   console.log("------------------------------------")
-  
-            db.weeklySnapshotModel.create(obj).then((result)=>{
-              console.log("Saved Snapshot ")
-            })
-            .catch((error)=>{
-              console.log("Error creating DB Snapshot ", error)
-            })
+            // console.log("Generating Snapshot 2" )
+            for (let i = 0; i < users.length; i++) {
+                // console.log("Generating Snapshot loop ", i)
+                let u = users[i]
+                let t = snapshotText[`${u}`];
+
+                let snapshot = await GetSnapshotFromJournals(t);
+
+                // console.log("Snapshot generated is ", snapshot)
+                try {
+
+
+                    if (snapshot !== "") {
+                        console.log("Valid Snapshot")
+                        let jsonSnap = JSON.parse(snapshot)
+                        // console.log(jsonSnap)
+                        let obj = {
+                            monday: dateSt1,
+                            sunday: dateSt2,
+                            mood: jsonSnap.mood,
+                            year: year,
+                            date: dateSt1Full + " - " + dateSt2Full,
+                            snapshot: jsonSnap.snapshot,
+                            tip: jsonSnap.tip,
+                            reflectionQuestion: jsonSnap.question,
+                            UserId: u
+                        }
+                        //   console.log("------------------------------------")
+                        //   console.log(chalk.yellow("Have Snapshot For User"))
+                        //   console.log(u)
+                        //   console.log("------------------------------------")
+
+                        db.weeklySnapshotModel.create(obj).then((result) => {
+                            console.log("Saved Snapshot ")
+                        })
+                            .catch((error) => {
+                                console.log("Error creating DB Snapshot ", error)
+                            })
+                    }
+
+                }
+                catch (error) {
+                    console.log("Exception Parse ", error)
+                }
             }
-  
-            }
-            catch(error){
-              console.log("Exception Parse ", error)
-            }
-          }
         }
         // console.log("User Vibes ")
         // console.log(JSON.stringify(UserVibes))
-  
-  
+
+
         // console.log(chalk.yellow("for week "));
         // console.log(chalk.yellow(JSON.stringify(d)));
-  
-  
-  
+
+
+
         //get the journals of this week.
     }//for loop ends here
     // number = number + 5;
-  
-  };
+
+};

@@ -45,6 +45,10 @@ const UserJournalModel = (sequelize, Sequelize) => {
         type: Sequelize.STRING(500),
         default: ''
       },
+      encrypted: {
+        type: Sequelize.BOOLEAN,
+        default: false
+      },
     },
     );
   

@@ -8,6 +8,8 @@ import moment from "moment-timezone";
 import axios from "axios";
 import chalk from "chalk";
 import nodemailer from 'nodemailer'
+
+import crypto from 'crypto'
 // import { fetchOrCreateUserToken } from "./plaid.controller.js";
 // const fs = require("fs");
 // var Jimp = require("jimp");
@@ -553,6 +555,43 @@ export const GenerateQuote = async () => {
     else {
         console.log("Quote already exists today")
     }
+}
+
+export const encrypt = (req, res)=>{
+    
+    let text = req.body.text;
+    let algo = process.env.EncryptionAlgorithm;
+    const key = crypto.randomBytes(32);
+    const iv = crypto.randomBytes(16);
+
+    db.user.update({
+        enc_key: key,
+        enc_iv: iv,
+    },
+    {
+        where:{
+            id: {
+                [Op.ne]: -1
+            }
+        }
+    })
+    console.log("Key is ", key);
+    console.log("Iv is ", iv);
+
+    const cipher = crypto.createCipheriv(algo, key, iv);
+
+
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    console.log("Encrypted texxt is ", encrypted)
+
+
+    const decipher = crypto.createDecipheriv(algo, key, iv);
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+
+    console.log("Deciphered ", decrypted);
+    res.send("Hello")
 }
 
 
