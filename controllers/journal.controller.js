@@ -31,7 +31,7 @@ function addCheckin(data) {
         return result
     })
         .catch((error) => {
-            // console.log("Checkin using journal error ", error)
+            // //console.log("Checkin using journal error ", error)
             return null
         })
 }
@@ -102,14 +102,14 @@ export const AddJournal = async (req, res) => {
             }
             data.createdAt = createdAt
             data.updatedAt = createdAt
-            console.log("Created at ", createdAt)
+            //console.log("Created at ", createdAt)
 
             const cipher = crypto.createCipheriv(algo, key, iv);
 
 
             let encrypted = cipher.update(data.detail, 'utf8', 'hex');
             encrypted += cipher.final('hex');
-            console.log("Encrypted journal is ", encrypted)
+            //console.log("Encrypted journal is ", encrypted)
             data.detail = encrypted;
             data.encrypted = true;
             // data.cod = req.body.cd;
@@ -138,19 +138,19 @@ export const AddJournal = async (req, res) => {
                             let chat = await db.chatModel.findByPk(chatid)
                             chat.UserJournalId = result.id
                             let chatSaved = await chat.save();
-                            console.log("Chat Saved ", chatSaved)
+                            //console.log("Chat Saved ", chatSaved)
                         }
                     }
                     let j = await JournalResource(result)
                     res.send({ status: true, message: "Journal added", data: j })
                 })
                     .catch((error) => {
-                        console.log(error)
+                        //console.log(error)
                         res.send({ status: true, message: "Journal not added", data: error })
                     })
             }
             catch (error) {
-                console.log("Try ", error)
+                //console.log("Try ", error)
                 res.send({ status: true, message: "Journal not added", data: error })
             }
         }
@@ -280,7 +280,7 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
     })
 
 
-    console.log("Chats", chats)
+    //console.log("Chats", chats)
 
     let songsCondition = {
         createdAt: {
@@ -373,15 +373,15 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
 
 
 
-    // console.log("Kalar Kahar ka bandar ")
-    // console.log(journals)
+    // //console.log("Kalar Kahar ka bandar ")
+    // //console.log(journals)
     let gif = GenerateRandomGif(mostCheckedInMood)
     var lastWeekVibe = {
         journals: journals, chats: chats, drafts: drafts, totalJournals: journals.length, startDate: lastMonday, endDate: lastSunday, mostCheckedInMood: mostCheckedInMood,
         lep: lep, hep: hep, leup: leup, heup: heup, dateString: dateSt1 + " - " + dateSt2, checkins: checkins, tracks: songs, gif: gif
     }
 
-    console.log(chalk.red("Vibe is ", JSON.stringify(lastWeekVibe)))
+    //console.log(chalk.red("Vibe is ", JSON.stringify(lastWeekVibe)))
     if (js.length == 0 && drafts.length == 0) {
         return null
     }
@@ -398,7 +398,7 @@ export const getWeeklyDates = (numberOfWeeks = 30, includeCurrentWeek = true) =>
         currentDate = currentDate.subtract(1, 'day');
     }
 
-    console.log("Start of current week date is ", currentDate)
+    //console.log("Start of current week date is ", currentDate)
     let m = currentDate.add(1, 'day')
     let s = moment()
     // dates.push({ monday: m.toDate(), sunday: s.toDate() })
@@ -429,25 +429,25 @@ export const GetJournals = (req, res) => {
     let lastSunday = new Date(currentDate);
     lastSunday.setDate(currentDate.getDate() - currentDate.getDay());
     // dates.slice(0, 0, { monday: originalDate, sunday: lastSunday })
-    console.log("Total Dates ", dates.length);
+    //console.log("Total Dates ", dates.length);
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
         if (authData) {
             let user = authData.user;
             let userid = user.id;
             var journals = []
             for (let i = 0; i < dates.length; i++) {
-                console.log("Fetching for date ", dates[i])
+                //console.log("Fetching for date ", dates[i])
                 let d = dates[i]
                 let vibe = await getJournalsVibeInAWeek(d.monday, d.sunday, user.id)
                 if (vibe) {
-                    console.log("Vibe exists ")
+                    //console.log("Vibe exists ")
                     let dateSt1 = moment(d.monday).format("MMM DD")
                     let dateSt2 = moment(d.sunday).format("MMM DD")
                     let year = moment(d.sunday).format("YYYY");
-                    console.log("Searching for Snapshot ", year)
-                    console.log(user.id)
-                    console.log(dateSt1)
-                    console.log(dateSt2)
+                    //console.log("Searching for Snapshot ", year)
+                    //console.log(user.id)
+                    //console.log(dateSt1)
+                    //console.log(dateSt2)
 
                     let snapshot = await db.weeklySnapshotModel.findOne({
                         where: {
@@ -461,7 +461,7 @@ export const GetJournals = (req, res) => {
                     journals.push(vibe);
                 }
                 else {
-                    console.log("Vibe doesn't exist ")
+                    //console.log("Vibe doesn't exist ")
                 }
             }
 
@@ -473,16 +473,16 @@ export const GetJournals = (req, res) => {
 
 
 export const GetSnapshotFromJournals = async (text) => {
-    console.log("In GetSnapshptFromJournals Method")
+    //console.log("In GetSnapshptFromJournals Method")
     // let gptMe = "{\n  \"mood\": \"Low energy, Pleasant\",\n  \"snapshot\": \"Over the past week, I have been grappling with feelings of doubt and anxiety about my tech project. Despite receiving positive feedback and even having companies pay for my work, the launch of a similar product by Apple and the dominance of companies like Calm and Headspace in the market have left me questioning my ability to compete. The critical inner voice has been persistent, undermining my confidence and making me fear that no one will download my app. Nonetheless, there's a part of me that yearns to shift to a positive mindset and to see myself as confident and capable, as a thought leader in my field. Amidst these conflicting emotions, there remains an undercurrent of bliss, possibly reflecting the intrinsic satisfaction I get from working on this project despite the external doubts.\"\n}"
     // gptMe = gptMe.replace(new RegExp("\n", 'g'), '');
     // return gptMe
-    // console.log("creating snapshot for text " + text)
+    // //console.log("creating snapshot for text " + text)
 
 
 
     let messageData = []
-    // console.log("Sending this summary to api ", summary);
+    // //console.log("Sending this summary to api ", summary);
     messageData.push({
         role: "system",
         content: `You're a helpful assistant. Create a snapshot of my journals that i am providing for the past week. Provide a weekly summary of my journal, my mood, how i was feeling
@@ -504,7 +504,7 @@ export const GetSnapshotFromJournals = async (text) => {
     //   });
     let APIKEY = process.env.AIKey;
     // APIKEY = "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"
-    console.log(APIKEY)
+    //console.log(APIKEY)
     const headers = {}
     const data = {
         model: "gpt-4-1106-preview",
@@ -520,23 +520,23 @@ export const GetSnapshotFromJournals = async (text) => {
                 'Authorization': `Bearer ${APIKEY}`
             }
         });
-        // console.log(result.data.data)
+        // //console.log(result.data.data)
         if (result.status === 200) {
             let gptMessage = result.data.choices[0].message.content;
             gptMessage = gptMessage.replace(new RegExp("```json", 'g'), '');
             gptMessage = gptMessage.replace(new RegExp("```", 'g'), '');
             gptMessage = gptMessage.replace(new RegExp("\n", 'g'), '');
-            // console.log(chalk.green(JSON.stringify(gptMessage)))
+            // //console.log(chalk.green(JSON.stringify(gptMessage)))
             // return ""
             return gptMessage
         }
         else {
-            console.log(chalk.red("Error in gpt response"))
+            //console.log(chalk.red("Error in gpt response"))
             return ""
         }
     }
     catch (error) {
-        console.log("Exception gpt", error)
+        //console.log("Exception gpt", error)
     }
 
     return ""
@@ -581,8 +581,8 @@ export const AnalyzeJournal = async (req, res) => {
     })
 
     const APIKEY = process.env.AIKey;
-    // console.log(APIKEY)
-    // console.log(messageData)
+    // //console.log(APIKEY)
+    // //console.log(messageData)
     const headers = {}
     const data = {
         model: "gpt-4-1106-preview",
@@ -591,7 +591,7 @@ export const AnalyzeJournal = async (req, res) => {
     }
 
     try {
-        console.log("Creating snapshot")
+        //console.log("Creating snapshot")
         const result = await axios.post("https://api.openai.com/v1/chat/completions", data, {
             headers: {
                 'content-type': 'application/json',
@@ -599,15 +599,15 @@ export const AnalyzeJournal = async (req, res) => {
             }
         });
 
-        // console.log("Api result is ", result)
+        // //console.log("Api result is ", result)
         if (result.status === 200) {
             let gptMessage = result.data.choices[0].message.content;
             gptMessage = gptMessage.replace('```', '');
             gptMessage = gptMessage.replace('json', '');
             gptMessage = gptMessage.replace('```', '');
-            // console.log("GPT Response is  ", gptMessage)
+            // //console.log("GPT Response is  ", gptMessage)
             let json = JSON.parse(gptMessage)
-            console.log("Json obejct is ", json)
+            //console.log("Json obejct is ", json)
             res.send({ status: true, data: json, message: "Snapshot" })
             // return gptMessage;
         }
@@ -636,8 +636,8 @@ pronunciation: "How to pronounce the word"
 }  Just give me a json object and no extra text out of the json object so that i can parse it to json in code .Don't add any extra text other than the json object.` // this data is being sent to chatgpt so only message should be sent
     });
     const APIKEY = process.env.AIKey;
-    // console.log(APIKEY)
-    // console.log(messageData)
+    // //console.log(APIKEY)
+    // //console.log(messageData)
     const headers = {}
     const data = {
         model: "gpt-4-1106-preview",
@@ -652,18 +652,18 @@ pronunciation: "How to pronounce the word"
             }
         });
 
-        console.log("Api result is ", result)
+        //console.log("Api result is ", result)
         if (result.status === 200) {
             let gptMessage = result.data.choices[0].message.content;
             gptMessage = gptMessage.replace('```', '');
             gptMessage = gptMessage.replace('json', '');
             gptMessage = gptMessage.replace('```', '');
-            console.log("List of moods is ", gptMessage)
+            //console.log("List of moods is ", gptMessage)
             let listOfMoods = JSON.parse(gptMessage)
 
             // setMoods(listOfMoods)
             // setShowIndicater(false)
-            console.log("Moods array is ", listOfMoods)
+            //console.log("Moods array is ", listOfMoods)
             return listOfMoods;
             // res.send({ status: true, message: "Moods", data: listOfMoods })
             // return gptMessage;
@@ -675,14 +675,14 @@ pronunciation: "How to pronounce the word"
     }
     catch (error) {
 
-        console.log("Exception in open ai call ", error)
+        //console.log("Exception in open ai call ", error)
         return null
         // res.send({ status: false, message: "Moods", data: error })
     }
 }
 
 export const GenerateListOfMoods = async (req, res) => {
-    console.log("Fetching moods from gpt")
+    //console.log("Fetching moods from gpt")
 
     try {
         let feelings = await db.checkinMoodModel.findAll({
@@ -697,7 +697,7 @@ export const GenerateListOfMoods = async (req, res) => {
 
     }
     catch (error) {
-        console.log("Exception in open ai call ", error)
+        //console.log("Exception in open ai call ", error)
         res.send({ status: false, message: "Moods", data: error })
     }
 }
@@ -737,8 +737,8 @@ export const GetCalendarEventPrompt = async (req, res) => {
     })
 
     const APIKEY = process.env.AIKey;
-    // console.log(APIKEY)
-    // console.log(messageData)
+    // //console.log(APIKEY)
+    // //console.log(messageData)
     const data = {
         model: "gpt-4-1106-preview",
         messages: messageData,
@@ -746,7 +746,7 @@ export const GetCalendarEventPrompt = async (req, res) => {
     }
 
     try {
-        console.log("Creating snapshot")
+        //console.log("Creating snapshot")
         const result = await axios.post("https://api.openai.com/v1/chat/completions", data, {
             headers: {
                 'content-type': 'application/json',
@@ -754,25 +754,25 @@ export const GetCalendarEventPrompt = async (req, res) => {
             }
         });
 
-        // console.log("Api result is ", result)
+        // //console.log("Api result is ", result)
         if (result.status === 200) {
             let gptMessage = result.data.choices[0].message.content;
             // gptMessage = gptMessage.replace('```json', '');
             // gptMessage = gptMessage.replace('json', '');
             // gptMessage = gptMessage.replace('```', '');
-            console.log("GPT Response is  ", gptMessage)
+            //console.log("GPT Response is  ", gptMessage)
             res.send({ data: gptMessage, status: true, message: "Prompt generated" });
 
             // return gptMessage;
         }
         else {
-            console.log("error message in open ai call ", json.messsage)
+            //console.log("error message in open ai call ", json.messsage)
             res.send({ data: "", status: false, message: "Prompt not generated" });
         }
     }
     catch (error) {
         res.send({ data: "", status: false, message: "Prompt not generated", error: error });
-        console.log("Exception in open ai call ", error)
+        //console.log("Exception in open ai call ", error)
     }
 };
 
@@ -784,10 +784,10 @@ export const GetInsights = (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
         if (authData) {
             let user = authData.user;
-            console.log("Getting insights for user ", user.name);
+            //console.log("Getting insights for user ", user.name);
             //get data for the last month for now
             getCheckinsForLast60Days(user).then(async dateCheckins => {
-                console.log(dateCheckins); // Output the result
+                //console.log(dateCheckins); // Output the result
                 let hep = 0;
                 let lep = 0;
                 let heup = 0;
@@ -831,7 +831,7 @@ export const GetInsights = (req, res) => {
                     limit: 4, // Limit the result to top 4 feelings
                 });
 
-                console.log(topFeelings);
+                //console.log(topFeelings);
 
                 res.send({ data: { checkins: dateCheckins, total: totalMoods, lep: lep / totalMoods * 100, hep: hep / totalMoods * 100, leup: leup / totalMoods * 100, heup: heup / totalMoods * 100, topFeelings: topFeelings }, status: true, message: "Data obtained" });
             }).catch(error => {
@@ -886,7 +886,7 @@ async function getCheckinsForLast60Days(user) {
 // Cron Job 
 function getMDDateFormat(date) {
     //2024-03-18T19:00:00.000Z
-    console.log("COnverting date ", date)
+    //console.log("COnverting date ", date)
     const month = date.getMonth(); // Month starts from 0, so add 1 to get the correct month
     const day = date.getUTCDate();
 
@@ -895,15 +895,15 @@ function getMDDateFormat(date) {
     // Construct the MM dd string
     // const formattedDate = formattedMonth + ' ' + formattedDay;
     let Months = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    console.log("Here now", day)
+    //console.log("Here now", day)
     let d = Months[month] + " " + formattedDay
-    console.log("Formated ", d)
+    //console.log("Formated ", d)
     return d
 }
 
 function getMDYDateFormat(date) {
     //2024-03-18T19:00:00.000Z
-    console.log("COnverting date ", date)
+    //console.log("COnverting date ", date)
     const month = date.getMonth(); // Month starts from 0, so add 1 to get the correct month
     const day = date.getUTCDate();
     const year = date.getYear();
@@ -913,23 +913,23 @@ function getMDYDateFormat(date) {
     // Construct the MM dd string
     // const formattedDate = formattedMonth + ' ' + formattedDay;
     let Months = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    console.log("Here now", day)
+    //console.log("Here now", day)
     let d = Months[month] + " " + formattedDay + " " + year
-    console.log("Formated ", d)
+    //console.log("Formated ", d)
     return d
 }
 export async function fetchWeeklySnapshots() {
     // Download the latest info on the transactions and update database accordingly
-    console.log(chalk.green("Cron Job Weekly Snapshot Running On ", new Date()));
+    //console.log(chalk.green("Cron Job Weekly Snapshot Running On ", new Date()));
     // return
     let lastTwoWeekDates = getWeeklyDates(30, false);
-    console.log("Dates ")
+    //console.log("Dates ")
     // return
-    // console.log(lastTwoWeekDates)
+    // //console.log(lastTwoWeekDates)
     // return
     for (let i = 0; i < lastTwoWeekDates.length; i++) {
         let d = lastTwoWeekDates[i];
-        // console.log("Dates ", d)
+        // //console.log("Dates ", d)
         let dateSt1Full = ""
         let dateSt2Full = ""
         let year = ""
@@ -942,21 +942,21 @@ export async function fetchWeeklySnapshots() {
             year = m.format("YYYY")
         }
         catch (error) {
-            console.log("Exception ", error)
+            //console.log("Exception ", error)
         }
 
         let dateSt1 = getMDDateFormat(d.monday)//m.format("MMM DD")
         let dateSt2 = getMDDateFormat(d.sunday)//s.format("MMM DD")
-        //   console.log("#################################################################")
-        //   console.log("Converting date ", { monday: d.monday, sunday: d.sunday })
-        //   console.log(`M ${dateSt1} - S ${dateSt2}`)
-        //   console.log("#################################################################")
+        //   //console.log("#################################################################")
+        //   //console.log("Converting date ", { monday: d.monday, sunday: d.sunday })
+        //   //console.log(`M ${dateSt1} - S ${dateSt2}`)
+        //   //console.log("#################################################################")
         //get users who have created a journal in the past week
         let UserVibes = {}
         let snapshotText = {} // for every user
         let journals = await getJournalsInAWeek(d.monday, d.sunday, null)
         let users = []
-        // console.log("Journals ", journals.length)
+        // //console.log("Journals ", journals.length)
         for (let i = 0; i < journals.length; i++) {
             let j = journals[i];
             let uid = j.UserId;
@@ -967,7 +967,7 @@ export async function fetchWeeklySnapshots() {
                 snapshotText[`${uid}`] = t;
             }
             else {
-                // console.log("Pushing uid dont exist already")
+                // //console.log("Pushing uid dont exist already")
                 users.push(uid)
                 let t = `Date: ${j.createdAt} ${j.title} \n ${j.detail} \n Mood: ${j.mood} \nFeeling: ${j.feeling}`;
                 snapshotText[`${uid}`] = t;
@@ -975,36 +975,36 @@ export async function fetchWeeklySnapshots() {
 
 
             if (UserVibes.hasOwnProperty(`${uid}`)) {
-                // console.log(`Key with UserId ${uid} exists.`);
+                // //console.log(`Key with UserId ${uid} exists.`);
                 let ujs = UserVibes[`${uid}`]
                 ujs.push(j)
                 UserVibes[uid] = ujs
 
 
             } else {
-                // console.log(`Key with UserId ${uid} does not exist.`);
+                // //console.log(`Key with UserId ${uid} does not exist.`);
                 UserVibes[uid] = [j]
             }
         }
-        console.log("Users ", users)
-        // console.log("Generating Snapshot")
+        //console.log("Users ", users)
+        // //console.log("Generating Snapshot")
         if (users.length > 0) {
-            // console.log("Generating Snapshot 2" )
+            // //console.log("Generating Snapshot 2" )
             for (let i = 0; i < users.length; i++) {
-                // console.log("Generating Snapshot loop ", i)
+                // //console.log("Generating Snapshot loop ", i)
                 let u = users[i]
                 let t = snapshotText[`${u}`];
 
                 let snapshot = await GetSnapshotFromJournals(t);
 
-                // console.log("Snapshot generated is ", snapshot)
+                // //console.log("Snapshot generated is ", snapshot)
                 try {
 
 
                     if (snapshot !== "") {
-                        console.log("Valid Snapshot")
+                        //console.log("Valid Snapshot")
                         let jsonSnap = JSON.parse(snapshot)
-                        // console.log(jsonSnap)
+                        // //console.log(jsonSnap)
                         let obj = {
                             monday: dateSt1,
                             sunday: dateSt2,
@@ -1016,31 +1016,31 @@ export async function fetchWeeklySnapshots() {
                             reflectionQuestion: jsonSnap.question,
                             UserId: u
                         }
-                        //   console.log("------------------------------------")
-                        //   console.log(chalk.yellow("Have Snapshot For User"))
-                        //   console.log(u)
-                        //   console.log("------------------------------------")
+                        //   //console.log("------------------------------------")
+                        //   //console.log(chalk.yellow("Have Snapshot For User"))
+                        //   //console.log(u)
+                        //   //console.log("------------------------------------")
 
                         db.weeklySnapshotModel.create(obj).then((result) => {
-                            console.log("Saved Snapshot ")
+                            //console.log("Saved Snapshot ")
                         })
                             .catch((error) => {
-                                console.log("Error creating DB Snapshot ", error)
+                                //console.log("Error creating DB Snapshot ", error)
                             })
                     }
 
                 }
                 catch (error) {
-                    console.log("Exception Parse ", error)
+                    //console.log("Exception Parse ", error)
                 }
             }
         }
-        // console.log("User Vibes ")
-        // console.log(JSON.stringify(UserVibes))
+        // //console.log("User Vibes ")
+        // //console.log(JSON.stringify(UserVibes))
 
 
-        // console.log(chalk.yellow("for week "));
-        // console.log(chalk.yellow(JSON.stringify(d)));
+        // //console.log(chalk.yellow("for week "));
+        // //console.log(chalk.yellow(JSON.stringify(d)));
 
 
 

@@ -41,7 +41,7 @@ job.start();
 const quoteJob = nodeCron.schedule("*/30 0-1 * * *", async function fetchPendingBankTransactions() {
   // const currentDate = new Date();
   let time = moment()
-  console.log("Quote Crone Job Running at time ", time);
+  //console.log("Quote Crone Job Running at time ", time);
   GenerateQuote();
 })
 quoteJob.start();
@@ -53,16 +53,16 @@ let index = 0
 const moodJob = nodeCron.schedule('0 0 1-7/2 * *', async function fetchPendingBankTransactions() {
   // const currentDate = new Date();
   let time = moment()
-  console.log("Mood Cron Job Running at time ", time);
+  //console.log("Mood Cron Job Running at time ", time);
  if(index === 0){
   index += 1
-  console.log("Running api ")
+  //console.log("Running api ")
   let moodKeys = ["Low energy, Pleasant", "High energy, Pleasant", "Low energy, Unpleasant", "High energy, Unpleasant"]
   for(let i = 0; i < moodKeys.length; i++){
     let mood = moodKeys[i];
     let feelings = await GetFeelingsromGpt(mood)
     if(feelings && feelings.length > 0){
-      console.log("Adding feelings to db")
+      //console.log("Adding feelings to db")
       feelings.forEach(async (item)=> {
         let saved = await db.checkinMoodModel.create({
           feeling: item.feeling,

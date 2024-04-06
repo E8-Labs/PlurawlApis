@@ -59,21 +59,21 @@ function GenerateRandomGif(mood){
       const max = 9;
       const randomNumber =
           Math.floor(Math.random() * (max - min + 1)) + min;
-          console.log("Random gif ", mood)
+          //console.log("Random gif ", mood)
           if(mood.toLowerCase() === CheckinMoods.MoodHep.toLowerCase()){
-              console.log(HepGifs[randomNumber])
+              //console.log(HepGifs[randomNumber])
               return HepGifs[randomNumber]
           }
           else if(mood.toLowerCase() === CheckinMoods.MoodHeup.toLowerCase()){
-              console.log(HeupGifs[randomNumber])
+              //console.log(HeupGifs[randomNumber])
               return HeupGifs[randomNumber]
           }
           else if(mood.toLowerCase() === CheckinMoods.MoodLep.toLowerCase()){
-              console.log(LepGifs[randomNumber])
+              //console.log(LepGifs[randomNumber])
               return LepGifs[randomNumber]
           }
           else if(mood.toLowerCase() === CheckinMoods.MoodLeup.toLowerCase()){
-              console.log(LeupGifs[randomNumber])
+              //console.log(LeupGifs[randomNumber])
               return LeupGifs[randomNumber]
           }
 }

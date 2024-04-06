@@ -27,8 +27,8 @@ const Message = db.messageModel;
 export const CreateChat = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (err, authData) => {
         if (authData) {
-            console.log("User in chat is ")
-            console.log(authData)
+            //console.log("User in chat is ")
+            //console.log(authData)
 
             let chattype = "journal"
             if (typeof (req.body.chattype) !== 'undefined') {
@@ -142,7 +142,7 @@ async function GenerateFirstMessageForAIChat(chat, user, callback) {
         if (gptResponse) {
             const result = await db.sequelize.transaction(async (t) => {
                 t.afterCommit(() => {
-                    console.log("\n\nTransaction is commited \n\n")
+                    //console.log("\n\nTransaction is commited \n\n")
                 });
 
                 const m1 = await db.messageModel.create({
@@ -199,10 +199,10 @@ export const UpdateChat = async (req, res) => {
 
 
 async function sendQueryToGpt(message, messageData) {
-    console.log("Sending Message " + message)
+    //console.log("Sending Message " + message)
 
-console.log(messageData)
-    // console.log("Sending this summary to api ", summary);
+//console.log(messageData)
+    // //console.log("Sending this summary to api ", summary);
     // messageData.push({
     //     role: "system",
     //     content: "You're a helpful assistant. So reply me keeping in context the whole data provided. Keep the response short and make it complete response. keep all of your responses within 300 words or less.", // summary will go here if the summary is created.
@@ -213,7 +213,7 @@ console.log(messageData)
         content: message // this data is being sent to chatgpt so only message should be sent
     });
     const APIKEY = process.env.AIKey;
-    console.log(APIKEY)
+    //console.log(APIKEY)
     const headers = {}
     const data = {
         model: "gpt-4-1106-preview",
@@ -229,7 +229,7 @@ console.log(messageData)
         }
     });
 
-    // console.log(result.data)
+    // //console.log(result.data)
     // setMessages(messages.filter(item => item.type !== MessageType.Loading)) // remove the loading message
     if (result.status === 200) {
         let gptMessage = result.data.choices[0].message.content;
@@ -259,7 +259,7 @@ function splitMessage(message) {
 
 export const SendMessage = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (err, authData) => {
-        console.log("Sending message", req.body.chatid)
+        //console.log("Sending message", req.body.chatid)
         if (authData) {
             const userid = authData.user.id;
             const chatid = req.body.chatid;
@@ -268,20 +268,20 @@ export const SendMessage = async (req, res) => {
             try {
 
                 if (chat) {
-                    console.log("Chat exists")
+                    //console.log("Chat exists")
                     const message = req.body.message;
-                    console.log("Messages saving ", message)
+                    //console.log("Messages saving ", message)
 
                     //check if there is a summary saved
                     // let messageWithSummary = await db.chat.findByPk(chatid);
-                    // console.log("Chat found ", messageWithSummary)
+                    // //console.log("Chat found ", messageWithSummary)
                     // let summary = null;
                     // if(messageWithSummary.summary !== null){
                     //     summary = messageWithSummary.summary;
                     // }
                     let messagesData = []
                     // if(summary !== null){ // 
-                    //     console.log("Summary already exists")
+                    //     //console.log("Summary already exists")
                     //     messagesData = [{role: "user", content: "generate summary of previous conversation"}, {role: "system", content: summary}, {role: "user", content: message}]
                     // }
                     // else{
@@ -298,14 +298,14 @@ export const SendMessage = async (req, res) => {
                     });
                     if (dbmessages.length > 0) {
                         // messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: messages[0].message}]
-                        console.log("Messages are in db")
-                        // console.log("################################################################")
+                        //console.log("Messages are in db")
+                        // //console.log("################################################################")
                         for (let i = 0; i < dbmessages.length; i++) {
                             let m = dbmessages[i]
-                            // console.log(chalk.green(`Message ${m.from}-${m.id} | ${m.message}`))
+                            // //console.log(chalk.green(`Message ${m.from}-${m.id} | ${m.message}`))
                             messagesData.push({ role: m.from === "me" ? "user" : "system", content: m.message })
                         }
-                        // console.log("################################################################")
+                        // //console.log("################################################################")
                         if (chat.snapshot !== null) {
                             messagesData.splice(0, 0, { role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${chat.snapshot}. The further conversation follows.` })
                         }
@@ -313,7 +313,7 @@ export const SendMessage = async (req, res) => {
                         
                     }
                     else {
-                        console.log("No messages, new chat")
+                        //console.log("No messages, new chat")
                         messagesData = [{ role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user. Keep your response within 100 words." }, { role: "user", content: message }]
                         if (chat.snapshot !== null) {
                             messagesData.splice(0, 0, { role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${chat.snapshot}. Now user will respond. Reply accordingly by keeping inside the scope of the journal context.` })
@@ -328,7 +328,7 @@ export const SendMessage = async (req, res) => {
                         if (gptResponse) {
                             const result = await db.sequelize.transaction(async (t) => {
                                 t.afterCommit(() => {
-                                    console.log("\n\nTransaction is commited \n\n")
+                                    //console.log("\n\nTransaction is commited \n\n")
                                 });
 
                                 let messageArray = []
@@ -418,8 +418,8 @@ export const SendMessage = async (req, res) => {
 
 async function generateSummaryFromGPT(messageData) {
     const APIKEY = process.env.AIKey;
-    console.log(APIKEY)
-    console.log("Generating summary from ", messageData);
+    //console.log(APIKEY)
+    //console.log("Generating summary from ", messageData);
     const headers = {}
 
     const data = {
@@ -437,11 +437,11 @@ async function generateSummaryFromGPT(messageData) {
 
     if (result.status === 200) {
         let gptMessage = result.data.choices[0].message.content;
-        console.log("Summary response is ", gptMessage)
+        //console.log("Summary response is ", gptMessage)
         return gptMessage
     }
     else {
-        console.log("Summary response error ")
+        //console.log("Summary response error ")
         return null
     }
 }
@@ -474,7 +474,7 @@ export const GetMessages = async (req, res) => {
 
             }
             else {
-                console.log("Not such chat", chatid)
+                //console.log("Not such chat", chatid)
                 // no such chat exists
                 res.send({ status: false, message: "No such chat", data: null })
             }

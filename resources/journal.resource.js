@@ -11,15 +11,15 @@ const Op = db.Sequelize.Op;
 
 const JournalResource = async (user) => {
     if (!Array.isArray(user)) {
-        //console.log("Not array")
+        ////console.log("Not array")
         return await getUserData(user);
     }
     else {
-        //console.log("Is array")
+        ////console.log("Is array")
         const data = []
         for (let i = 0; i < user.length; i++) {
             const p = await getUserData(user[i])
-            //console.log("Adding to index " + i)
+            ////console.log("Adding to index " + i)
             data.push(p);
         }
 
@@ -62,12 +62,12 @@ async function getUserData(user) {
     }
     
 
-console.log(`Hightlights ${user.id}`)
-console.log(th)
+// //console.log(`Hightlights ${user.id}`)
+// //console.log(th)
     const UserFullResource = {
         id: user.id,
         title: user.title,
-        detail: user.decrypted,
+        detail: decrypted,
         type: user.type,
         cd: user.cd,
         snapshot: user.snapshot,
