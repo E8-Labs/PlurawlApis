@@ -56,10 +56,15 @@ async function getUserData(user) {
     let iv = ownerUser.enc_iv;
     let decrypted = user.detail;
     console.log("decipher", user.id)
-    if(key && iv && user.encrypted){
-        const decipher = crypto.createDecipheriv(algo, key, iv);
-        decrypted = decipher.update(user.detail, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
+    try{
+        if(key && iv && user.encrypted){
+            const decipher = crypto.createDecipheriv(algo, key, iv);
+            decrypted = decipher.update(user.detail, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+        }
+    }
+    catch(error){
+        console.log("error encryption ", error)
     }
     
 
