@@ -57,8 +57,8 @@ async function getUserData(user, currentUser = null) {
     lastSunday.setDate(currentDate.getDate() - (currentDate.getDay()));
     const lastMonday = new Date(lastSunday);
     lastMonday.setDate(lastSunday.getDate() - 6);
-    //console.log("Last Sunday is ", lastSunday)
-    //console.log("Last Monday is ", lastMonday)
+    console.log("Last Sunday is ", lastSunday)
+    console.log("Last Monday is ", lastMonday)
 
     let journals = await getJournalsInAWeek(lastMonday, lastSunday, user.id)
 
