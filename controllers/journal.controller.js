@@ -177,9 +177,10 @@ export const getJournalsInAWeek = async (lastMonday, lastSunday, userid = null, 
                 createdAt: {
                     [Op.between]: [lastMonday, lastSunday]
                 },
-                type: {
-                    [Op.ne]: 'draft'
-                },
+                [Op.or]: [
+                    { type: { [Op.ne]: 'draft' } }, // type not equal to 'draft'
+                    { type: { [Op.is]: null } }     // type is NULL
+                ],
                 UserId: userid
             }
         }
