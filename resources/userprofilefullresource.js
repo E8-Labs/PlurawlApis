@@ -79,8 +79,8 @@ async function getUserData(user, currentUser = null) {
     var hep = 0
     var leup = 0
     var heup = 0
-    for (let i = 0; i < checkins.length; i++) {
-        let cin = checkins[i];
+    for (let i = 0; i < journals.length; i++) {
+        let cin = journals[i];
         if (cin.mood === CheckinMoods.MoodHep) {
             hep = hep + 1
         }

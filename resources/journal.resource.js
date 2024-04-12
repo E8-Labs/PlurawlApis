@@ -55,7 +55,7 @@ async function getUserData(user) {
     let key = ownerUser.enc_key;
     let iv = ownerUser.enc_iv;
     let decrypted = user.detail;
-    console.log("decipher", user.id)
+    // console.log("decipher", user.id)
     try{
         if(key && iv && user.encrypted){
             const decipher = crypto.createDecipheriv(algo, key, iv);

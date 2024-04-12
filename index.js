@@ -49,7 +49,7 @@ import journalRouter from "./routes/journal.router.js";
 import chatRouter from "./routes/chat.router.js";
 
 db.sequelize.authenticate().then(() => {
-  //console.log("Connected to the database!");
+  console.log("Connected to the database!");
 })
   .catch(err => {
     //console.log("Cannot connect to the database!", err);

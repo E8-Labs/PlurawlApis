@@ -216,6 +216,7 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
             { type: { [Op.ne]: 'draft' } }, // type not equal to 'draft'
             { type: { [Op.is]: null } }     // type is NULL
         ],
+        
     }
     let draftCondition = {
         createdAt: {
@@ -235,7 +236,8 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
                 { type: { [Op.ne]: 'draft' } }, // type not equal to 'draft'
                 { type: { [Op.is]: null } }     // type is NULL
             ],
-            UserId: userid
+            UserId: userid,
+            
         }
 
         draftCondition = {
@@ -252,7 +254,8 @@ export const getJournalsVibeInAWeek = async (lastMonday, lastSunday, userid = nu
 
 
     let js = await db.userJournalModel.findAll({
-        where: condition
+        where: condition,
+        limit: 50
     })
     let journals = await JournalResource(js)
 
@@ -438,6 +441,7 @@ export const GetJournals = (req, res) => {
             for (let i = 0; i < dates.length; i++) {
                 //console.log("Fetching for date ", dates[i])
                 let d = dates[i]
+                console.log(chalk.red(`Getting Journals Vibe in week ${d.monday} - ${d.sunday}`))
                 let vibe = await getJournalsVibeInAWeek(d.monday, d.sunday, user.id)
                 if (vibe) {
                     //console.log("Vibe exists ")
@@ -448,7 +452,7 @@ export const GetJournals = (req, res) => {
                     //console.log(user.id)
                     //console.log(dateSt1)
                     //console.log(dateSt2)
-
+                    console.log(`Getting Vibe Snapshot in week ${dateSt1} - ${dateSt2} ${year} ${user.id}`)
                     let snapshot = await db.weeklySnapshotModel.findOne({
                         where: {
                             sunday: dateSt2,
@@ -457,6 +461,7 @@ export const GetJournals = (req, res) => {
                             UserId: user.id,
                         }
                     })
+                    console.log(chalk.green("Snap is ", snapshot))
                     vibe.snapshot = snapshot;
                     journals.push(vibe);
                 }
@@ -894,7 +899,7 @@ function getMDDateFormat(date) {
 
     // Construct the MM dd string
     // const formattedDate = formattedMonth + ' ' + formattedDay;
-    let Months = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    let Months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     //console.log("Here now", day)
     let d = Months[month] + " " + formattedDay
     //console.log("Formated ", d)
