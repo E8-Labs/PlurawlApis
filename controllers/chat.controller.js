@@ -22,6 +22,8 @@ const Chat = db.chatModel;
 const Message = db.messageModel;
 
 
+const GptModel = "gpt-3.5-turbo-0125";
+
 
 
 export const CreateChat = async (req, res) => {
@@ -216,7 +218,7 @@ async function sendQueryToGpt(message, messageData) {
     //console.log(APIKEY)
     const headers = {}
     const data = {
-        model: "gpt-4-1106-preview",
+        model: GptModel,
         // temperature: 1.2,
         messages: messageData,
         // max_tokens: 1000,
@@ -423,7 +425,7 @@ async function generateSummaryFromGPT(messageData) {
     const headers = {}
 
     const data = {
-        model: "gpt-4",
+        model: GptModel,
         // temperature: 1.2,
         messages: messageData,
         max_tokens: 500,
