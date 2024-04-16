@@ -74,16 +74,19 @@ export const CreateChat = async (req, res) => {
                         else if (typeof (req.body.chattype) !== 'undefined') {
                             // let type = req.body.type;
                             if (chattype === "AIChat") {
+                                res.send({ message: "Chat created", data: chatCreated, status: true });
                                 //started from the main screen dashboard
                                 //this will lead to  entry of journal through chat
-                              GenerateFirstMessageForAIChat(chatCreated, authData.user, (messages)=>{
-                                if(messages){
-                                    res.send({ message: "Chat created", data: chatCreated, status: true });
-                                  }
-                                  else{
-                                    res.send({ message: "Chat created", data: chatCreated, status: true });
-                                  }
-                              })
+
+                                //We will let user send the first message then this prompt will be sent in AI Chat
+                            //   GenerateFirstMessageForAIChat(chatCreated, authData.user, (messages)=>{
+                            //     if(messages){
+                            //         res.send({ message: "Chat created", data: chatCreated, status: true });
+                            //       }
+                            //       else{
+                            //         res.send({ message: "Chat created", data: chatCreated, status: true });
+                            //       }
+                            //   })
                               
 
                             }
@@ -108,7 +111,7 @@ export const CreateChat = async (req, res) => {
 }
 
 
-async function GenerateFirstMessageForAIChat(chat, user, callback) {
+async function GenerateFirstMessageForAIChat(chat, user, message = null, callback) {
     let name = user.name;
     if(name.length > 0){
      name = name.split(" ")[0]
@@ -131,6 +134,8 @@ async function GenerateFirstMessageForAIChat(chat, user, callback) {
     It should feel like a conversation, so ask one question at a time, don't word vomit and ask a lot of questions at once.. make it feel like you're chatting.
     Keep response within 150 words.
     `
+
+    console.log("First Prompt for AI Chat ", cdText);
     // const m1 = await db.messageModel.create({
     //     message: cdText,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
     //     ChatId: chat.id,
@@ -139,6 +144,9 @@ async function GenerateFirstMessageForAIChat(chat, user, callback) {
     //     title: "",
     // });
     let messagesData = [{ role: "system", content: cdText }]
+    if(message){
+        messagesData = [{ role: "system", content: cdText }, {role: 'user', content: message}]
+    }
                         
     sendQueryToGpt(cdText, messagesData).then(async (gptResponse) => {
         if (gptResponse) {
@@ -148,10 +156,10 @@ async function GenerateFirstMessageForAIChat(chat, user, callback) {
                 });
 
                 const m1 = await db.messageModel.create({
-                    message: cdText,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+                    message: message != null ? message : cdText,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
                     ChatId: chat.id,
-                    from: "gpt",
-                    type: "promptinvisible",
+                    from: message != null ? "user" : "gpt",
+                    type: message != null ? "text" : "promptinvisible",
                     title: "",
                 }, { transaction: t });
                 const m2 = await db.messageModel.create({
@@ -272,6 +280,8 @@ export const SendMessage = async (req, res) => {
                 if (chat) {
                     //console.log("Chat exists")
                     const message = req.body.message;
+
+                    
                     //console.log("Messages saving ", message)
 
                     //check if there is a summary saved
@@ -313,89 +323,85 @@ export const SendMessage = async (req, res) => {
                         }
                         messagesData.splice(0, 0, { role: "system", content: `Keep your response within 100 words.` })
                         
+                        sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
+                            if (gptResponse) {
+                                const result = await db.sequelize.transaction(async (t) => {
+                                    t.afterCommit(() => {
+                                        //console.log("\n\nTransaction is commited \n\n")
+                                    });
+    
+                                    let messageArray = []
+                                    const m1 = await db.messageModel.create({
+                                        message: message,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+                                        ChatId: chatid,
+                                        from: "me",
+                                        type: "text",
+                                        title: "",
+                                    }, { transaction: t });
+    
+                                    messageArray.push(m1)
+                                    let messages = splitMessage(gptResponse);
+                                    if(messages.length === 1){
+                                        const m2 = await db.messageModel.create({
+                                            message: messages[0],
+                                            ChatId: chatid,
+                                            from: "gpt",
+                                            type: "text"//messages[1].type
+                                        }, { transaction: t });
+                                        messageArray.push(m2)
+                                    }
+                                    else{
+                                        let mes1 = messages[0]
+                                        let mes2 = messages[1]
+                                        const m2 = await db.messageModel.create({
+                                            message: mes1,
+                                            ChatId: chatid,
+                                            from: "gpt",
+                                            type: "text"//messages[1].type
+                                        }, { transaction: t });
+                                        const m3 = await db.messageModel.create({
+                                            message: mes2,
+                                            ChatId: chatid,
+                                            from: "gpt",
+                                            type: "text"//messages[1].type
+                                        }, { transaction: t });
+    
+                                        messageArray.push(m2)
+                                        messageArray.push(m3)
+                                    }
+                                    
+    
+    
+    
+                                    // await t.commit();
+                                    res.send({ status: true, message: "Messages sent", data: { messages: messageArray, chat: chat } });
+                                })
+    
+                            }
+                            else {
+                                res.send({ status: false, message: "Error sending message to gpt", data: null });
+                            }
+    
+                        })
                     }
                     else {
                         //console.log("No messages, new chat")
-                        messagesData = [{ role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user. Keep your response within 100 words." }, { role: "user", content: message }]
-                        if (chat.snapshot !== null) {
-                            messagesData.splice(0, 0, { role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${chat.snapshot}. Now user will respond. Reply accordingly by keeping inside the scope of the journal context.` })
-                        }
+                        GenerateFirstMessageForAIChat(chat, authData.user, message, (messages)=>{
+                            if(messages){
+                                res.send({ status: true, message: "Messages sent", data: { messages: messages, chat: chat } });
+                              }
+                              else{
+                                res.send({ message: "Error sending message", data: null, status: false });
+                              }
+                          })
                         // messagesData = [{role: "user", content: messages[0].message}]
                     }
                     // }
 
 
 
-                    sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
-                        if (gptResponse) {
-                            const result = await db.sequelize.transaction(async (t) => {
-                                t.afterCommit(() => {
-                                    //console.log("\n\nTransaction is commited \n\n")
-                                });
+                    
 
-                                let messageArray = []
-                                const m1 = await db.messageModel.create({
-                                    message: message,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
-                                    ChatId: chatid,
-                                    from: "me",
-                                    type: "text",
-                                    title: "",
-                                }, { transaction: t });
-
-                                messageArray.push(m1)
-                                let messages = splitMessage(gptResponse);
-                                if(messages.length === 1){
-                                    const m2 = await db.messageModel.create({
-                                        message: messages[0],
-                                        ChatId: chatid,
-                                        from: "gpt",
-                                        type: "text"//messages[1].type
-                                    }, { transaction: t });
-                                    messageArray.push(m2)
-                                }
-                                else{
-                                    let mes1 = messages[0]
-                                    let mes2 = messages[1]
-                                    const m2 = await db.messageModel.create({
-                                        message: mes1,
-                                        ChatId: chatid,
-                                        from: "gpt",
-                                        type: "text"//messages[1].type
-                                    }, { transaction: t });
-                                    const m3 = await db.messageModel.create({
-                                        message: mes2,
-                                        ChatId: chatid,
-                                        from: "gpt",
-                                        type: "text"//messages[1].type
-                                    }, { transaction: t });
-
-                                    messageArray.push(m2)
-                                    messageArray.push(m3)
-                                }
-                                
-
-
-
-                                // await t.commit();
-                                res.send({ status: true, message: "Messages sent", data: { messages: messageArray, chat: chat } });
-                            })
-
-                        }
-                        else {
-                            res.send({ status: false, message: "Error sending message to gpt", data: null });
-                        }
-
-                    })
-
-                    // })
-
-
-
-                    // }
-                    // else{
-                    //     await t.rollback();
-                    //     res.send({status: false, message: "error sending message", data: null})
-                    // }
 
                 }
                 else {
