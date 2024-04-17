@@ -918,7 +918,7 @@ function getMDYDateFormat(date) {
 
     // Construct the MM dd string
     // const formattedDate = formattedMonth + ' ' + formattedDay;
-    let Months = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    let Months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     //console.log("Here now", day)
     let d = Months[month] + " " + formattedDay + " " + year
     //console.log("Formated ", d)
