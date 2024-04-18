@@ -363,9 +363,17 @@ export const UpdateProfile = async (req, res) => {
                 if (typeof req.body.industry !== 'undefined') {
                     user.industry = req.body.industry;
                 }
+                if (typeof req.body.countries !== 'undefined') {
+                    user.countries = req.body.countries;
+                }
+                if (typeof req.body.pronouns !== 'undefined') {
+                    user.pronouns = req.body.pronouns;
+                }
+                if (typeof req.body.dob !== 'undefined') {
+                    user.dob = req.body.dob;
+                }
 
                 const saved = await user.save();
-
                 let u = await UserProfileFullResource(user)
                 res.send({ status: true, message: "User updated", data: u, userData: req.body })
             }

@@ -194,6 +194,9 @@ if(myJournals){
         lastWeekVibe: lastWeekVibe,
         quote_of_day: quote,
         have_journals: haveJournals,
+        pronouns: user.pronouns,
+        countries: JSON.parse(user.countries),
+        dob: user.dob,
     }
 
 

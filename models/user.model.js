@@ -81,6 +81,18 @@ const UserModel = (sequelize, Sequelize) => {
         type: Sequelize.BLOB,
         allowNull: true
       },
+      countries: {
+        type: Sequelize.STRING,
+        default: ""
+      },
+      pronouns: {
+        type: Sequelize.STRING,
+        default: ""
+      },
+      dob: {
+        type: Sequelize.STRING,
+        default: ""
+      }
       
     }, 
     // {
