@@ -195,7 +195,7 @@ if(myJournals){
         quote_of_day: quote,
         have_journals: haveJournals,
         pronouns: user.pronouns,
-        countries: user.countries ? JSON.parse(user.countries) : "",
+        countries: (user.countries !== null && user.countries != "") ? JSON.parse(user.countries) : "",
         dob: user.dob,
     }
 

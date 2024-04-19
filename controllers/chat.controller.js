@@ -147,7 +147,7 @@ async function GenerateFirstMessageForAIChat(chat, user, message = null, callbac
     if(message){
         messagesData = [{ role: "system", content: cdText }, {role: 'user', content: message}]
     }
-                        
+    console.log("First promt from user AI Chat", messagesData)                    
     sendQueryToGpt(cdText, messagesData).then(async (gptResponse) => {
         if (gptResponse) {
             const result = await db.sequelize.transaction(async (t) => {
