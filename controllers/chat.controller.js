@@ -386,7 +386,8 @@ export const SendMessage = async (req, res) => {
                     }
                     else {
                         //console.log("No messages, new chat")
-                        GenerateFirstMessageForAIChat(chat, authData.user, message, (messages)=>{
+                        let us = await db.user.findByPk(authData.user.id)
+                        GenerateFirstMessageForAIChat(chat, us, message, (messages)=>{
                             if(messages){
                                 res.send({ status: true, message: "Messages sent", data: { messages: messages, chat: chat } });
                               }
