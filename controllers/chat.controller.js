@@ -170,7 +170,7 @@ async function GenerateFirstMessageForAIChat(chat, user, message = null, callbac
         so have guardrails that only allow you to support users based on what you’re intended for. Only focus on guiding users through
         their journaling and checkin process.  
     
-    So the instruction is, first introduce yourself and respond to the user input, then greet the user. Using the outline above, act as one's advanced AI journaling coach but
+    So the instruction is, first introduce yourself and respond to the user input, then greet the user. Using the outline above, act as one's advanced AI coach but
      remember not to mention you’re a therapist but rather a personal coach , have them check in first if they agree to checkin, 
      then start their journal entry. Otherwise, just allow them to journal and engage and address what they’ve written about Oh and 
      your name is Plurawl, don't forget to introduce yourself. Strictly follow the above instructions. Don't stray away from the intended behavior.
@@ -180,7 +180,7 @@ async function GenerateFirstMessageForAIChat(chat, user, message = null, callbac
     Keep response within 150 words.
     `
 
-    console.log("First Prompt for AI Chat ", cdText);
+    // console.log("First Prompt for AI Chat ", cdText);
     // const m1 = await db.messageModel.create({
     //     message: cdText,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
     //     ChatId: chat.id,
@@ -267,6 +267,9 @@ async function sendQueryToGpt(message, messageData) {
         role: "user",
         content: message // this data is being sent to chatgpt so only message should be sent
     });
+    console.log(messageData)
+
+    console.log("################################################################")
     const APIKEY = process.env.AIKey;
     //console.log(APIKEY)
     const headers = {}
@@ -366,25 +369,7 @@ export const SendMessage = async (req, res) => {
                 if (chat) {
                     //console.log("Chat exists")
                     const message = req.body.message;
-
-                    
-                    //console.log("Messages saving ", message)
-
-                    //check if there is a summary saved
-                    // let messageWithSummary = await db.chat.findByPk(chatid);
-                    // //console.log("Chat found ", messageWithSummary)
-                    // let summary = null;
-                    // if(messageWithSummary.summary !== null){
-                    //     summary = messageWithSummary.summary;
-                    // }
                     let messagesData = []
-                    // if(summary !== null){ // 
-                    //     //console.log("Summary already exists")
-                    //     messagesData = [{role: "user", content: "generate summary of previous conversation"}, {role: "system", content: summary}, {role: "user", content: message}]
-                    // }
-                    // else{
-                        //Repeat introduction was because of the message order. The first message would be sent last 
-                        //to gpt so it would consider that an instruction and greet again.
                     const dbmessages = await db.messageModel.findAll({
                         where: {
                             ChatId: chatid
@@ -397,18 +382,19 @@ export const SendMessage = async (req, res) => {
                     if (dbmessages.length > 0) {
                         // messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: messages[0].message}]
                         //console.log("Messages are in db")
-                        // //console.log("################################################################")
+                        console.log("################################################################")
                         for (let i = 0; i < dbmessages.length; i++) {
                             let m = dbmessages[i]
                             // //console.log(chalk.green(`Message ${m.from}-${m.id} | ${m.message}`))
                             messagesData.push({ role: m.from === "me" ? "user" : "system", content: m.message })
                         }
-                        // //console.log("################################################################")
+                        
                         if (chat.snapshot !== null) {
                             messagesData.splice(0, 0, { role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${chat.snapshot}. The further conversation follows.` })
                         }
                         messagesData.splice(0, 0, { role: "system", content: `Keep your response within 100 words.` })
                         
+
                         sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
                             if (gptResponse) {
                                 const result = await db.sequelize.transaction(async (t) => {
