@@ -202,7 +202,7 @@ async function GenerateFirstMessageForAIChat(chat, user, message = null, callbac
                 const m1 = await db.messageModel.create({
                     message: message != null ? message : cdText,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
                     ChatId: chat.id,
-                    from: message != null ? "user" : "gpt",
+                    from: message != null ? "me" : "gpt",
                     type: message != null ? "text" : "promptinvisible",
                     title: "",
                 }, { transaction: t });
