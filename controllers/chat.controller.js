@@ -22,7 +22,7 @@ const Chat = db.chatModel;
 const Message = db.messageModel;
 
 
-const GptModel = "gpt-3.5-turbo-0125";//"gpt-4-turbo-preview";//
+const GptModel = "gpt-4-turbo-preview";//"gpt-3.5-turbo-0125";//"gpt-4-turbo-preview";//
 
 
 
