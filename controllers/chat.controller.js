@@ -79,21 +79,21 @@ export const CreateChat = async (req, res) => {
                                 //this will lead to  entry of journal through chat
 
                                 //We will let user send the first message then this prompt will be sent in AI Chat
-                            //   GenerateFirstMessageForAIChat(chatCreated, authData.user, (messages)=>{
-                            //     if(messages){
-                            //         res.send({ message: "Chat created", data: chatCreated, status: true });
-                            //       }
-                            //       else{
-                            //         res.send({ message: "Chat created", data: chatCreated, status: true });
-                            //       }
-                            //   })
-                              
+                                //   GenerateFirstMessageForAIChat(chatCreated, authData.user, (messages)=>{
+                                //     if(messages){
+                                //         res.send({ message: "Chat created", data: chatCreated, status: true });
+                                //       }
+                                //       else{
+                                //         res.send({ message: "Chat created", data: chatCreated, status: true });
+                                //       }
+                                //   })
+
 
                             }
                         }
 
                     }
-                    
+
 
 
                 })
@@ -111,12 +111,7 @@ export const CreateChat = async (req, res) => {
 }
 
 
-async function GenerateFirstMessageForAIChat(chat, user, message = null, callback) {
-    let name = user.name;
-    if(name.length > 0){
-     name = name.split(" ")[0]
-    }
-
+function getAIChatPromptText(name) {
     let cdText = `You're an advanced AI self discovery coach and people engage with you to checkin and journal about their life. 
 
     Here are some of the terms that we will be using in the instructions.
@@ -178,19 +173,23 @@ async function GenerateFirstMessageForAIChat(chat, user, message = null, callbac
     
     It should feel like a conversation, so ask one question at a time, don't word vomit and ask a lot of questions at once.. make it feel like you're chatting.
     Keep response within 150 words.
+    
     `
 
-    // console.log("First Prompt for AI Chat ", cdText);
-    // const m1 = await db.messageModel.create({
-    //     message: cdText,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
-    //     ChatId: chat.id,
-    //     from: "gpt",
-    //     type: "promptinvisible",
-    //     title: "",
-    // });
+    return cdText;
+}
+
+
+async function GenerateFirstMessageForAIChat(chat, user, message = null, callback) {
+    let name = user.name;
+    if (name.length > 0) {
+        name = name.split(" ")[0]
+    }
+
+    let cdText = getAIChatPromptText(name);
     let messagesData = [{ role: "system", content: cdText }]
-    if(message){
-        messagesData = [{ role: "system", content: cdText }, {role: 'user', content: message}]
+    if (message) {
+        messagesData = [{ role: "system", content: cdText }, { role: 'user', content: message }]
     }
     // console.log("First promt from user AI Chat", messagesData)                    
     sendQueryToGpt(cdText, messagesData).then(async (gptResponse) => {
@@ -218,7 +217,7 @@ async function GenerateFirstMessageForAIChat(chat, user, message = null, callbac
 
                 // await t.commit();
 
-                callback( [m1, m2])
+                callback([m1, m2])
             })
 
         }
@@ -256,7 +255,7 @@ export const UpdateChat = async (req, res) => {
 async function sendQueryToGpt(message, messageData) {
     //console.log("Sending Message " + message)
 
-//console.log(messageData)
+    //console.log(messageData)
     // //console.log("Sending this summary to api ", summary);
     // messageData.push({
     //     role: "system",
@@ -269,7 +268,7 @@ async function sendQueryToGpt(message, messageData) {
     });
     console.log(messageData)
 
-    console.log("################################################################")
+    console.log("################################################################", messageData.length)
     const APIKEY = process.env.AIKey;
     //console.log(APIKEY)
     const headers = {}
@@ -363,6 +362,7 @@ export const SendMessage = async (req, res) => {
             const userid = authData.user.id;
             const chatid = req.body.chatid;
             const chat = await db.chatModel.findByPk(chatid);
+            const user = await db.user.findByPk(userid)
 
             try {
 
@@ -370,6 +370,15 @@ export const SendMessage = async (req, res) => {
                     //console.log("Chat exists")
                     const message = req.body.message;
                     let messagesData = []
+                    if (chat.type === "AIChat") {
+                        let name = user.name;
+                        if (name.length > 0) {
+                            name = name.split(" ")[0]
+                        }
+
+                        let cdText = getAIChatPromptText(name);
+                        messagesData = [{ role: "system", content: cdText }]
+                    }
                     const dbmessages = await db.messageModel.findAll({
                         where: {
                             ChatId: chatid
@@ -388,12 +397,12 @@ export const SendMessage = async (req, res) => {
                             // //console.log(chalk.green(`Message ${m.from}-${m.id} | ${m.message}`))
                             messagesData.push({ role: m.from === "me" ? "user" : "system", content: m.message })
                         }
-                        
+
                         if (chat.snapshot !== null) {
                             messagesData.splice(0, 0, { role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${chat.snapshot}. The further conversation follows.` })
                         }
                         messagesData.splice(0, 0, { role: "system", content: `Keep your response within 100 words.` })
-                        
+
 
                         sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
                             if (gptResponse) {
@@ -401,7 +410,7 @@ export const SendMessage = async (req, res) => {
                                     t.afterCommit(() => {
                                         //console.log("\n\nTransaction is commited \n\n")
                                     });
-    
+
                                     let messageArray = []
                                     const m1 = await db.messageModel.create({
                                         message: message,// (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
@@ -410,10 +419,10 @@ export const SendMessage = async (req, res) => {
                                         type: "text",
                                         title: "",
                                     }, { transaction: t });
-    
+
                                     messageArray.push(m1)
                                     let messages = splitMessage(gptResponse);
-                                    if(messages.length === 1){
+                                    if (messages.length === 1) {
                                         const m2 = await db.messageModel.create({
                                             message: messages[0],
                                             ChatId: chatid,
@@ -422,7 +431,7 @@ export const SendMessage = async (req, res) => {
                                         }, { transaction: t });
                                         messageArray.push(m2)
                                     }
-                                    else{
+                                    else {
                                         let mes1 = messages[0]
                                         let mes2 = messages[1]
                                         const m2 = await db.messageModel.create({
@@ -437,43 +446,43 @@ export const SendMessage = async (req, res) => {
                                             from: "gpt",
                                             type: "text"//messages[1].type
                                         }, { transaction: t });
-    
+
                                         messageArray.push(m2)
                                         messageArray.push(m3)
                                     }
-                                    
-    
-    
-    
+
+
+
+
                                     // await t.commit();
                                     res.send({ status: true, message: "Messages sent", data: { messages: messageArray, chat: chat } });
                                 })
-    
+
                             }
                             else {
                                 res.send({ status: false, message: "Error sending message to gpt", data: null });
                             }
-    
+
                         })
                     }
                     else {
                         //console.log("No messages, new chat")
                         let us = await db.user.findByPk(authData.user.id)
-                        GenerateFirstMessageForAIChat(chat, us, message, (messages)=>{
-                            if(messages){
+                        GenerateFirstMessageForAIChat(chat, us, message, (messages) => {
+                            if (messages) {
                                 res.send({ status: true, message: "Messages sent", data: { messages: messages, chat: chat } });
-                              }
-                              else{
+                            }
+                            else {
                                 res.send({ message: "Error sending message", data: null, status: false });
-                              }
-                          })
+                            }
+                        })
                         // messagesData = [{role: "user", content: messages[0].message}]
                     }
                     // }
 
 
 
-                    
+
 
 
                 }
