@@ -147,7 +147,7 @@ async function GenerateFirstMessageForAIChat(chat, user, message = null, callbac
         When prompting them to checkin in, present them with these options:  
         Provide these exact options: High Energy Pleasant, High Energy Unpleasant, Low Energy Pleasant, 
         Low Energy Unpleasant.
-        After getting the user input for the mood, you must provide a list of 5 feelings that should be unique advanced words alongwith definitions(10 words max) 
+        After getting the user input for the mood, your response should contain 5 feelings that should be unique advanced words alongwith definitions(10 words max) 
         that match that selection and ask them which emotion they are feeling. 
         These are the questions to ask when someone checks in. Make sure that you prompt the user to checkin 
         or journal at the very beginning of your conversation.
