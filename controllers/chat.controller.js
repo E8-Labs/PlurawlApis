@@ -147,7 +147,7 @@ async function GenerateFirstMessageForAIChat(chat, user, message = null, callbac
     if(message){
         messagesData = [{ role: "system", content: cdText }, {role: 'user', content: message}]
     }
-    console.log("First promt from user AI Chat", messagesData)                    
+    // console.log("First promt from user AI Chat", messagesData)                    
     sendQueryToGpt(cdText, messagesData).then(async (gptResponse) => {
         if (gptResponse) {
             const result = await db.sequelize.transaction(async (t) => {
@@ -250,7 +250,7 @@ async function sendQueryToGpt(message, messageData) {
     }
 }
 
-function splitMessage(message) {
+function splitMessageOld(message) {
     let wordsThreshold = 50
     const words = message.split(' ');
     if (words.length <= wordsThreshold) {
@@ -264,6 +264,47 @@ function splitMessage(message) {
             return [firstPart, remainingPart]; // Return two parts of the message as an array
         }
     }
+}
+
+
+function splitMessage(text) {
+    // Regular expression to match sentence boundaries
+    const sentenceEndings = /([.!?])\s+/g;
+    let w = text.split(' ');
+    console.log("Total words in message are ", w.length)
+    const sentences = text.split(sentenceEndings).reduce((acc, elem, index, array) => {
+        if (index % 2 === 0 && array[index + 1]) { // Pair the sentences with their punctuation
+            acc.push(elem + array[index + 1].trim());
+        } else if (index % 2 === 0) { // Handle the case of the last sentence potentially without punctuation
+            acc.push(elem);
+        }
+        return acc;
+    }, []);
+
+    // Count words
+    let wordCount = 0;
+    let splitIndex = sentences.length;
+    for (let i = 0; i < sentences.length; i++) {
+        const count = sentences[i].split(/\s+/).length;
+        if (wordCount + count > 100) {
+            splitIndex = i;
+            break;
+        }
+        wordCount += count;
+    }
+
+    // Ensure the second message is not shorter than 20 words
+    let secondPartWordCount = sentences.slice(splitIndex).join(' ').split(/\s+/).length;
+    while (secondPartWordCount < 20 && splitIndex > 1) {
+        splitIndex--;
+        secondPartWordCount = sentences.slice(splitIndex).join(' ').split(/\s+/).length;
+    }
+
+    // Construct messages
+    const firstMessage = sentences.slice(0, splitIndex).join(' ');
+    const secondMessage = sentences.slice(splitIndex).join(' ');
+
+    return [firstMessage, secondMessage];
 }
 
 
