@@ -338,7 +338,7 @@ function countWords(text) {
 }
 
 function splitMessage(text){
-    if (countWords(text) <= 50) {
+    if (countWords(text) <= 60) {
         return [text];
       }
     
@@ -367,6 +367,9 @@ function splitMessage(text){
         firstPart = firstPart.replace(lastSentence, '');
       }
     
+      if(secondPart.length < 10){
+        return [firstPart + secondPart]
+      }
       return [firstPart, secondPart ];//{ canSplit: true, firstPart: firstPart, secondPart: secondPart };
 }
   
