@@ -17,6 +17,11 @@ let chatModel = (sequelize, Sequelize) => {
       cd: { // cd of journal
         type: Sequelize.STRING(50)
       },
+      total_cost: {
+        type: Sequelize.DOUBLE, 
+        allowNull: false,
+        defaultValue: 0
+      }
       
     });
     // Chat.belongsTo(User);

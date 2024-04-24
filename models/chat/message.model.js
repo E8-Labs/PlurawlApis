@@ -16,7 +16,10 @@ let messageModel = (sequelize, Sequelize) => {
         type: Sequelize.STRING(30), 
         default: "text" // text, prompt(if it is prompt sent directly)
       },
-      
+      tokens: {
+        type: Sequelize.INTEGER, 
+        default: 0
+      }
       
     });
     // Message.belongsTo(User);

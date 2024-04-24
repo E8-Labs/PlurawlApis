@@ -188,12 +188,15 @@ async function GenerateFirstMessageForAIChat(chat, user, message = null, callbac
 
     let cdText = getAIChatPromptText(name);
     let messagesData = [{ role: "system", content: cdText }]
-    if (message) {
-        messagesData = [{ role: "system", content: cdText }, { role: 'user', content: message }]
-    }
-    // console.log("First promt from user AI Chat", messagesData)                    
-    sendQueryToGpt(cdText, messagesData).then(async (gptResponse) => {
+    // if (message) {
+    //     messagesData = [{ role: "system", content: cdText }, { role: 'user', content: message }]
+    // }
+    console.log("First promt from user AI Chat", messagesData)
+    sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
         if (gptResponse) {
+            console.log("Gpt Response Cost ", gptResponse.total_cost)
+                                chat.total_cost += gptResponse.total_cost;
+                                let savedChat = await chat.save();
             const result = await db.sequelize.transaction(async (t) => {
                 t.afterCommit(() => {
                     //console.log("\n\nTransaction is commited \n\n")
@@ -205,17 +208,15 @@ async function GenerateFirstMessageForAIChat(chat, user, message = null, callbac
                     from: message != null ? "me" : "gpt",
                     type: message != null ? "text" : "promptinvisible",
                     title: "",
+                    tokens: gptResponse.prompt_tokens
                 }, { transaction: t });
                 const m2 = await db.messageModel.create({
-                    message: gptResponse,
+                    message: gptResponse.gptMessage,
                     ChatId: chat.id,
                     from: "gpt",
-                    type: "text"//messages[1].type
+                    type: "text",//messages[1].type
+                    tokens: gptResponse.completion_tokens
                 }, { transaction: t });
-
-
-
-                // await t.commit();
 
                 callback([m1, m2])
             })
@@ -289,8 +290,25 @@ async function sendQueryToGpt(message, messageData) {
     // //console.log(result.data)
     // setMessages(messages.filter(item => item.type !== MessageType.Loading)) // remove the loading message
     if (result.status === 200) {
+        console.log(result.data)
         let gptMessage = result.data.choices[0].message.content;
-        return gptMessage;
+        console.log(chalk.red(gptMessage))
+        let tokens = result.data.usage.total_tokens;
+        let prompt_tokens = result.data.usage.prompt_tokens;
+        let completion_tokens = result.data.usage.completion_tokens;
+
+        let inputCostPerToken = 10 / 1000000;
+        let outoutCostPerToken = 30 / 1000000;
+
+        let inputCost = inputCostPerToken * prompt_tokens;
+        let outputCost = outoutCostPerToken * completion_tokens;
+
+        let totalCost = inputCost + outputCost;
+        console.log("Total cost this request", totalCost);
+        return {
+            gptMessage: gptMessage, tokens: tokens, completion_tokens: completion_tokens,
+            prompt_tokens: prompt_tokens, total_cost: totalCost
+        };
     }
     else {
         return null;
@@ -315,41 +333,48 @@ function splitMessageOld(message) {
 
 
 function splitMessage(text) {
-    // Regular expression to match sentence boundaries
-    const sentenceEndings = /([.!?])\s+/g;
-    let w = text.split(' ');
-    console.log("Total words in message are ", w.length)
-    const sentences = text.split(sentenceEndings).reduce((acc, elem, index, array) => {
-        if (index % 2 === 0 && array[index + 1]) { // Pair the sentences with their punctuation
-            acc.push(elem + array[index + 1].trim());
-        } else if (index % 2 === 0) { // Handle the case of the last sentence potentially without punctuation
-            acc.push(elem);
-        }
-        return acc;
-    }, []);
+    // Regular expression to detect sentence boundaries more inclusively
+    const sentenceRegex = /(?<=[.!?])\s+|\n/;
+    // Split text into sentences
+    const sentences = text.split(sentenceRegex).filter(s => s.trim().length > 0);
 
-    // Count words
-    let wordCount = 0;
-    let splitIndex = sentences.length;
-    for (let i = 0; i < sentences.length; i++) {
-        const count = sentences[i].split(/\s+/).length;
-        if (wordCount + count > 100) {
-            splitIndex = i;
-            break;
-        }
-        wordCount += count;
+    if (sentences.length === 0) return [text]; // Return the original text if no sentences detected
+
+    let firstPart = [];
+    let totalWords = 0;
+    let index = 0;
+
+    // Aggregate sentences into the first part until exceeding 100 words
+    while (index < sentences.length && totalWords <= 100) {
+        const sentence = sentences[index];
+        const wordCount = sentence.split(/\s+/).length;
+
+        if (totalWords + wordCount > 100) break; // Break if adding this sentence exceeds 100 words
+
+        firstPart.push(sentence);
+        totalWords += wordCount;
+        index++;
     }
 
-    // Ensure the second message is not shorter than 20 words
-    let secondPartWordCount = sentences.slice(splitIndex).join(' ').split(/\s+/).length;
-    while (secondPartWordCount < 20 && splitIndex > 1) {
-        splitIndex--;
-        secondPartWordCount = sentences.slice(splitIndex).join(' ').split(/\s+/).length;
+    // Ensure the second part is not less than 20 words
+    let secondPart = sentences.slice(index);
+    let secondPartWordCount = secondPart.join(' ').split(/\s+/).length;
+
+    while (secondPartWordCount < 20 && firstPart.length > 0) {
+        const lastSentence = firstPart.pop();
+        secondPart.unshift(lastSentence);
+        secondPartWordCount += lastSentence.split(/\s+/).length;
+        totalWords -= lastSentence.split(/\s+/).length;
     }
 
-    // Construct messages
-    const firstMessage = sentences.slice(0, splitIndex).join(' ');
-    const secondMessage = sentences.slice(splitIndex).join(' ');
+    if (firstPart.length === 0 || secondPart.length === 0) {
+        // If we can't meet the criteria, return the original text as one block
+        return [text];
+    }
+
+    // Join the parts back into strings
+    const firstMessage = firstPart.join(' ');
+    const secondMessage = secondPart.join(' ');
 
     return [firstMessage, secondMessage];
 }
@@ -401,15 +426,20 @@ export const SendMessage = async (req, res) => {
                         if (chat.snapshot !== null) {
                             messagesData.splice(0, 0, { role: "system", content: `Here is the summary of the user journal. Based on this you have asked the user why he has used the particular cognitive distortion in this journal he wrote. ${chat.snapshot}. The further conversation follows.` })
                         }
-                        messagesData.splice(0, 0, { role: "system", content: `Keep your response within 100 words.` })
+                        messagesData.splice(0, 0, { role: "system", content: `Keep your response within 150 words.` })
 
 
                         sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
                             if (gptResponse) {
+                                console.log("Gpt Response Cost ", gptResponse.total_cost)
+                                chat.total_cost += gptResponse.total_cost;
+                                let savedChat = await chat.save();
+
                                 const result = await db.sequelize.transaction(async (t) => {
                                     t.afterCommit(() => {
                                         //console.log("\n\nTransaction is commited \n\n")
                                     });
+                                    
 
                                     let messageArray = []
                                     const m1 = await db.messageModel.create({
@@ -418,16 +448,18 @@ export const SendMessage = async (req, res) => {
                                         from: "me",
                                         type: "text",
                                         title: "",
+                                        tokens: gptResponse.prompt_tokens,
                                     }, { transaction: t });
 
                                     messageArray.push(m1)
-                                    let messages = splitMessage(gptResponse);
+                                    let messages = splitMessage(gptResponse.gptMessage);
                                     if (messages.length === 1) {
                                         const m2 = await db.messageModel.create({
                                             message: messages[0],
                                             ChatId: chatid,
                                             from: "gpt",
-                                            type: "text"//messages[1].type
+                                            type: "text",//messages[1].type
+                                            tokens: gptResponse.completion_tokens,
                                         }, { transaction: t });
                                         messageArray.push(m2)
                                     }
@@ -438,13 +470,15 @@ export const SendMessage = async (req, res) => {
                                             message: mes1,
                                             ChatId: chatid,
                                             from: "gpt",
-                                            type: "text"//messages[1].type
+                                            type: "text",//messages[1].type
+                                            tokens: 0
                                         }, { transaction: t });
                                         const m3 = await db.messageModel.create({
                                             message: mes2,
                                             ChatId: chatid,
                                             from: "gpt",
-                                            type: "text"//messages[1].type
+                                            type: "text",//messages[1].type
+                                            tokens: gptResponse.completion_tokens,
                                         }, { transaction: t });
 
                                         messageArray.push(m2)
@@ -466,7 +500,7 @@ export const SendMessage = async (req, res) => {
                         })
                     }
                     else {
-                        //console.log("No messages, new chat")
+                        console.log("No messages, new chat")
                         let us = await db.user.findByPk(authData.user.id)
                         GenerateFirstMessageForAIChat(chat, us, message, (messages) => {
                             if (messages) {
