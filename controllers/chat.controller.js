@@ -333,8 +333,42 @@ function splitMessageOld(message) {
     }
 }
 
+function countWords(text) {
+    return text.split(/\s+/).filter(Boolean).length;
+}
 
-function splitMessage(text) {
+function splitMessage(text){
+    if (countWords(text) <= 100) {
+        return [text];
+      }
+    
+      // Split text into sentences using a regex that captures sentence boundaries
+      const sentences = text.match(/[^.!?]+[.!?]\s*/g) || [];
+    
+      let firstPart = '';
+      let secondPart = '';
+      let wordsInFirstPart = 0;
+    
+      // Accumulate sentences into the first part until it has more than 100 words
+      for (let sentence of sentences) {
+        if (wordsInFirstPart <= 100) {
+          firstPart += sentence;
+          wordsInFirstPart = countWords(firstPart);
+        } else {
+          secondPart += sentence;
+        }
+      }
+    
+      // Check if the second part has at least 10 words
+      if (countWords(secondPart) < 10) {
+        return [text]//{ canSplit: false, message: 'Second part has less than 10 words after splitting.' };
+      }
+    
+      return [firstPart, secondPart]//{ canSplit: true, firstPart: firstPart, secondPart: secondPart };
+}
+  
+
+function splitMessage2(text) {
     // Regular expression to detect sentence boundaries more inclusively
     const sentenceRegex = /(?<=[.!?])\s+|\n/;
     // Split text into sentences
