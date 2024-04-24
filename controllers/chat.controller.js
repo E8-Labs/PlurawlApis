@@ -351,7 +351,7 @@ function splitMessage(text){
     
       // Accumulate sentences into the first part until it has more than 100 words
       for (let sentence of sentences) {
-        if (wordsInFirstPart <= 100) {
+        if (wordsInFirstPart <= 75) {
           firstPart += sentence;
           wordsInFirstPart = countWords(firstPart);
         } else {
