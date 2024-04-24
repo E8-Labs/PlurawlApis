@@ -25,6 +25,8 @@ import CheckInTypes from "../models/checkintype.js";
 import chalk from "chalk";
 import JournalResource from "../resources/journal.resource.js";
 
+const GptModel = "gpt-4-turbo-preview";
+
 function addCheckin(data) {
 
     db.userCheckinModel.create(data).then(async (result) => {
@@ -34,6 +36,25 @@ function addCheckin(data) {
             // //console.log("Checkin using journal error ", error)
             return null
         })
+}
+
+
+export const GetCostEstimate = (data) => {
+    let tokens = data.usage.total_tokens;
+    let prompt_tokens = data.usage.prompt_tokens;
+    let completion_tokens = data.usage.completion_tokens;
+
+    let inputCostPerToken = 10 / 1000000;
+    let outoutCostPerToken = 30 / 1000000;
+
+    let inputCost = inputCostPerToken * prompt_tokens;
+    let outputCost = outoutCostPerToken * completion_tokens;
+
+    let totalCost = inputCost + outputCost;
+
+    
+    console.log("Total cost this request", totalCost);
+    return {prompt_tokens: prompt_tokens, completion_tokens: completion_tokens, total_cost: totalCost}
 }
 
 export const AddJournal = async (req, res) => {
@@ -513,7 +534,7 @@ export const GetSnapshotFromJournals = async (text) => {
     //console.log(APIKEY)
     const headers = {}
     const data = {
-        model: "gpt-4-1106-preview",
+        model: GptModel,
         // temperature: 1.2,
         messages: messageData,
         // max_tokens: 1000,
@@ -532,6 +553,14 @@ export const GetSnapshotFromJournals = async (text) => {
             gptMessage = gptMessage.replace(new RegExp("```json", 'g'), '');
             gptMessage = gptMessage.replace(new RegExp("```", 'g'), '');
             gptMessage = gptMessage.replace(new RegExp("\n", 'g'), '');
+
+
+            let estimate = GetCostEstimate(result.data);
+            let created = await db.costModel.create({
+                type: "GetSnapshotFromJournals",
+                total_cost: estimate.total_cost,
+                total_tokens: estimate.completion_tokens + estimate.prompt_tokens
+            })
             // //console.log(chalk.green(JSON.stringify(gptMessage)))
             // return ""
             return gptMessage
@@ -592,7 +621,7 @@ export const AnalyzeJournal = async (req, res) => {
     // //console.log(messageData)
     const headers = {}
     const data = {
-        model: "gpt-4-1106-preview",
+        model: GptModel,
         messages: messageData,
         // max_tokens: 1000,
     }
@@ -614,6 +643,16 @@ export const AnalyzeJournal = async (req, res) => {
             gptMessage = gptMessage.replace('```', '');
             // //console.log("GPT Response is  ", gptMessage)
             let json = JSON.parse(gptMessage)
+
+
+            let estimate = GetCostEstimate(result.data);
+            let created = await db.costModel.create({
+                type: "AnalyzeJournal",
+                total_cost: estimate.total_cost,
+                total_tokens: estimate.completion_tokens + estimate.prompt_tokens
+            })
+
+
             //console.log("Json obejct is ", json)
             res.send({ status: true, data: json, message: "Snapshot" })
             // return gptMessage;
@@ -647,7 +686,7 @@ pronunciation: "How to pronounce the word"
     // //console.log(messageData)
     const headers = {}
     const data = {
-        model: "gpt-4-1106-preview",
+        model: GptModel,//"gpt-4-1106-preview",
         messages: messageData,
         // max_tokens: 1000,
     }
@@ -668,6 +707,13 @@ pronunciation: "How to pronounce the word"
             //console.log("List of moods is ", gptMessage)
             let listOfMoods = JSON.parse(gptMessage)
 
+            //get cost estimate
+            let estimate = GetCostEstimate(result.data);
+            let created = await db.costModel.create({
+                type: "GetFeelingsromGpt",
+                total_cost: estimate.total_cost,
+                total_tokens: estimate.completion_tokens + estimate.prompt_tokens
+            })
             // setMoods(listOfMoods)
             // setShowIndicater(false)
             //console.log("Moods array is ", listOfMoods)
@@ -747,7 +793,7 @@ export const GetCalendarEventPrompt = async (req, res) => {
     // //console.log(APIKEY)
     // //console.log(messageData)
     const data = {
-        model: "gpt-4-1106-preview",
+        model: GptModel,//"gpt-4-1106-preview",
         messages: messageData,
         // max_tokens: 1000,
     }
@@ -768,6 +814,14 @@ export const GetCalendarEventPrompt = async (req, res) => {
             // gptMessage = gptMessage.replace('json', '');
             // gptMessage = gptMessage.replace('```', '');
             //console.log("GPT Response is  ", gptMessage)
+
+            //get cost estimate
+            let estimate = GetCostEstimate(result.data);
+            let created = await db.costModel.create({
+                type: "GetCalendarEventPrompt",
+                total_cost: estimate.total_cost,
+                total_tokens: estimate.completion_tokens + estimate.prompt_tokens
+            })
             res.send({ data: gptMessage, status: true, message: "Prompt generated" });
 
             // return gptMessage;

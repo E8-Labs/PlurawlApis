@@ -8,6 +8,7 @@ import moment from "moment-timezone";
 import axios from "axios";
 import chalk from "chalk";
 import nodemailer from 'nodemailer'
+import { GetCostEstimate } from "./journal.controller.js";
 
 import crypto from 'crypto'
 // import { fetchOrCreateUserToken } from "./plaid.controller.js";
@@ -24,7 +25,7 @@ import UserProfileFullResource from "../resources/userprofilefullresource.js";
 
 export const RegisterUser = async (req, res) => {
 
-//console.log("Checking user")
+    //console.log("Checking user")
     // res.send({data: {text: "kanjar Students"}, message: "Chawal Students", status: true})
 
     const alreadyUser = await User.findOne({
@@ -107,7 +108,7 @@ export const RegisterUser = async (req, res) => {
 }
 
 
-export const SocialLogin = async(req, res) => {
+export const SocialLogin = async (req, res) => {
     //console.log("Checking user")
     // res.send({data: {text: "kanjar Students"}, message: "Chawal Students", status: true})
 
@@ -116,9 +117,9 @@ export const SocialLogin = async(req, res) => {
             provider_id: req.body.provider_id
         }
     })
-    
+
     if (alreadyUser) {
-         let user = alreadyUser
+        let user = alreadyUser
         JWT.sign({ user }, process.env.SecretJwtKey, { expiresIn: '365d' }, async (error, token) => {
             if (error) {
                 //console.log(error)
@@ -134,54 +135,42 @@ export const SocialLogin = async(req, res) => {
     else {
         // ////console.log("Hello bro")
         // res.send("Hello")
-        
-            var userData = {
-                name: req.body.name,
-                email: req.body.email,
-                profile_image: req.body.profile_image,
-                password: req.body.provider_id,
-                role: UserRole.RoleUser,
-                points: 0,
-                provider_name: req.body.provider_name,
-                provider_id: req.body.provider_id
-            };
-            const salt = await bcrypt.genSalt(10);
-            const hashed = await bcrypt.hash(req.body.provider_id, salt);
-            userData.password = hashed;
 
-            try {
-                User.create(userData).then(async data => {
-                    ////console.log("User created ", data.id)
-                    // let userToken = fetchOrCreateUserToken(data);
-                    ////console.log("User Token created in Register ", userToken)
-                    let user = data
-                    JWT.sign({ user }, process.env.SecretJwtKey, { expiresIn: '365d' }, async (err, token) => {
-                        if (err) {
-                            ////console.log("Error signing")
-                            res.send({ status: false, message: "Error Token " + err, data: null });
-                        }
-                        else {
-                            ////console.log("signed creating user")
-                            let u = await UserProfileFullResource(data);
-                            res.send({ status: true, message: "User registered", data: { user: u, token: token } })
+        var userData = {
+            name: req.body.name,
+            email: req.body.email,
+            profile_image: req.body.profile_image,
+            password: req.body.provider_id,
+            role: UserRole.RoleUser,
+            points: 0,
+            provider_name: req.body.provider_name,
+            provider_id: req.body.provider_id
+        };
+        const salt = await bcrypt.genSalt(10);
+        const hashed = await bcrypt.hash(req.body.provider_id, salt);
+        userData.password = hashed;
 
-                        }
-                    })
+        try {
+            User.create(userData).then(async data => {
+                ////console.log("User created ", data.id)
+                // let userToken = fetchOrCreateUserToken(data);
+                ////console.log("User Token created in Register ", userToken)
+                let user = data
+                JWT.sign({ user }, process.env.SecretJwtKey, { expiresIn: '365d' }, async (err, token) => {
+                    if (err) {
+                        ////console.log("Error signing")
+                        res.send({ status: false, message: "Error Token " + err, data: null });
+                    }
+                    else {
+                        ////console.log("signed creating user")
+                        let u = await UserProfileFullResource(data);
+                        res.send({ status: true, message: "User registered", data: { user: u, token: token } })
 
-
-                }).catch(error => {
-                    ////console.log("User not created")
-                    ////console.log(error)
-                    res.send({
-                        message:
-                            err.message || "Some error occurred while creating the user.",
-                        status: false,
-                        data: null
-                    });
+                    }
                 })
-            }
-            catch (error) {
-                ////console.log("Exception ", error)
+
+
+            }).catch(error => {
                 ////console.log("User not created")
                 ////console.log(error)
                 res.send({
@@ -190,7 +179,19 @@ export const SocialLogin = async(req, res) => {
                     status: false,
                     data: null
                 });
-            }
+            })
+        }
+        catch (error) {
+            ////console.log("Exception ", error)
+            ////console.log("User not created")
+            ////console.log(error)
+            res.send({
+                message:
+                    err.message || "Some error occurred while creating the user.",
+                status: false,
+                data: null
+            });
+        }
     }
 }
 
@@ -539,6 +540,12 @@ export const GenerateQuote = async () => {
                 gptMessage = gptMessage.replace(new RegExp("\n", 'g'), '');
                 //console.log(chalk.green(JSON.stringify(gptMessage)))
                 // return ""
+                let estimate = GetCostEstimate(result.data);
+                let createdCost = await db.costModel.create({
+                    type: "GenerateQuote",
+                    total_cost: estimate.total_cost,
+                    total_tokens: estimate.completion_tokens + estimate.prompt_tokens
+                })
                 let json = JSON.parse(gptMessage)
                 //add to the database here
                 let data = {
@@ -565,8 +572,8 @@ export const GenerateQuote = async () => {
     }
 }
 
-export const encrypt = (req, res)=>{
-    
+export const encrypt = (req, res) => {
+
     let text = req.body.text;
     let algo = process.env.EncryptionAlgorithm;
     const key = crypto.randomBytes(32);
@@ -576,13 +583,13 @@ export const encrypt = (req, res)=>{
         enc_key: key,
         enc_iv: iv,
     },
-    {
-        where:{
-            id: {
-                [Op.ne]: -1
+        {
+            where: {
+                id: {
+                    [Op.ne]: -1
+                }
             }
-        }
-    })
+        })
     //console.log("Key is ", key);
     //console.log("Iv is ", iv);
 
@@ -613,7 +620,7 @@ export const UploadTracks = (req, res) => {
             //every track has an id, artImage, preview_url & title
             let InsertObj = await db.spotifySongModel.bulkCreate(tracks);
             //console.log("Created ", InsertObj)
-            res.send({status: true, message: "Songs added", data: InsertObj})
+            res.send({ status: true, message: "Songs added", data: InsertObj })
 
         }
         else {
@@ -632,98 +639,98 @@ function generateRandomCode(length) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
-  }
+}
 
 
 export const SendPasswordResetEmail = (req, res) => {
     let email = req.body.email;
     let user = db.user.findOne({
-      where: {
-        email: email
-      }
+        where: {
+            email: email
+        }
     })
     if (user) {
-      //send email here
-      // Create a transporter object using the default SMTP transport
-      let transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com", // Replace with your mail server host
-        port: 587, // Port number depends on your email provider and whether you're using SSL or not
-        secure: false, // true for 465 (SSL), false for other ports
-        auth: {
-          user: "salman@e8-labs.com", // Your email address
-          pass: "uzmvwsljflyqnzgu", // Your email password
-        },
-      });
-      const randomCode = generateRandomCode(6);
-      db.passwordResetCode.destroy({
-        where:{
-          email: email
-        }
-      })
-      db.passwordResetCode.create({
-        email: email,
-        code: `${randomCode}`
-      })
-      // Setup email data with unicode symbols
-      let mailOptions = {
-        from: '"Plurawl" salman@e8-labs.com', // Sender address
-        to: email, // List of recipients
-        subject: "Password Reset Code", // Subject line
-        text: `${randomCode}`, // Plain text body
-        html: `<html><b>Hello,${user.name}</b>This is your reset code. <b>${randomCode}</b> </html>`, // HTML body
-      };
-  
-      // Send mail with defined transport object
-      try{
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              res.send({status: false, message: "Code not sent"})
-               //console.log(error);
+        //send email here
+        // Create a transporter object using the default SMTP transport
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com", // Replace with your mail server host
+            port: 587, // Port number depends on your email provider and whether you're using SSL or not
+            secure: false, // true for 465 (SSL), false for other ports
+            auth: {
+                user: "salman@e8-labs.com", // Your email address
+                pass: "uzmvwsljflyqnzgu", // Your email password
+            },
+        });
+        const randomCode = generateRandomCode(6);
+        db.passwordResetCode.destroy({
+            where: {
+                email: email
             }
-            //console.log('Message sent: %s', info.messageId);
-            //console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-            res.send({status: true, message: "Code sent"})
-            
-          });
-      }
-      catch(error){
-        //console.log("Exception ", error)
-      }
+        })
+        db.passwordResetCode.create({
+            email: email,
+            code: `${randomCode}`
+        })
+        // Setup email data with unicode symbols
+        let mailOptions = {
+            from: '"Plurawl" salman@e8-labs.com', // Sender address
+            to: email, // List of recipients
+            subject: "Password Reset Code", // Subject line
+            text: `${randomCode}`, // Plain text body
+            html: `<html><b>Hello,${user.name}</b>This is your reset code. <b>${randomCode}</b> </html>`, // HTML body
+        };
+
+        // Send mail with defined transport object
+        try {
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    res.send({ status: false, message: "Code not sent" })
+                    //console.log(error);
+                }
+                //console.log('Message sent: %s', info.messageId);
+                //console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+                res.send({ status: true, message: "Code sent" })
+
+            });
+        }
+        catch (error) {
+            //console.log("Exception ", error)
+        }
     }
     else {
-      res.send({ status: false, data: null, message: "No such user" })
+        res.send({ status: false, data: null, message: "No such user" })
     }
-  }
-  
-  export const ResetPassword = async (req, res)=>{
+}
+
+export const ResetPassword = async (req, res) => {
     let email = req.body.email;
     let password = req.body.password;
     let code = req.body.code;
-  
+
     let dbCode = await db.passwordResetCode.findOne({
-      where: {
-        email: email
-      }
-    })
-  
-    if( (dbCode && dbCode.code === code) || code == "112211"){
-      const salt = await bcrypt.genSalt(10);
-      const hashed = await bcrypt.hash(password, salt);
-      let user = await db.user.findOne({
         where: {
-          email: email
+            email: email
         }
-      })
-      user.password = hashed;
-      let saved = await user.save();
-      if(saved){
-        res.send({ status: true, data: null, message: "Password updated" })
-      }
-      else{
-        res.send({ status: false, data: null, message: "Error updating password" })
-      }
+    })
+
+    if ((dbCode && dbCode.code === code) || code == "112211") {
+        const salt = await bcrypt.genSalt(10);
+        const hashed = await bcrypt.hash(password, salt);
+        let user = await db.user.findOne({
+            where: {
+                email: email
+            }
+        })
+        user.password = hashed;
+        let saved = await user.save();
+        if (saved) {
+            res.send({ status: true, data: null, message: "Password updated" })
+        }
+        else {
+            res.send({ status: false, data: null, message: "Error updating password" })
+        }
     }
-    else{
-      res.send({ status: false, data: null, message: "Incorrect code" })
+    else {
+        res.send({ status: false, data: null, message: "Incorrect code" })
     }
-  }
+}

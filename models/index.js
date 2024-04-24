@@ -37,6 +37,7 @@ import chatModel from "./chat/chat.model.js";
 import messageModel from "./chat/message.model.js";
 import SpotifySongModel from "./spotifysong.model.js";
 import CheckinMoodModel from "./checkinfeelings.model.js";
+import costModel from "./cost.model.js";
 
 
 
@@ -84,5 +85,7 @@ db.user.hasMany(db.spotifySongModel);
 db.passwordResetCode = passwordresetcodeModel(sequelize, Sequelize);
 
 db.checkinMoodModel = CheckinMoodModel(sequelize, Sequelize);
+
+db.costModel = costModel(sequelize, Sequelize);
 
 export default db;
