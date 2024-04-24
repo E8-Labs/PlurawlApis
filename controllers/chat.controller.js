@@ -338,20 +338,21 @@ function countWords(text) {
 }
 
 function splitMessage(text){
-    if (countWords(text) <= 100) {
+    if (countWords(text) <= 50) {
         return [text];
       }
     
       // Split text into sentences using a regex that captures sentence boundaries
       const sentences = text.match(/[^.!?]+[.!?]\s*/g) || [];
-    
       let firstPart = '';
       let secondPart = '';
+      let totalWords = countWords(text);
       let wordsInFirstPart = 0;
+      let targetWordCount = Math.floor(totalWords / 2);
     
-      // Accumulate sentences into the first part until it has more than 100 words
+      // Accumulate sentences into the first part until approximately half the total words
       for (let sentence of sentences) {
-        if (wordsInFirstPart <= 75) {
+        if (wordsInFirstPart < targetWordCount) {
           firstPart += sentence;
           wordsInFirstPart = countWords(firstPart);
         } else {
@@ -359,12 +360,14 @@ function splitMessage(text){
         }
       }
     
-      // Check if the second part has at least 10 words
-      if (countWords(secondPart) < 10) {
-        return [text]//{ canSplit: false, message: 'Second part has less than 10 words after splitting.' };
+      // Adjust if necessary to ensure that neither part is too short
+      if (countWords(firstPart) < targetWordCount - 10) { // a threshold to avoid small second parts
+        let lastSentence = sentences.find((sentence) => firstPart.includes(sentence));
+        secondPart = lastSentence + secondPart;
+        firstPart = firstPart.replace(lastSentence, '');
       }
     
-      return [firstPart, secondPart]//{ canSplit: true, firstPart: firstPart, secondPart: secondPart };
+      return [firstPart, secondPart ];//{ canSplit: true, firstPart: firstPart, secondPart: secondPart };
 }
   
 
