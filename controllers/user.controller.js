@@ -22,6 +22,7 @@ const Op = db.Sequelize.Op;
 import UserRole from "../models/userrole.js";
 
 import UserProfileFullResource from "../resources/userprofilefullresource.js";
+import { createCard, createCustomer, findCustomer, loadCards } from "./stripe.js";
 
 export const RegisterUser = async (req, res) => {
 
@@ -71,6 +72,8 @@ export const RegisterUser = async (req, res) => {
                         else {
                             ////console.log("signed creating user")
                             let u = await UserProfileFullResource(data);
+                            let customer = await createCustomer(data);
+                            console.log("Create customer response ", customer)
                             res.send({ status: true, message: "User registered", data: { user: u, token: token } })
 
                         }
@@ -127,6 +130,8 @@ export const SocialLogin = async (req, res) => {
             }
             else {
                 let u = await UserProfileFullResource(alreadyUser);
+                let customer = await createCustomer(alreadyUser);
+                console.log("Create customer response ", customer)
                 res.send({ data: { user: u, token: token }, status: true, message: "Logged in" });
             }
         })
@@ -164,6 +169,8 @@ export const SocialLogin = async (req, res) => {
                     else {
                         ////console.log("signed creating user")
                         let u = await UserProfileFullResource(data);
+                        let customer = await createCustomer(data);
+                        console.log("Create customer response ", customer)
                         res.send({ status: true, message: "User registered", data: { user: u, token: token } })
 
                     }
@@ -225,6 +232,10 @@ export const LoginUser = async (req, res) => {
                     }
                     else {
                         let u = await UserProfileFullResource(user);
+                        // let isCustomer = await findCustomer(user)
+                        // console.log("Already found ", isCustomer)
+                        let customer = await createCustomer(user);
+                        console.log("Create customer response ", customer)
                         res.send({ data: { user: u, token: token }, status: true, message: "Logged in" });
                     }
                 })
@@ -236,6 +247,31 @@ export const LoginUser = async (req, res) => {
     }
     // ////console.log(user);
 
+}
+
+export const AddCard = async (req, res) => {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (authData) {
+            let user = await db.user.findByPk(authData.user.id);
+            let token = req.body.source;
+            console.log("User provided Token is ", token)
+            let card = await createCard(user, token);
+
+            res.send({ status: true, message: "Card added", data: card })
+        }
+    })
+}
+
+
+export const GetUserPaymentSources = async (req, res) => {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (authData) {
+            let user = await db.user.findByPk(authData.user.id);
+            let cards = await loadCards(user);
+console.log("cards loaded ", cards)
+            res.send({ status: true, message: "Card loaded", data: cards })
+        }
+    })
 }
 
 export const CheckIn = (req, res) => {

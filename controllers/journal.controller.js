@@ -24,6 +24,7 @@ import UserProfileFullResource from "../resources/userprofilefullresource.js";
 import CheckInTypes from "../models/checkintype.js";
 import chalk from "chalk";
 import JournalResource from "../resources/journal.resource.js";
+import UserStreaks from "../models/UserStreaks.js";
 
 const GptModel = "gpt-4-turbo-preview";
 
@@ -56,6 +57,104 @@ export const GetCostEstimate = (data) => {
     console.log("Total cost this request", totalCost);
     return {prompt_tokens: prompt_tokens, completion_tokens: completion_tokens, total_cost: totalCost}
 }
+
+
+// async function checkJournalsForLastNDays(userId, numberOfDays) {
+//     try {
+//       const today = new Date();
+//       const endDate = new Date(today);
+//       const startDate = new Date(today);
+//       startDate.setDate(today.getDate() - numberOfDays); // Calculate the start date based on the provided number of days
+  
+//       // Query journals for the specified number of days
+//       console.log(`Finding journals between ${startDate} - ${endDate}`)
+//       const journals = await db.userJournalModel.findAll({
+//         where: {
+//           UserId: userId,
+//           createdAt: {
+//             [db.Sequelize.Op.between]: [startDate, endDate], // Between startDate and endDate
+//           },
+//         },
+//         order: [['createdAt', 'ASC']], // Order by creation date in ascending order
+//       });
+  
+//       // Check if journals exist for each day within the specified range
+//       const expectedDate = new Date(startDate);
+//       let isContinuous = true;
+  
+//       for (const journal of journals) {
+//         const journalDate = new Date(journal.createdAt);
+  
+//         // Check if the journal date matches the expected date
+//         console.log(`Matching ${journalDate.getDate()} = ${expectedDate.getDate()}`)
+//         if (journalDate.getDate() !== expectedDate.getDate()) {
+//           isContinuous = false;
+//           break;
+//         }
+  
+//         // Increment the expected date for the next iteration
+//         expectedDate.setDate(expectedDate.getDate() + 1);
+//       }
+//       if(!journals || journals.length === 0){
+//         isContinuous = false;
+//       }
+  
+//       if (isContinuous) {
+//         console.log(`User ${userId} journaled continuously for the last ${numberOfDays} days.`);
+//       } else {
+//         console.log(`User ${userId} did not journal continuously for the last ${numberOfDays} days.`);
+//       }
+//       return isContinuous
+//     } catch (error) {
+//       console.error('Error checking journals:', error);
+//       return false
+//     }
+//   }
+
+  async function checkJournalsForLastNDays(userId, numberOfDays) {
+    try {
+      const today = new Date();
+      const endDate = new Date(today);
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() - numberOfDays); // Calculate the start date based on the provided number of days
+  
+      // Query journals for the specified number of days
+      const journals = await db.userJournalModel.findAll({
+        where: {
+          UserId: userId,
+          createdAt: {
+            [db.Sequelize.Op.between]: [startDate, endDate], // Between startDate and endDate
+          },
+        },
+        order: [['createdAt', 'ASC']], // Order by creation date in ascending order
+      });
+  
+      // Extract unique journal dates
+      const uniqueDates = new Set();
+      for (const journal of journals) {
+        const journalDate = new Date(journal.createdAt);
+        const formattedDate = `${journalDate.getFullYear()}-${journalDate.getMonth() + 1}-${journalDate.getDate()}`; // Format the date as 'YYYY-MM-DD'
+        uniqueDates.add(formattedDate);
+      }
+  
+      // Check if the number of unique dates matches the expected number of days
+      const isContinuous = uniqueDates.size === numberOfDays;
+  
+      if (isContinuous) {
+        console.log(`User ${userId} journaled continuously for the last ${numberOfDays + 1} days.`);
+      } else {
+        console.log(`User ${userId} did not journal continuously for the last ${numberOfDays + 1} days.`);
+      }
+      return isContinuous
+    } catch (error) {
+      console.error('Error checking journals:', error);
+      return false
+    }
+  }
+  
+  // Example usage: Pass the user's ID and the number of days to check
+  
+  
 
 export const AddJournal = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
@@ -163,6 +262,66 @@ export const AddJournal = async (req, res) => {
                         }
                     }
                     let j = await JournalResource(result)
+
+
+                    //check and update point
+                    let streak = await db.userStreakModel.findOne({
+                        where: {
+                            UserId: user.id
+                        },
+                        order: [
+                            ["id", "DESC"]
+                        ]
+                    })
+                    if(streak){
+                        if(streak.streak === UserStreaks.Streak3Day){
+                            user.points += 1.5;
+                        }
+                        else if(streak.streak === UserStreaks.Streak30Day){
+                            user.points += 2;
+                        }
+                    }
+                    else{
+                        user.points += 1
+
+                    }
+                    await user.save();
+                    //Points updated
+                    if(streak){
+                        if(streak.streak === UserStreaks.Streak3Day){
+                            //if he has already a streak and the latest streak is 3 day streak then
+                            //then check for 30 day streak 
+                            let isContinous = await checkJournalsForLastNDays(user.id, 29);
+                            console.log("Is Continusous 30 Days ", isContinous)
+                            if(isContinous){
+                                let st = await db.userStreakModel.create({
+                                    streak: UserStreaks.Streak30Day,
+                                    UserId: user.id
+                                })
+                            }
+                        }
+                    }
+                    else{
+                        //if no streak & he now journaled continously for last 3 days then add the streak
+                        let isContinous = await checkJournalsForLastNDays(user.id, 2);
+                        console.log("Is Continusous 3 Days ", isContinous)
+                        if(isContinous){
+                            let st = await db.userStreakModel.create({
+                                streak: UserStreaks.Streak3Day,
+                                UserId: user.id
+                            })
+                        }
+                        
+                    }
+
+                    //Check if user is on 3 day or 30 day streak
+
+
+
+                    
+
+
+
                     res.send({ status: true, message: "Journal added", data: j })
                 })
                     .catch((error) => {

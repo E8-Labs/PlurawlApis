@@ -92,6 +92,11 @@ const UserModel = (sequelize, Sequelize) => {
       dob: {
         type: Sequelize.STRING,
         default: ""
+      },
+      points:{
+        type: Sequelize.DOUBLE,
+        allowNull: false,
+        defaultValue: 0
       }
       
     }, 

@@ -171,6 +171,16 @@ if(myJournals){
 }
 
 
+let level = 0
+if(user.points < 200 && user.points >= 100){
+    level = 1
+}
+else if(user.points < 400 && user.points >= 200){
+    level = 2
+}
+else if(user.points >= 400){
+    level = 3
+}
     const UserFullResource = {
         id: user.id,
         name: user.firstname,
@@ -197,6 +207,8 @@ if(myJournals){
         pronouns: user.pronouns,
         countries: (user.countries !== null && user.countries != "") ? JSON.parse(user.countries) : "",
         dob: user.dob,
+        points: user.points,
+        level: level
     }
 
 

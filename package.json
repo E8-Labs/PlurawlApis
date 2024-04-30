@@ -24,6 +24,7 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.13",
     "sequelize": "^6.36.0",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "stripe": "^15.4.0"
   }
 }
