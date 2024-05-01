@@ -22,7 +22,7 @@ const Op = db.Sequelize.Op;
 import UserRole from "../models/userrole.js";
 
 import UserProfileFullResource from "../resources/userprofilefullresource.js";
-import { createCard, createCustomer, findCustomer, loadCards } from "./stripe.js";
+import { GetActiveSubscriptions, SubscriptionTypesProduction, SubscriptionTypesSandbox, cancelSubscription, createCard, createCustomer, createSubscription, findCustomer, loadCards } from "./stripe.js";
 
 export const RegisterUser = async (req, res) => {
 
@@ -268,8 +268,90 @@ export const GetUserPaymentSources = async (req, res) => {
         if (authData) {
             let user = await db.user.findByPk(authData.user.id);
             let cards = await loadCards(user);
-console.log("cards loaded ", cards)
+            console.log("cards loaded ", cards)
             res.send({ status: true, message: "Card loaded", data: cards })
+        }
+    })
+}
+
+export const CancelSubscription = async (req, res) => {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (authData) {
+            let user = await db.user.findByPk(authData.user.id);
+            let sub = await db.subscriptionModel.findOne({
+                where: {
+                    UserId: user.id
+                }
+            })
+            if(sub){
+                let cancelled = await cancelSubscription(user, sub);
+                if(cancelled && cancelled.status){
+                    sub.data = JSON.stringify(cancelled.data)
+                    let saved = await sub.save();
+                    res.send({ status: true, message: "Cancelled", data: cancelled.data })
+                }
+                else{
+                    res.send({ status: true, message: cancelled.message, data: null })
+                }
+            }
+            else{
+                res.send({ status: false, message: `${user.name} have no active subs`, data: null })
+            }
+            
+        }
+    })
+}
+
+
+export const subscribeUser = async (req, res) => {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (authData) {
+            let user = await db.user.findByPk(authData.user.id);
+
+            let subs = await GetActiveSubscriptions(user)
+            if(subs && subs.data.length !== 0){
+                console.log("User is already subscribed")
+                res.send({ status: false, message: "Already subscribed" , data: subs })
+            }
+            else{
+                let cards = await loadCards(user);
+            
+                if(cards.length === 0){
+                    res.send({ status: false, message: "no payment source found", data: null })
+                }
+                else{
+                    let subtype = req.body.sub_type; //Monthly = 0, HalfYearly = 1, Yearly = 2
+                    let subscription = SubscriptionTypesSandbox[2];
+                    let sandbox = process.env.Environment === "Sandbox";
+                    console.log("Subscription in Sandbox ", sandbox)
+                    if(sandbox){
+                        subscription = SubscriptionTypesSandbox[subtype];
+                    }
+                    else{
+                        subscription = SubscriptionTypesProduction[subtype];
+                    }
+                    console.log("Subscription is ", subscription)
+                    let sub = await createSubscription(user, subscription);
+                    if(sub && sub.status){
+                        let saved = await db.subscriptionModel.create({
+                            subid: sub.data.id,
+                            data: JSON.stringify(sub.data),
+                            UserId: user.id
+                        })
+                        res.send({ status: true, message: "Subscription", data: sub.data })
+                    }
+                    else{
+                        res.send({ status: false, message: sub.message , data: sub.data })
+                    }
+                    
+                }
+            }
+
+            
+            
+        }
+        else{
+            res.send({ status: false, message: "Unauthenticated user" , data: null })
         }
     })
 }

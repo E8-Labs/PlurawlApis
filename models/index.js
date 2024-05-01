@@ -39,6 +39,7 @@ import SpotifySongModel from "./spotifysong.model.js";
 import CheckinMoodModel from "./checkinfeelings.model.js";
 import costModel from "./cost.model.js";
 import UseStreakModel from "./userstreak.model.js";
+import SubscriptionModel from "./subscription.model.js";
 
 
 
@@ -93,5 +94,10 @@ db.costModel = costModel(sequelize, Sequelize);
 db.userStreakModel = UseStreakModel(sequelize, Sequelize);
 db.userStreakModel.belongsTo(db.user);
 db.user.hasMany(db.userStreakModel);
+
+
+db.subscriptionModel = SubscriptionModel(sequelize, Sequelize);
+db.subscriptionModel.belongsTo(db.user);
+db.user.hasMany(db.subscriptionModel);
 
 export default db;
