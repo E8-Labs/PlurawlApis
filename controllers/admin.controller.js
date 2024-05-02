@@ -89,7 +89,7 @@ const countUniqueDownloads = async (days) => {
         order: [[db.sequelize.fn('DATE', db.sequelize.col('createdAt')), 'ASC']],
         raw: true
       });
-      console.log("DA Users ", dailyUsersResult)
+    //   console.log("DA Users ", dailyUsersResult)
   
       // Create an array of dates from startDate to endDate
       let dateArray = [];
@@ -119,7 +119,78 @@ const countUniqueDownloads = async (days) => {
     }
   };
   
-
+  const fetchLoginActivity = async () => {
+    try {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 30);
+  
+      // Get the total number of unique users
+      const totalUniqueUsers = await db.dailyLogin.count({
+        distinct: true,
+        col: 'userId',
+        where: {
+          createdAt: { [Op.gte]: startDate }
+        }
+      });
+  
+      // Get the total number of logins
+      const totalLogins = await db.dailyLogin.count({
+        where: {
+          createdAt: { [Op.gte]: startDate }
+        }
+      });
+  
+      // Get the daily counts of unique users
+      const dailyLoginData = await db.dailyLogin.findAll({
+        where: {
+          createdAt: { [Op.gte]: startDate }
+        },
+        attributes: [
+          [db.sequelize.fn('DATE', db.sequelize.col('createdAt')), 'date'],
+          [db.sequelize.fn('COUNT', db.sequelize.fn('DISTINCT', db.sequelize.col('userId'))), 'total_users']
+        ],
+        group: [db.sequelize.fn('DATE', db.sequelize.col('createdAt'))],
+        order: [[db.sequelize.fn('DATE', db.sequelize.col('createdAt')), 'ASC']],
+        raw: true
+      });
+      console.log("DA Users ", dailyLoginData)
+  
+      // Create an array of all dates from startDate to endDate
+      let dateArray = [];
+      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        dateArray.push(new Date(d));
+      }
+      console.log("Date array ", dateArray)
+      // Map results to a date-indexed object
+      const loginDataByDate = dailyLoginData.reduce((acc, cur) => {
+        acc[cur.date] = cur.total_users;
+        return acc;
+      }, {});
+  
+      // Combine all dates with the login data, defaulting to zero where no data exists
+      const graphData = dateArray.map(date => ({
+        date: moment(date).format('YYYY-MM-DD'),
+        total_users: loginDataByDate[moment(date).format('YYYY-MM-DD')] || 0  // Default to 0 if no data exists for a date
+      }));
+  
+      return {
+        totalUniqueUsers,
+        totalLogins,
+        graphData
+      };
+    } catch (error) {
+      console.error('Error in fetching login activity:', error);
+      return {
+        totalUniqueUsers: 0,
+        totalLogins: 0,
+        graphData: []
+      };
+    }
+  };
+  
+  
+  
 
 
   export const AdminDashboard = (req, res) => {
@@ -129,8 +200,8 @@ const countUniqueDownloads = async (days) => {
             let userid = authData.user.id;
             
             let totalDownloads = await uniqueDownloads(30);
-            
-            res.send({ status: true, message: "Dashboard ", data: {downloads: totalDownloads} })
+            let dailyActiveUsers = await fetchLoginActivity()
+            res.send({ status: true, message: "Dashboard ", data: {downloads: totalDownloads, active_users: dailyActiveUsers} })
             
             
 

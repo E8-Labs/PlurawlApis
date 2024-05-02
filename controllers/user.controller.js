@@ -82,8 +82,6 @@ export const RegisterUser = async (req, res) => {
 
 
                 }).catch(error => {
-                    ////console.log("User not created")
-                    ////console.log(error)
                     res.send({
                         message:
                             err.message || "Some error occurred while creating the user.",
@@ -93,9 +91,6 @@ export const RegisterUser = async (req, res) => {
                 })
             }
             catch (error) {
-                ////console.log("Exception ", error)
-                ////console.log("User not created")
-                ////console.log(error)
                 res.send({
                     message:
                         err.message || "Some error occurred while creating the user.",
@@ -103,12 +98,8 @@ export const RegisterUser = async (req, res) => {
                     data: null
                 });
             }
-
-
         }
-
     }
-
 }
 
 
@@ -238,6 +229,10 @@ export const LoginUser = async (req, res) => {
                         // console.log("Already found ", isCustomer)
                         let customer = await createCustomer(user);
                         console.log("Create customer response ", customer)
+                        let loginRecorded = await db.dailyLogin.create({
+                            UserId: user.id,
+                            type: "Login"
+                        })
                         res.send({ data: { user: u, token: token }, status: true, message: "Logged in" });
                     }
                 })
@@ -563,6 +558,11 @@ export const GetUserProfile = (req, res) => {
                 userid = req.query.userid;
             }
             const user = await User.findByPk(userid);
+
+            let loginRecorded = await db.dailyLogin.create({
+                UserId: user.id,
+                type: "Login"
+            })
             if (user) {
                 let u = await UserProfileFullResource(user);
                 res.send({ status: true, message: "Profile ", data: u })

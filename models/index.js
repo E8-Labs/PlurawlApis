@@ -40,6 +40,7 @@ import CheckinMoodModel from "./checkinfeelings.model.js";
 import costModel from "./cost.model.js";
 import UseStreakModel from "./userstreak.model.js";
 import SubscriptionModel from "./subscription.model.js";
+import DailyLoginModel from "./dailylogin.model.js";
 
 
 
@@ -99,5 +100,9 @@ db.user.hasMany(db.userStreakModel);
 db.subscriptionModel = SubscriptionModel(sequelize, Sequelize);
 db.subscriptionModel.belongsTo(db.user);
 db.user.hasMany(db.subscriptionModel);
+
+db.dailyLogin = DailyLoginModel(sequelize, Sequelize);
+db.dailyLogin.belongsTo(db.user);
+db.user.hasMany(db.dailyLogin);
 
 export default db;
