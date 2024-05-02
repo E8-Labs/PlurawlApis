@@ -52,7 +52,8 @@ export const RegisterUser = async (req, res) => {
                 role: UserRole.RoleUser,
                 points: 0,
                 provider_name: 'Email',
-                provider_id: ''
+                provider_id: '',
+                device_id: req.body.device_id,
             };
             const salt = await bcrypt.genSalt(10);
             const hashed = await bcrypt.hash(req.body.password, salt);
@@ -149,7 +150,8 @@ export const SocialLogin = async (req, res) => {
             role: UserRole.RoleUser,
             points: 0,
             provider_name: req.body.provider_name,
-            provider_id: req.body.provider_id
+            provider_id: req.body.provider_id,
+            device_id: req.body.device_id,
         };
         const salt = await bcrypt.genSalt(10);
         const hashed = await bcrypt.hash(req.body.provider_id, salt);

@@ -47,6 +47,7 @@ app.use(express.json());
 import db from "./models/index.js";
 import journalRouter from "./routes/journal.router.js";
 import chatRouter from "./routes/chat.router.js";
+import adminRouter from "./routes/admin.router.js";
 
 db.sequelize.authenticate().then(() => {
   console.log("Connected to the database!");
@@ -64,6 +65,7 @@ db.sequelize.sync({ alter: true })//{alter: true}
 app.use("/api/users", uploadImg, userRouter);
 app.use("/api/journal", journalRouter)
 app.use("/api/chat", verifyJwtToken, chatRouter);//verifyJwtToken
+app.use("/api/admin", verifyJwtToken, adminRouter);//verifyJwtToken
 // app.use('/api/loans', verifyJwtToken, loanRouter);
 // app.use("/api/houses", verifyJwtToken, houseRouter);
 

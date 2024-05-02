@@ -56,6 +56,10 @@ const UserModel = (sequelize, Sequelize) => {
         type:Sequelize.STRING,
         default: ''
       },
+      device_id:{ // unique for every device
+        type:Sequelize.STRING,
+        defaultValue: ''
+      },
       provider_id: {
         type: Sequelize.STRING,
         default: ''
