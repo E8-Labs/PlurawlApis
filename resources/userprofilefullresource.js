@@ -169,6 +169,17 @@ async function getUserData(user, currentUser = null) {
         lastWeekVibe.snapshot = snapshot;
     }
 
+    let countries = null
+    if(user.countries !== null && user.countries !== "" ){
+        try {
+            countries = JSON.parse(user.countries);
+        } catch (e) {
+            console.error("Failed to parse countries: ", e);
+            countries = null; // or set to default, or handle the error accordingly
+        }
+    }
+
+
 let haveJournals = false
 let myJournals = await db.userJournalModel.findAll({
     where: {
@@ -217,7 +228,7 @@ else if(user.points >= 400){
         quote_of_day: quote,
         have_journals: haveJournals,
         pronouns: user.pronouns,
-        countries: (user.countries !== null && user.countries != "") ? JSON.parse(user.countries) : "",
+        countries: countries,
         dob: user.dob,
         points: user.points,
         level: level,
