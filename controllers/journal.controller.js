@@ -6,7 +6,7 @@ import multer from "multer";
 import path from "path";
 import moment from "moment-timezone";
 import axios from "axios";
-
+import nodemailer from 'nodemailer'
 import crypto from 'crypto'
 
 import { CheckinMoods, GenerateRandomGif } from "../models/checkinmoods.js";
@@ -155,6 +155,56 @@ export const GetCostEstimate = (data) => {
   // Example usage: Pass the user's ID and the number of days to check
   
   
+  function sendLevelUpEmail(level, user){
+    
+    let levelName = ""
+    if(level === 1){
+        levelName = "Squad"
+    }
+    else if(level === 2){
+        levelName = "Swag"
+    }
+    else if(level === 3){
+        levelName = "Social"
+    }
+    console.log("Sending email for level ", levelName);
+    let mailOptions = {
+        from: '"Plurawl" salman@e8-labs.com', // Sender address
+        to: "salmanmajid14@gmail.com", // List of recipients
+        subject: "New Level Achieved", // Subject line
+        // text: `${randomCode}`, // Plain text body
+        html: `<html><b>Hello admin, ${user.name}</b> has reached new level ${levelName}. Reward him accordingly </html>`, // HTML body
+    };
+
+    // Send mail with defined transport object
+    try {
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com", // Replace with your mail server host
+            port: 587, // Port number depends on your email provider and whether you're using SSL or not
+            secure: false, // true for 465 (SSL), false for other ports
+            auth: {
+                user: "salman@e8-labs.com", // Your email address
+                pass: "uzmvwsljflyqnzgu", // Your email password
+            },
+        });
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                // res.send({ status: false, message: "Code not sent" })
+                console.log("Level Email error", error);
+            }
+            else{
+                console.log('Email sent level');
+            }
+            //console.log('Message sent: %s', info.messageId);
+            //console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+            // res.send({ status: true, message: "Code sent" })
+
+        });
+    }
+    catch (error) {
+        console.log("Exception Level email", error)
+    }
+  }
 
 export const AddJournal = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
@@ -285,6 +335,18 @@ export const AddJournal = async (req, res) => {
                         user.points += 1
 
                     }
+                    if(user.points >= 100 && user.points <= 101.5){
+
+                        sendLevelUpEmail(1, user);
+                    }
+                    else if(user.points >= 200 && user.points <= 201.5){
+
+                        sendLevelUpEmail(2, user);
+                    }
+                    else if(user.points >= 400 && user.points <= 401.5){
+
+                        sendLevelUpEmail(3, user);
+                    }
                     await user.save();
                     //Points updated
                     if(streak){
@@ -314,7 +376,7 @@ export const AddJournal = async (req, res) => {
                         
                     }
 
-                    //Check if user is on 3 day or 30 day streak
+                    
 
 
 
