@@ -792,16 +792,17 @@ export const SendPasswordResetEmail = (req, res) => {
             code: `${randomCode}`
         })
         // Setup email data with unicode symbols
-        let mailOptions = {
-            from: '"Plurawl" salman@e8-labs.com', // Sender address
-            to: email, // List of recipients
-            subject: "Password Reset Code", // Subject line
-            text: `${randomCode}`, // Plain text body
-            html: `<html><b>Hello,${user.name}</b>This is your reset code. <b>${randomCode}</b> </html>`, // HTML body
-        };
+        
 
         // Send mail with defined transport object
         try {
+            let mailOptions = {
+                from: '"Plurawl" salman@e8-labs.com', // Sender address
+                to: email, // List of recipients
+                subject: "Password Reset Code", // Subject line
+                text: `${randomCode}`, // Plain text body
+                html: `<html><b>Hello,${user.name}</b>This is your reset code. <b>${randomCode}</b> </html>`, // HTML body
+            };
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
                     res.send({ status: false, message: "Code not sent" })
@@ -813,7 +814,7 @@ export const SendPasswordResetEmail = (req, res) => {
             });
         }
         catch (error) {
-            //console.log("Exception ", error)
+            console.log("Exception email", error)
         }
     }
     else {
