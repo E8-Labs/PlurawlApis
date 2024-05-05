@@ -807,10 +807,9 @@ export const SendPasswordResetEmail = (req, res) => {
                     res.send({ status: false, message: "Code not sent" })
                     //console.log(error);
                 }
-                //console.log('Message sent: %s', info.messageId);
-                //console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-                res.send({ status: true, message: "Code sent" })
-
+                else{
+                    res.send({ status: true, message: "Code sent" })
+                }
             });
         }
         catch (error) {
