@@ -41,6 +41,7 @@ import costModel from "./cost.model.js";
 import UseStreakModel from "./userstreak.model.js";
 import SubscriptionModel from "./subscription.model.js";
 import DailyLoginModel from "./dailylogin.model.js";
+import NotificationModel from "./notification.model.js";
 
 
 
@@ -104,5 +105,8 @@ db.user.hasMany(db.subscriptionModel);
 db.dailyLogin = DailyLoginModel(sequelize, Sequelize);
 db.dailyLogin.belongsTo(db.user);
 db.user.hasMany(db.dailyLogin);
+
+db.notification = NotificationModel(sequelize, Sequelize);
+
 
 export default db;

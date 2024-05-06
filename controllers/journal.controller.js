@@ -355,6 +355,16 @@ export const AddJournal = async (req, res) => {
                             //then check for 30 day streak 
                             let isContinous = await checkJournalsForLastNDays(user.id, 29);
                             console.log("Is Continusous 30 Days ", isContinous)
+                            let admin = await db.user.findOne({where: {
+                                role: 'admin'
+                            }})
+                            if(admin){
+                                let saved = await db.notification.create({
+                                    from: data.id, 
+                                    to: admin.id,
+                                    notification_type: "Streak30"
+                                })
+                            }
                             if(isContinous){
                                 let st = await db.userStreakModel.create({
                                     streak: UserStreaks.Streak30Day,
@@ -367,6 +377,16 @@ export const AddJournal = async (req, res) => {
                         //if no streak & he now journaled continously for last 3 days then add the streak
                         let isContinous = await checkJournalsForLastNDays(user.id, 2);
                         console.log("Is Continusous 3 Days ", isContinous)
+                        let admin = await db.user.findOne({where: {
+                            role: 'admin'
+                        }})
+                        if(admin){
+                            let saved = await db.notification.create({
+                                from: data.id, 
+                                to: admin.id,
+                                notification_type: "Streak3"
+                            })
+                        }
                         if(isContinous){
                             let st = await db.userStreakModel.create({
                                 streak: UserStreaks.Streak3Day,

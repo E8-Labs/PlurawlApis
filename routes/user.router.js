@@ -4,7 +4,7 @@ import {verifyJwtToken}  from "../middleware/jwtmiddleware.js";
 import {RegisterUser, LoginUser, GetUserProfile, UpdateProfile, 
     GetUsers, UpdateGoals, CheckIn, UploadTracks, SocialLogin,
     SendPasswordResetEmail, ResetPassword, encrypt, AddCard, GetUserPaymentSources,
-    subscribeUser, CancelSubscription} from "../controllers/user.controller.js";
+    subscribeUser, CancelSubscription, GetUserNotifications} from "../controllers/user.controller.js";
 
 
 
@@ -21,6 +21,7 @@ userRouter.post("/add_card", verifyJwtToken, AddCard);
 userRouter.get("/load_cards", verifyJwtToken, GetUserPaymentSources);
 userRouter.post("/subscribe", verifyJwtToken, subscribeUser);
 userRouter.post("/cancel_subscription", verifyJwtToken, CancelSubscription);
+userRouter.get("/notifications", verifyJwtToken, GetUserNotifications);
 userRouter.post("/send_reset_email", SendPasswordResetEmail);
 userRouter.post("/update_password", ResetPassword);
 userRouter.post("/encrypt", encrypt);

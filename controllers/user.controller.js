@@ -23,6 +23,7 @@ import UserRole from "../models/userrole.js";
 
 import UserProfileFullResource from "../resources/userprofilefullresource.js";
 import { GetActiveSubscriptions, SubscriptionTypesProduction, SubscriptionTypesSandbox, cancelSubscription, createCard, createCustomer, createSubscription, findCustomer, loadCards } from "./stripe.js";
+import NotificationResource from "../resources/notification.resource.js";
 
 export const RegisterUser = async (req, res) => {
 
@@ -75,6 +76,17 @@ export const RegisterUser = async (req, res) => {
                             let u = await UserProfileFullResource(data);
                             let customer = await createCustomer(data);
                             console.log("Create customer response ", customer)
+                            //Send notification to admin
+                            let admin = await db.user.findOne({where: {
+                                role: 'admin'
+                            }})
+                            if(admin){
+                                let saved = await db.notification.create({
+                                    from: data.id, 
+                                    to: admin.id,
+                                    notification_type: "NewUser"
+                                })
+                            }
                             res.send({ status: true, message: "User registered", data: { user: u, token: token } })
 
                         }
@@ -244,6 +256,26 @@ export const LoginUser = async (req, res) => {
     }
     // ////console.log(user);
 
+}
+
+
+export const GetUserNotifications = async (req, res) => {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (authData) {
+            let user = await db.user.findByPk(authData.user.id);
+            let offset = req.query.offset || 0;
+            let cards = await db.notification.findAll({
+                limit: 20,
+                offset: Number(offset)
+            });
+            console.log("Notifications loaded ", cards)
+            let nots = await NotificationResource(cards)
+            res.send({ status: true, message: "Notifications loaded", data: nots })
+        }
+        else{
+            res.send({ status: false, message: "Unauthenticated user", data: null });
+        }
+    })
 }
 
 export const AddCard = async (req, res) => {
