@@ -512,6 +512,7 @@ export const UpdateProfile = async (req, res) => {
                     user.industry = req.body.industry;
                 }
                 if (typeof req.body.countries !== 'undefined') {
+                    console.log("Have Countries ", req.body.countries)
                     user.countries = req.body.countries;
                 }
                 if (typeof req.body.pronouns !== 'undefined') {
