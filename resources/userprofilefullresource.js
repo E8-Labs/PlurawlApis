@@ -2,7 +2,7 @@ import db from "../models/index.js";
 import CheckInTypes from "../models/checkintype.js";
 import {CheckinMoods, GenerateRandomGif} from "../models/checkinmoods.js";
 import { getJournalsInAWeek, getWeeklyDates } from "../controllers/journal.controller.js";
-
+import { getRandomColor } from "../config/utility.js";
 import moment from "moment-timezone";
 // import LoanStatus from "../../models/loanstatus.js";
 // import PlaidTokenTypes from "../../models/plaidtokentypes.js";
