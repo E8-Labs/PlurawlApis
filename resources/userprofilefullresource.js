@@ -233,6 +233,7 @@ else if(user.points >= 400){
         points: user.points,
         level: level,
         plan: plan,
+        color: getRandomColor(),
     }
 
 

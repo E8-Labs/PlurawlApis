@@ -4,6 +4,7 @@ import {CheckinMoods, GenerateRandomGif} from "../models/checkinmoods.js";
 import { getJournalsInAWeek, getWeeklyDates } from "../controllers/journal.controller.js";
 
 import moment from "moment-timezone";
+import { getRandomColor } from "../config/utility.js";
 // import LoanStatus from "../../models/loanstatus.js";
 // import PlaidTokenTypes from "../../models/plaidtokentypes.js";
 // import UserLoanFullResource from "../loan/loan.resource.js";
@@ -201,6 +202,7 @@ else if(user.points >= 400){
         state: user.state,
         role: user.role,
         city: user.city,
+        color: getRandomColor(),
         // company: user.company,
         // industry: user.industry,
         // title: user.title,

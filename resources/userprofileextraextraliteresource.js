@@ -39,6 +39,7 @@ async function getUserData(user, currentUser = null) {
         state: user.state,
         role: user.role,
         city: user.city,
+        color: getRandomColor(),
     }
 
 
