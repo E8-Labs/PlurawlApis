@@ -170,7 +170,7 @@ export const GetCostEstimate = (data) => {
     console.log("Sending email for level ", levelName);
     let mailOptions = {
         from: '"Plurawl" salman@e8-labs.com', // Sender address
-        to: "salmanmajid14@gmail.com", // List of recipients
+        to: process.env.ADMINEMAIL, // List of recipients
         subject: "New Level Achieved", // Subject line
         // text: `${randomCode}`, // Plain text body
         html: `<html><b>Hello admin, ${user.name}</b> has reached new level ${levelName}. Reward him accordingly </html>`, // HTML body
