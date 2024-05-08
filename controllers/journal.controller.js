@@ -360,7 +360,7 @@ export const AddJournal = async (req, res) => {
                             }})
                             if(admin){
                                 let saved = await db.notification.create({
-                                    from: data.id, 
+                                    from: user.id, 
                                     to: admin.id,
                                     notification_type: "Streak30"
                                 })
@@ -382,7 +382,7 @@ export const AddJournal = async (req, res) => {
                         }})
                         if(admin){
                             let saved = await db.notification.create({
-                                from: data.id, 
+                                from: user.id, 
                                 to: admin.id,
                                 notification_type: "Streak3"
                             })
