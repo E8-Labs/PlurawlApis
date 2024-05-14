@@ -154,7 +154,60 @@ export const GetCostEstimate = (data) => {
   
   // Example usage: Pass the user's ID and the number of days to check
   
-  
+
+  async function getRecentJournalsFromDb(user){
+    const journals = await db.userJournalModel.findAll({
+        where: {
+            UserId: user.id
+        },
+        limit: 4,
+        order: [['createdAt', 'DESC']]  // Ensure 'createdAt' is correctly indexed for performance
+    });
+
+    const sections = [];
+    const journalsFormatted = {};
+
+    journals.forEach(journal => {
+        const createdAt = moment(journal.createdAt);
+        let sectionName;
+
+        if (createdAt.isSame(moment(), 'day')) {
+            sectionName = 'today';
+        } else if (createdAt.isSame(moment().subtract(1, 'days'), 'day')) {
+            sectionName = 'yesterday';
+        } else if (createdAt.isSame(moment(), 'month')) {
+            sectionName = moment(createdAt).format('MMMM');
+        } else {
+            sectionName = moment(createdAt).format('MMMM');
+            // sectionName = moment(createdAt).format('MM-DD-YYYY');
+        }
+
+        if (!sections.includes(sectionName)) {
+            sections.push(sectionName);
+            journalsFormatted[sectionName] = [];  // Initialize an empty array for new section
+        }
+
+        journalsFormatted[sectionName].push(journal);  // Append journal to the appropriate section
+    });
+
+    return {
+        sections,
+        journals: journalsFormatted
+    };
+  }
+  export const fetchRecentJournals = async (req, res) => {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (authData) {
+            let user = await db.user.findByPk(authData.user.id);
+            let data = await getRecentJournalsFromDb(user)
+          
+            res.send({data: data, message: "Recent Journals for " + user.id, status: true})
+            
+        }
+
+    })
+    
+  };
   function sendLevelUpEmail(level, user){
     
     let levelName = ""
