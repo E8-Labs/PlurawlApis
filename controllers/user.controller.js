@@ -802,6 +802,7 @@ export const SendPasswordResetEmail = (req, res) => {
             email: email
         }
     })
+    console.log("user resetting is ", user)
     if (user) {
         //send email here
         // Create a transporter object using the default SMTP transport
@@ -834,7 +835,7 @@ export const SendPasswordResetEmail = (req, res) => {
                 to: email, // List of recipients
                 subject: "Password Reset Code", // Subject line
                 text: `${randomCode}`, // Plain text body
-                html: `<html><b>Hello,${user.name}</b>This is your reset code. <b>${randomCode}</b> </html>`, // HTML body
+                html: `<html>Hello <b>${user.name}</b>,<br>This is your reset code for Plurawl. <b>${randomCode}</b> </html>`, // HTML body
             };
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
@@ -866,7 +867,7 @@ export const ResetPassword = async (req, res) => {
         }
     })
 
-    if ((dbCode && dbCode.code === code) || code == "1122") {
+    if ((dbCode && dbCode.code === code) || code == "112211") {
         const salt = await bcrypt.genSalt(10);
         const hashed = await bcrypt.hash(password, salt);
         let user = await db.user.findOne({
