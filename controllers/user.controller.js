@@ -795,9 +795,9 @@ function generateRandomCode(length) {
 }
 
 
-export const SendPasswordResetEmail = (req, res) => {
+export const SendPasswordResetEmail = async(req, res) => {
     let email = req.body.email;
-    let user = db.user.findOne({
+    let user = await db.user.findOne({
         where: {
             email: email
         }
