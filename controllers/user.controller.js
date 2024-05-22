@@ -811,8 +811,8 @@ export const SendPasswordResetEmail = async(req, res) => {
             port: 587, // Port number depends on your email provider and whether you're using SSL or not
             secure: false, // true for 465 (SSL), false for other ports
             auth: {
-                user: "dev@plurawl.com", // Your email address
-                pass: "dnirxmybsocefzst", // Your email password
+                user: process.env.email, // Your email address
+              pass: process.env.AppPassword, // Your email password
             },
         });
         const randomCode = generateRandomCode(6);
