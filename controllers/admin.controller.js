@@ -263,8 +263,8 @@ export const SendPasswordResetEmail = (req, res) => {
             port: 587, // Port number depends on your email provider and whether you're using SSL or not
             secure: false, // true for 465 (SSL), false for other ports
             auth: {
-                user: "salman@e8-labs.com", // Your email address
-                pass: "uzmvwsljflyqnzgu", // Your email password
+              user: "dev@plurawl.com", // Your email address
+              pass: "dnirxmybsocefzst", // Your email password
             },
         });
         const randomCode = generateRandomCode(6);
