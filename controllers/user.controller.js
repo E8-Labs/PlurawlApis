@@ -352,6 +352,9 @@ export const subscribeUser = async (req, res) => {
                     let subtype = req.body.sub_type; //Monthly = 0, HalfYearly = 1, Yearly = 2
                     let subscription = SubscriptionTypesSandbox[2];
                     let sandbox = process.env.Environment === "Sandbox";
+                    let code = req.body.code || null;
+
+                    
                     console.log("Subscription in Sandbox ", sandbox)
                     if(sandbox){
                         subscription = SubscriptionTypesSandbox[subtype];
@@ -360,7 +363,8 @@ export const subscribeUser = async (req, res) => {
                         subscription = SubscriptionTypesProduction[subtype];
                     }
                     console.log("Subscription is ", subscription)
-                    let sub = await createSubscription(user, subscription);
+
+                    let sub = await createSubscription(user, subscription, code);
                     if(sub && sub.status){
                         let saved = await db.subscriptionModel.create({
                             subid: sub.data.id,

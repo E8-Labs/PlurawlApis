@@ -27,8 +27,9 @@ export const createCustomer = async (user) => {
     try {
 
         let alreadyCustomer = await findCustomer(user)
-        
-        if (alreadyCustomer.data.length === 1) {
+        console.log("Customer is ", alreadyCustomer)
+
+        if (alreadyCustomer.data.length >= 1) {
             console.log("Already found ", alreadyCustomer)
             return alreadyCustomer.data[0]
         }
@@ -98,32 +99,107 @@ export const createCard = async (user, token) => {
     }
 }
 
-export const createSubscription = async (user, subscription) => {
 
-    let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
-    console.log("Subscription in stripe.js ", subscription)
+
+
+
+export const createPromo = async (code, repetition = "once", duration_in_months = null, percent_off = 50, applies_to = "All") => {
+    const key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
+    const stripe = StripeSdk(key);
+    //Monthly, HalfYearly, Yearly
+    let MonthPID = process.env.Environment === "Sandbox" ? "prod_Q1i0Ts5frQe8fZ" : "prod_PzUntWaL2cGCre"
+    let HalfYearPID = process.env.Environment === "Sandbox" ? "prod_Q1i1XCOwozX1Vd" : "prod_PzUoUdee8wPQHA"
+    let YearPID = process.env.Environment === "Sandbox" ? "prod_Q1i1ab5JC4J7Ql" : "prod_PzUrqNVq181qHi"
+    let products = [MonthPID, HalfYearPID, YearPID, ]
+console.log("Using products for ", process.env.Environment)
+    if(applies_to === "Monthly"){
+        products = [MonthPID]
+    }
+    else if(applies_to === "HalfYearly"){
+        products = [HalfYearPID]
+    }
+     else if(applies_to === "Yearly"){
+        products = [YearPID]
+    }
+
 
     try {
-        const stripe = StripeSdk(key);
+        let data = {
+            id: code,
+            duration: "once",
+            percent_off: percent_off,
+            applies_to: {
+                products: products
+            }
+        };
+
+        if (duration_in_months !== null) {
+            data.duration = "repeating";
+            data.duration_in_months = duration_in_months;
+        }
+
+        const coupon = await stripe.coupons.create(data);
+        return coupon;
+    } catch (error) {
+        console.error("Error creating promo:", error);
+        throw error;
+    }
+};
+
+export const GetCoupon = async (code) => {
+    const key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
+    const stripe = StripeSdk(key);
+    try {
+        const coupon = await stripe.coupons.retrieve(code);
+        return coupon;
+    } catch (error) {
+        console.error("Error retrieving coupon:", error);
+        throw error;
+    }
+};
+
+
+
+export const createSubscription = async (user, subscription, code = null) => {
+    const key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
+    const stripe = StripeSdk(key);
+    try {
         let customer = await createCustomer(user);
-        const sub = await stripe.subscriptions.create({
+        let data = {
             customer: customer.id,
             items: [
                 {
                     price: subscription.id,
                 },
             ],
-        });
-        console.log("##############")
-        console.log("Subscribed ", sub)
-        console.log("##############")
+        };
+
+        if (code !== null) {
+            console.log("Code is not null");
+            try {
+                let coupon = await GetCoupon(code);
+                if (coupon) {
+                    console.log("Coupon exists:", coupon);
+                    data.discounts = [{ coupon: code }];
+                } else {
+                    return { status: false, message: "No such coupon" };
+                }
+            } catch (error) {
+                console.error("Error applying coupon:", error);
+                return { status: false, message: "No such coupon" };
+            }
+        }
+
+        console.log("Data applying for subscription is", data);
+        const sub = await stripe.subscriptions.create(data);
+        console.log("Subscribed successfully:", sub);
         return { data: sub, status: true, message: "User subscribed" };
+    } catch (error) {
+        console.error("Error creating subscription:", error);
+        return { data: error, status: false, message: error.message };
     }
-    catch (error) {
-        console.log(error)
-        return { data: error, status: false, message: error };
-    }
-}
+};
+
 
 export const cancelSubscription = async (user, subscription) => {
 
@@ -137,10 +213,10 @@ export const cancelSubscription = async (user, subscription) => {
 
         const sub = await stripe.subscriptions.cancel(
             subid
-          );
+        );
         // let subs = await GetActiveSubscriptions(user)
-        
-        
+
+
         return { data: sub, status: true, message: "Subscription cancelled" };
     }
     catch (error) {
@@ -164,8 +240,8 @@ export const cancelSubscription = async (user, subscription) => {
 //             subid
 //           );
 //         // let subs = await GetActiveSubscriptions(user)
-        
-        
+
+
 //         return { data: sub, status: true, message: "Subscription cancelled" };
 //     }
 //     catch (error) {
@@ -176,7 +252,7 @@ export const cancelSubscription = async (user, subscription) => {
 
 
 export const RetrieveASubscriptions = async (subid) => {
-console.log("Retrieving ", subid)
+    console.log("Retrieving ", subid)
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
     // console.log("Subscription in stripe.js ", subscription)
 
@@ -184,7 +260,7 @@ console.log("Retrieving ", subid)
         const stripe = StripeSdk(key);
         const sub = await stripe.subscriptions.retrieve(
             subid
-          );
+        );
         return sub
     }
     catch (error) {

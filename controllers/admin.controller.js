@@ -10,6 +10,8 @@ import chalk from "chalk";
 import nodemailer from 'nodemailer'
 import { GetCostEstimate } from "./journal.controller.js";
 
+import { createPromo } from "./stripe.js";
+
 import crypto from 'crypto'
 // import { fetchOrCreateUserToken } from "./plaid.controller.js";
 // const fs = require("fs");
@@ -310,4 +312,15 @@ export const SendPasswordResetEmail = (req, res) => {
     else {
         res.send({ status: false, data: null, message: "No such user" })
     }
+}
+
+
+export const CreatePromoCode = async (req, res) => {
+  let applies_to = req.body.applies_to || "All";
+  let duration_in_months = req.body.duration_in_months || null;
+  console.log("Duration Months ", duration_in_months);
+  console.log("Code ", req.body.code);
+  console.log("Off ", req.body.percent_off);
+  let code = await createPromo(req.body.code, req.body.repetetion, duration_in_months, req.body.percent_off, applies_to);
+  res.send({ status: true, data: code, message: "Create Promo Response" })
 }
