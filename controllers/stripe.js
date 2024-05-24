@@ -212,16 +212,16 @@ export const cancelSubscription = async (user, subscription) => {
         let customer = await createCustomer(user);
         let subid = subscription.subid;
 
-        const sub = await stripe.subscriptions.cancel(
-            subid,
-            {
-                cancel_at_period_end: true
-            }
-        );
+        // const sub = await stripe.subscriptions.cancel(
+        //     subid
+        // );
+        const sub = await stripe.subscriptions.update(subid, {
+            cancel_at_period_end: true
+        });
         // let subs = await GetActiveSubscriptions(user)
 
 
-        return { data: sub, status: true, message: "Subscription cancelled" };
+        return { data: sub, status: true, message: "Subscription will cancel at period end" };
     }
     catch (error) {
         console.log(error)
