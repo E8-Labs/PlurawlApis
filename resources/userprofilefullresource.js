@@ -78,7 +78,7 @@ async function getUserData(user, currentUser = null) {
             environment: process.env.Environment
         },
         order:[
-            ["created_at", "DESC"]
+            ["createdAt", "DESC"]
         ]
     })
     let plan = null
