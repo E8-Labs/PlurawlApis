@@ -7,6 +7,7 @@ import {RegisterUser, LoginUser, GetUserProfile, UpdateProfile,
     subscribeUser, CancelSubscription, GetUserNotifications} from "../controllers/user.controller.js";
 
 
+    import { CreateWebHook, SubscriptionUpdated } from "../controllers/stripe.js";
 
 userRouter.post("/register", RegisterUser);
 userRouter.post("/login", LoginUser);
@@ -25,6 +26,9 @@ userRouter.get("/notifications", verifyJwtToken, GetUserNotifications);
 userRouter.post("/send_reset_email", SendPasswordResetEmail);
 userRouter.post("/update_password", ResetPassword);
 userRouter.post("/encrypt", encrypt);
+
+userRouter.post("/create_webhook", CreateWebHook);
+userRouter.post("/subscription_updated", SubscriptionUpdated);
 
 
 export default userRouter;

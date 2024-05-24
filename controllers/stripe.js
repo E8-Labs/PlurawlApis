@@ -1,6 +1,7 @@
 import StripeSdk from 'stripe'
 import axios from 'axios';
 import qs from 'qs'
+import db from "../models/index.js";
 
 
 export const SubscriptionTypesSandbox = [
@@ -110,15 +111,15 @@ export const createPromo = async (code, repetition = "once", duration_in_months 
     let MonthPID = process.env.Environment === "Sandbox" ? "prod_Q1i0Ts5frQe8fZ" : "prod_PzUntWaL2cGCre"
     let HalfYearPID = process.env.Environment === "Sandbox" ? "prod_Q1i1XCOwozX1Vd" : "prod_PzUoUdee8wPQHA"
     let YearPID = process.env.Environment === "Sandbox" ? "prod_Q1i1ab5JC4J7Ql" : "prod_PzUrqNVq181qHi"
-    let products = [MonthPID, HalfYearPID, YearPID, ]
-console.log("Using products for ", process.env.Environment)
-    if(applies_to === "Monthly"){
+    let products = [MonthPID, HalfYearPID, YearPID,]
+    console.log("Using products for ", process.env.Environment)
+    if (applies_to === "Monthly") {
         products = [MonthPID]
     }
-    else if(applies_to === "HalfYearly"){
+    else if (applies_to === "HalfYearly") {
         products = [HalfYearPID]
     }
-     else if(applies_to === "Yearly"){
+    else if (applies_to === "Yearly") {
         products = [YearPID]
     }
 
@@ -251,6 +252,53 @@ export const cancelSubscription = async (user, subscription) => {
 // }
 
 
+
+export const CreateWebHook = async (req, res) => {
+    let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
+    const stripe = StripeSdk(key);
+
+    const webhookEndpoint = await stripe.webhookEndpoints.create({
+        enabled_events: ['customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted', 'customer.subscription.paused', 'customer.subscription.resumed',
+    'customer.subscription.pending_update_applied', 'customer.subscription.pending_update_expired'],
+        url: req.body.url,
+    });
+    res.send({status: true, message: "Webhook", webhookEndpoint})
+}
+
+
+export const SubscriptionUpdated = async (req, res)=>{
+    let data = req.body;
+    console.log("Subscription updated", data)
+    let type = data.type;
+    console.log("EVent is ", type);
+
+    if(type === "customer.subscription.updated" || type === 'customer.subscription.pending_update_expired'
+    || type === 'customer.subscription.paused' || type === 'customer.subscription.resumed' || type === 'customer.subscription.pending_update_applied'){
+        let sub = data.data.object;
+        let subid = sub.id;
+        let dbSub = await db.subscriptionModel.findOne({
+            where:{
+                subid: subid
+            }
+        })
+        console.log("Sub from db ", dbSub)
+        if(dbSub){
+            dbSub.data = JSON.stringify(sub)
+            dbSub.save(); 
+        }
+    }
+    if(type === "customer.subscription.deleted"){
+        let sub = data.data.object;
+        let subid = sub.id;
+        let dbSub = await db.subscriptionModel.destroy({
+            where:{
+                subid: subid
+            }
+        })
+        console.log("Subscription deleted")
+    }
+    res.send({status: true, message: "Subscription updated", event: type})
+}
 export const RetrieveASubscriptions = async (subid) => {
     console.log("Retrieving ", subid)
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
