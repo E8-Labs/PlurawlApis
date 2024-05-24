@@ -1,6 +1,7 @@
 const UserRole = {
     RoleUser: 'user',
-    RoleAdmin: 'admin'
+    RoleAdmin: 'admin',
+    RoleAdmin: 'free'
 }
 
 export default UserRole;

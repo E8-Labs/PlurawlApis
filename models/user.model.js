@@ -70,7 +70,7 @@ const UserModel = (sequelize, Sequelize) => {
       },
       role: {
         type: Sequelize.ENUM,
-        values: ['user', 'admin'],
+        values: ['user', 'admin', 'free'],
         default: 'user'
       },
       points: {
