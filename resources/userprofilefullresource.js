@@ -76,13 +76,31 @@ async function getUserData(user, currentUser = null) {
         where: {
             UserId: user.id,
             environment: process.env.Environment
-        }
+        },
+        order:[
+            ["created_at", "DESC"]
+        ]
     })
     let plan = null
     console.log("Environment is ", process.env.Environment)
+
     if(sub){
         let p = JSON.parse(sub.data);
+        const cancelAtPeriodEnd = p.cancel_at_period_end;
+
+        // Get the current period end date
+        const currentPeriodEnd = p.current_period_end;
+
+        // Calculate remaining days
+        const currentDate = Math.floor(Date.now() / 1000); // Current date in seconds
+        const remainingDays = Math.ceil((currentPeriodEnd - currentDate) / (60 * 60 * 24)); // Convert seconds to days
         console.log("User have subscription plan", p)
+        p.remainingDays = remainingDays;
+        if (cancelAtPeriodEnd) {
+            console.log(`Subscription will end at the end of the current period. Remaining days: ${remainingDays}`);
+        } else {
+            console.log('Subscription is active and set to auto-renew.');
+        }
         
         if((p.livemode && process.env.Environment === "Production") || (!p.livemode && process.env.Environment === "Sandbox")){
             plan = p;
