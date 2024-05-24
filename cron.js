@@ -41,32 +41,32 @@ job.start();
 //subscription updates
 //Every two min '*/2 * * * *'
 //Every 3 hours "0 */3 * * *"
-const jobSub = nodeCron.schedule("*/1 * * * *", async function GetSubUpdates(){
+// const jobSub = nodeCron.schedule("*/1 * * * *", async function GetSubUpdates(){
 
-  let subs = await db.subscriptionModel.findAll();
-  if(subs && subs.length > 0){
-    subs.forEach(async(item)=>{
-      let subid = item.subid;//subscription object id from stripe
-      let sub = JSON.parse(item.data)
-      let plan = sub.plan;
-      console.log("Plan is ", plan)
-      if(plan.active){
-        console.log("Plan is active")
-        let subscription = await RetrieveASubscriptions(subid)
-        item.data = JSON.stringify(subscription);
-        let saved = item.save();
-        if(saved){
-          console.log("Sub updated", subscription)
-        }
-      }
-      else{
-        console.log("Plan is inactive")
-      }
+//   let subs = await db.subscriptionModel.findAll();
+//   if(subs && subs.length > 0){
+//     subs.forEach(async(item)=>{
+//       let subid = item.subid;//subscription object id from stripe
+//       let sub = JSON.parse(item.data)
+//       let plan = sub.plan;
+//       console.log("Plan is ", plan)
+//       if(plan.active){
+//         console.log("Plan is active")
+//         let subscription = await RetrieveASubscriptions(subid)
+//         item.data = JSON.stringify(subscription);
+//         let saved = item.save();
+//         if(saved){
+//           console.log("Sub updated", subscription)
+//         }
+//       }
+//       else{
+//         console.log("Plan is inactive")
+//       }
       
-    })
-  }
+//     })
+//   }
 
-})
+// })
 
 jobSub.start();
 

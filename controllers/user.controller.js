@@ -77,12 +77,14 @@ export const RegisterUser = async (req, res) => {
                             let customer = await createCustomer(data);
                             console.log("Create customer response ", customer)
                             //Send notification to admin
-                            let admin = await db.user.findOne({where: {
-                                role: 'admin'
-                            }})
-                            if(admin){
+                            let admin = await db.user.findOne({
+                                where: {
+                                    role: 'admin'
+                                }
+                            })
+                            if (admin) {
                                 let saved = await db.notification.create({
-                                    from: data.id, 
+                                    from: data.id,
                                     to: admin.id,
                                     notification_type: "NewUser"
                                 })
@@ -259,6 +261,15 @@ export const LoginUser = async (req, res) => {
 }
 
 
+export const DeleteAllSubscriptions = async (req, res) => {
+    let deleted = await db.subscriptionModel.destroy({
+        where: {},
+        truncate: true
+    }
+    );
+    res.send({ status: true, message: "Subscriptions delted", data: deleted })
+}
+
 export const GetUserNotifications = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
         if (authData) {
@@ -272,7 +283,7 @@ export const GetUserNotifications = async (req, res) => {
             let nots = await NotificationResource(cards)
             res.send({ status: true, message: "Notifications loaded", data: nots })
         }
-        else{
+        else {
             res.send({ status: false, message: "Unauthenticated user", data: null });
         }
     })
@@ -312,21 +323,21 @@ export const CancelSubscription = async (req, res) => {
                     UserId: user.id
                 }
             })
-            if(sub){
+            if (sub) {
                 let cancelled = await cancelSubscription(user, sub);
-                if(cancelled && cancelled.status){
+                if (cancelled && cancelled.status) {
                     sub.data = JSON.stringify(cancelled.data)
                     let saved = await sub.save();
                     res.send({ status: true, message: "Cancelled", data: cancelled.data })
                 }
-                else{
+                else {
                     res.send({ status: true, message: cancelled.message, data: null })
                 }
             }
-            else{
+            else {
                 res.send({ status: false, message: `${user.name} have no active subs`, data: null })
             }
-            
+
         }
     })
 }
@@ -338,34 +349,34 @@ export const subscribeUser = async (req, res) => {
             let user = await db.user.findByPk(authData.user.id);
 
             let subs = await GetActiveSubscriptions(user)
-            if(subs && subs.data.length !== 0){
+            if (subs && subs.data.length !== 0) {
                 console.log("User is already subscribed")
-                res.send({ status: false, message: "Already subscribed" , data: subs })
+                res.send({ status: false, message: "Already subscribed", data: subs })
             }
-            else{
+            else {
                 let cards = await loadCards(user);
-            
-                if(cards.length === 0){
+
+                if (cards.length === 0) {
                     res.send({ status: false, message: "no payment source found", data: null })
                 }
-                else{
+                else {
                     let subtype = req.body.sub_type; //Monthly = 0, HalfYearly = 1, Yearly = 2
                     let subscription = SubscriptionTypesSandbox[2];
                     let sandbox = process.env.Environment === "Sandbox";
                     let code = req.body.code || null;
 
-                    
+
                     console.log("Subscription in Sandbox ", sandbox)
-                    if(sandbox){
+                    if (sandbox) {
                         subscription = SubscriptionTypesSandbox[subtype];
                     }
-                    else{
+                    else {
                         subscription = SubscriptionTypesProduction[subtype];
                     }
                     console.log("Subscription is ", subscription)
 
                     let sub = await createSubscription(user, subscription, code);
-                    if(sub && sub.status){
+                    if (sub && sub.status) {
                         let saved = await db.subscriptionModel.create({
                             subid: sub.data.id,
                             data: JSON.stringify(sub.data),
@@ -374,18 +385,18 @@ export const subscribeUser = async (req, res) => {
                         })
                         res.send({ status: true, message: "Subscription", data: sub.data })
                     }
-                    else{
-                        res.send({ status: false, message: sub.message , data: sub.data })
+                    else {
+                        res.send({ status: false, message: sub.message, data: sub.data })
                     }
-                    
+
                 }
             }
 
-            
-            
+
+
         }
-        else{
-            res.send({ status: false, message: "Unauthenticated user" , data: null })
+        else {
+            res.send({ status: false, message: "Unauthenticated user", data: null })
         }
     })
 }
@@ -800,7 +811,7 @@ function generateRandomCode(length) {
 }
 
 
-export const SendPasswordResetEmail = async(req, res) => {
+export const SendPasswordResetEmail = async (req, res) => {
     let email = req.body.email;
     let user = await db.user.findOne({
         where: {
@@ -817,7 +828,7 @@ export const SendPasswordResetEmail = async(req, res) => {
             secure: false, // true for 465 (SSL), false for other ports
             auth: {
                 user: process.env.email, // Your email address
-              pass: process.env.AppPassword, // Your email password
+                pass: process.env.AppPassword, // Your email password
             },
         });
         const randomCode = generateRandomCode(6);
@@ -831,7 +842,7 @@ export const SendPasswordResetEmail = async(req, res) => {
             code: `${randomCode}`
         })
         // Setup email data with unicode symbols
-        
+
 
         // Send mail with defined transport object
         try {
@@ -847,7 +858,7 @@ export const SendPasswordResetEmail = async(req, res) => {
                     res.send({ status: false, message: "Code not sent" })
                     //console.log(error);
                 }
-                else{
+                else {
                     res.send({ status: true, message: "Code sent" })
                 }
             });
