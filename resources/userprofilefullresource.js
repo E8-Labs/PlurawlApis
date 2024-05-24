@@ -81,7 +81,10 @@ async function getUserData(user, currentUser = null) {
     if(sub){
         let p = JSON.parse(sub.data);
         console.log("User have subscription plan", p)
-        plan = p;
+        console.log("Environment is ", process.env.Environment)
+        if((p.livemode && process.env.Environment === "Production") || (!p.livemode && process.env.Environment === "Sandbox")){
+            plan = p;
+        }
     }
     
     let dateSt1 = moment(lastMonday).format("MMM DD")
