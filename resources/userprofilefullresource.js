@@ -239,6 +239,7 @@ else if(user.points >= 400){
         level: level,
         plan: plan,
         color: getRandomColor(),
+        env: process.env.Environment
     }
 
 

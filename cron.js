@@ -41,7 +41,7 @@ job.start();
 //subscription updates
 //Every two min '*/2 * * * *'
 //Every 3 hours "0 */3 * * *"
-const jobSub = nodeCron.schedule("*/30 * * * *", async function GetSubUpdates(){
+const jobSub = nodeCron.schedule("*/1 * * * *", async function GetSubUpdates(){
 
   let subs = await db.subscriptionModel.findAll();
   if(subs && subs.length > 0){
