@@ -277,7 +277,7 @@ export const SubscriptionUpdated = async (req, res)=>{
 
     if(type === "customer.subscription.updated" || type === 'customer.subscription.pending_update_expired'
     || type === 'customer.subscription.paused' || type === 'customer.subscription.resumed' || 
-    type === 'customer.subscription.pending_update_applied' || type === "customer.subscription.deleted"){
+    type === 'customer.subscription.pending_update_applied' ){
         let sub = data.data.object;
         let subid = sub.id;
         let dbSub = await db.subscriptionModel.findOne({
@@ -292,13 +292,13 @@ export const SubscriptionUpdated = async (req, res)=>{
         }
     }
     if(type === "customer.subscription.deleted"){
-        // let sub = data.data.object;
-        // let subid = sub.id;
-        // let dbSub = await db.subscriptionModel.destroy({
-        //     where:{
-        //         subid: subid
-        //     }
-        // })
+        let sub = data.data.object;
+        let subid = sub.id;
+        let dbSub = await db.subscriptionModel.destroy({
+            where:{
+                subid: subid
+            }
+        })
         console.log("Subscription deleted")
     }
     res.send({status: true, message: "Subscription updated", event: type})
