@@ -74,7 +74,8 @@ async function getUserData(user, currentUser = null) {
 
     let sub = await db.subscriptionModel.findOne({
         where: {
-            UserId: user.id
+            UserId: user.id,
+            environment: process.env.Environment
         }
     })
     let plan = null

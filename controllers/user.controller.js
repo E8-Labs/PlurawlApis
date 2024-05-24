@@ -369,7 +369,8 @@ export const subscribeUser = async (req, res) => {
                         let saved = await db.subscriptionModel.create({
                             subid: sub.data.id,
                             data: JSON.stringify(sub.data),
-                            UserId: user.id
+                            UserId: user.id,
+                            environment: process.env.Environment
                         })
                         res.send({ status: true, message: "Subscription", data: sub.data })
                     }

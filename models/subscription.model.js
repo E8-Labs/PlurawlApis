@@ -5,6 +5,11 @@ let SubscriptionModel = (sequelize, Sequelize) => {
         },
       data: {
         type: Sequelize.STRING(8000)
+      },
+      environment: {
+        type: Sequelize.STRING,
+        defaultValue: "Sandbox",
+        allowNull: false,
       }
       
     });
