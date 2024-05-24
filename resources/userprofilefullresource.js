@@ -79,10 +79,11 @@ async function getUserData(user, currentUser = null) {
         }
     })
     let plan = null
+    console.log("Environment is ", process.env.Environment)
     if(sub){
         let p = JSON.parse(sub.data);
         console.log("User have subscription plan", p)
-        console.log("Environment is ", process.env.Environment)
+        
         if((p.livemode && process.env.Environment === "Production") || (!p.livemode && process.env.Environment === "Sandbox")){
             plan = p;
         }
