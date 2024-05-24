@@ -10,6 +10,8 @@ import chalk from "chalk";
 import nodemailer from 'nodemailer'
 import { GetCostEstimate } from "./journal.controller.js";
 
+import UserSubscriptionResource from "../resources/usersubscription.resource.js";
+
 import crypto from 'crypto'
 // import { fetchOrCreateUserToken } from "./plaid.controller.js";
 // const fs = require("fs");
@@ -328,7 +330,8 @@ export const CancelSubscription = async (req, res) => {
                 if (cancelled && cancelled.status) {
                     sub.data = JSON.stringify(cancelled.data)
                     let saved = await sub.save();
-                    res.send({ status: true, message: "Cancelled", data: cancelled.data })
+                    let s = await UserSubscriptionResource(cancelled.data)
+                    res.send({ status: true, message: "Cancelled", data: s })
                 }
                 else {
                     res.send({ status: true, message: cancelled.message, data: null })
@@ -349,9 +352,12 @@ export const subscribeUser = async (req, res) => {
             let user = await db.user.findByPk(authData.user.id);
 
             let subs = await GetActiveSubscriptions(user)
+            // subs = subs.data
             if (subs && subs.data.length !== 0) {
-                console.log("User is already subscribed")
-                res.send({ status: false, message: "Already subscribed", data: subs })
+                console.log("User is already subscribed", subs)
+                let s = await UserSubscriptionResource(subs.data[0])
+                
+                res.send({ status: false, message: "Already subscribed", data: s })
             }
             else {
                 let cards = await loadCards(user);
@@ -383,7 +389,8 @@ export const subscribeUser = async (req, res) => {
                             UserId: user.id,
                             environment: process.env.Environment
                         })
-                        res.send({ status: true, message: "Subscription", data: sub.data })
+                        let plan = await UserSubscriptionResource(sub.data)
+                        res.send({ status: true, message: "Subscription", data: plan })
                     }
                     else {
                         res.send({ status: false, message: sub.message, data: sub.data })
