@@ -5,6 +5,7 @@ import { getJournalsInAWeek, getWeeklyDates } from "../controllers/journal.contr
 import { getRandomColor } from "../config/utility.js";
 import moment from "moment-timezone";
 import UserSubscriptionResource from "./usersubscription.resource.js";
+import { loadCards } from "../controllers/stripe.js";
 // import LoanStatus from "../../models/loanstatus.js";
 // import PlaidTokenTypes from "../../models/plaidtokentypes.js";
 // import UserLoanFullResource from "../loan/loan.resource.js";
@@ -210,6 +211,11 @@ else if(user.points < 400 && user.points >= 200){
 else if(user.points >= 400){
     level = 3
 }
+
+
+
+let cards = await loadCards(user);
+
     const UserFullResource = {
         id: user.id,
         name: user.firstname,
@@ -240,7 +246,8 @@ else if(user.points >= 400){
         level: level,
         plan: plan,
         color: getRandomColor(),
-        env: process.env.Environment
+        env: process.env.Environment,
+        payment_source_added: cards.length > 0
     }
 
 
