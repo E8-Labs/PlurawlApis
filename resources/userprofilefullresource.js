@@ -247,7 +247,7 @@ let cards = await loadCards(user);
         plan: plan,
         color: getRandomColor(),
         env: process.env.Environment,
-        payment_source_added: cards.length > 0
+        payment_source_added: (cards !== null && cards.length > 0)
     }
 
 
