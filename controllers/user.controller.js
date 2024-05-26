@@ -52,7 +52,8 @@ export const RegisterUser = async (req, res) => {
                 email: req.body.email,
                 profile_image: '',
                 password: req.body.password,
-                role: UserRole.RoleUser,
+                // role:UserRole.RoleUser, 
+                role:UserRole.RoleFree, 
                 points: 0,
                 provider_name: 'Email',
                 provider_id: '',
@@ -506,6 +507,9 @@ export const UpdateProfile = async (req, res) => {
 
                 if (typeof req.body.state !== 'undefined') {
                     user.state = req.body.state;
+                }
+                if (typeof req.body.role !== 'undefined') {
+                    user.role = req.body.role;
                 }
                 if (typeof req.body.city !== 'undefined') {
                     user.city = req.body.city;
