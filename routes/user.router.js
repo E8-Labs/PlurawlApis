@@ -4,7 +4,7 @@ import {verifyJwtToken}  from "../middleware/jwtmiddleware.js";
 import {RegisterUser, LoginUser, GetUserProfile, UpdateProfile, 
     GetUsers, UpdateGoals, CheckIn, UploadTracks, SocialLogin,
     SendPasswordResetEmail, ResetPassword, encrypt, AddCard, GetUserPaymentSources,
-    subscribeUser, CancelSubscription, GetUserNotifications, DeleteAllSubscriptions} from "../controllers/user.controller.js";
+    subscribeUser, CancelSubscription, GetUserNotifications, DeleteAllSubscriptions, DeleteUser} from "../controllers/user.controller.js";
 
 
     import { CreateWebHook, SubscriptionUpdated } from "../controllers/stripe.js";
@@ -23,6 +23,7 @@ userRouter.get("/load_cards", verifyJwtToken, GetUserPaymentSources);
 userRouter.post("/subscribe", verifyJwtToken, subscribeUser);
 userRouter.post("/cancel_subscription", verifyJwtToken, CancelSubscription);
 userRouter.get("/notifications", verifyJwtToken, GetUserNotifications);
+userRouter.post("/delete_account", verifyJwtToken, DeleteUser);
 userRouter.post("/send_reset_email", SendPasswordResetEmail);
 userRouter.post("/update_password", ResetPassword);
 userRouter.post("/encrypt", encrypt);

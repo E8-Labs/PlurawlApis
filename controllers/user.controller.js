@@ -915,3 +915,34 @@ export const ResetPassword = async (req, res) => {
         res.send({ status: false, data: null, message: "Incorrect code" })
     }
 }
+
+
+export const DeleteUser = (req, res) => {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (authData) {
+            ////console.log("Auth data ", authData)
+            let userid = authData.user.id;
+            if (typeof req.query.userid !== 'undefined') {
+                userid = req.query.userid;
+            }
+            const user = await User.findByPk(userid);
+
+            let deleted = await User.destroy({
+                where: {
+                    id: userid
+                }
+            })
+            if (deleted) {
+                // let u = await UserProfileFullResource(user);
+                res.send({ status: true, message: "Profile deleted", data: null })
+            }
+            else {
+                res.send({ status: false, message: "No Profile found", data: null })
+            }
+
+        }
+        else {
+            res.send({ status: false, message: "Unauthenticated user", data: null })
+        }
+    })
+}
