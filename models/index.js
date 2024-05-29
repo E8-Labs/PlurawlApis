@@ -42,6 +42,7 @@ import UseStreakModel from "./userstreak.model.js";
 import SubscriptionModel from "./subscription.model.js";
 import DailyLoginModel from "./dailylogin.model.js";
 import NotificationModel from "./notification.model.js";
+import UserWebAccessCodeModel from "./webaccesscode.model.js";
 
 
 
@@ -107,6 +108,11 @@ db.dailyLogin.belongsTo(db.user);
 db.user.hasMany(db.dailyLogin);
 
 db.notification = NotificationModel(sequelize, Sequelize);
+
+db.WebAccessCode = UserWebAccessCodeModel(sequelize, Sequelize);
+db.user.hasMany(db.WebAccessCode);
+db.WebAccessCode.belongsTo(db.user);
+
 
 
 export default db;

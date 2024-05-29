@@ -9,7 +9,7 @@ import axios from "axios";
 import chalk from "chalk";
 import nodemailer from 'nodemailer'
 import { GetCostEstimate } from "./journal.controller.js";
-
+import { v4 as uuidv4 } from 'uuid';
 import UserSubscriptionResource from "../resources/usersubscription.resource.js";
 
 import crypto from 'crypto'
@@ -946,3 +946,102 @@ export const DeleteUser = (req, res) => {
         }
     })
 }
+
+
+// Function to generate web access code
+export const generateWebAccessCode = (req, res) => {
+    JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+        if (error) {
+            return res.status(403).send({ status: false, message: 'Unauthenticated user', data: null });
+        }
+
+        const userId = authData.user.id;
+        const code = uuidv4(); // Generate a unique code
+
+        try {
+            // Create or update the web access code for the user
+            await db.WebAccessCode.upsert({
+                UserId: userId,
+                code: code
+            });
+
+            res.send({ status: true, message: 'Web access code generated successfully.', data: { code } });
+        } catch (err) {
+            console.error('Error generating web access code:', err);
+            res.status(500).send({ status: false, message: 'An error occurred while generating the web access code.', error: err.message });
+        }
+    });
+};
+
+export const verifyWebAccessCode = async (req, res) => {
+    const { code } = req.body;
+
+    try {
+        const webAccessCode = await db.WebAccessCode.findOne({ where: { code } });
+
+        if (webAccessCode) {
+            const user = await db.user.findByPk(webAccessCode.UserId);
+            if (user) {
+                const userProfile = await UserProfileFullResource(user);
+
+                // Generate a new JWT token for the user
+                const token = JWT.sign({ user: userProfile }, process.env.SecretJwtKey, {
+                    expiresIn: '1h' // Token expiration time
+                });
+
+                res.send({ status: true, message: 'Web access code verified successfully.', data: { token, user: userProfile } });
+            } else {
+                res.send({ status: false, message: 'User not found.', data: null });
+            }
+        } else {
+            res.send({ status: false, message: 'Invalid web access code.', data: null });
+        }
+    } catch (err) {
+        console.error('Error verifying web access code:', err);
+        res.status(500).send({ status: false, message: 'An error occurred while verifying the web access code.', error: err.message });
+    }
+};
+
+
+
+export const  contactUsEmail = async(req, res) => {
+    let user = req.body;
+    
+    console.log("Sending email for contact us ");
+    let mailOptions = {
+        from: `"Plurawl" ${process.env.email}`, // Sender address
+        to: "salman@e8-labs.com",//process.env.ADMINEMAIL, // List of recipients
+        subject: "New Level Achieved", // Subject line
+        // text: `${randomCode}`, // Plain text body
+        html: `<html><p>Hello admin,</p></br><p> <b>${user.name}</b> has submitted new feedback.</p></br><p><b>Email:</b> ${user.email}</br></p> <p><b>Comment:</b> ${user.comment} </p></html>`, // HTML body
+    };
+
+    // Send mail with defined transport object
+    try {
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com", // Replace with your mail server host
+            port: 587, // Port number depends on your email provider and whether you're using SSL or not
+            secure: false, // true for 465 (SSL), false for other ports
+            auth: {
+                user: process.env.email, // Your email address
+              pass: process.env.AppPassword, // Your email password
+            },
+        });
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                // res.send({ status: false, message: "Code not sent" })
+                console.log("Contact Us Email error", error);
+            }
+            else{
+                console.log('Email sent Contact');
+            }
+            //console.log('Message sent: %s', info.messageId);
+            //console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+            res.send({ status: true, message: "Email sent" })
+
+        });
+    }
+    catch (error) {
+        console.log("Exception Level email", error)
+    }
+  }
