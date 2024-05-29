@@ -68,7 +68,7 @@ job.start();
 
 // })
 
-jobSub.start();
+// jobSub.start();
 
 //run job to get Daily quotes
 const quoteJob = nodeCron.schedule("*/30 0-1 * * *", async function fetchPendingBankTransactions() {
