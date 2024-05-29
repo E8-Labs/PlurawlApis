@@ -1011,7 +1011,7 @@ export const  contactUsEmail = async(req, res) => {
     let mailOptions = {
         from: `"Plurawl" ${process.env.email}`, // Sender address
         to: "salman@e8-labs.com",//process.env.ADMINEMAIL, // List of recipients
-        subject: "New Level Achieved", // Subject line
+        subject: "Contact Us Form", // Subject line
         // text: `${randomCode}`, // Plain text body
         html: `<html><p>Hello admin,</p></br><p> <b>${user.name}</b> has submitted new feedback.</p></br><p><b>Email:</b> ${user.email}</br></p> <p><b>Comment:</b> ${user.comment} </p></html>`, // HTML body
     };
