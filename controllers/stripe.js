@@ -22,11 +22,11 @@ export const createCustomer = async (user) => {
 
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
     console.log("Key is ", key)
-    const stripe = StripeSdk(key);
+    
 
 
     try {
-
+        const stripe = StripeSdk(key);
         let alreadyCustomer = await findCustomer(user)
         console.log("Customer is ", alreadyCustomer)
 
@@ -57,8 +57,9 @@ export const findCustomer = async (user) => {
 
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
     console.log("Key is ", key)
-    const stripe = StripeSdk(key);
+    
     try {
+        const stripe = StripeSdk(key);
         // const customer = await stripe.customers.search({
         //     query: `email: '${user.email}'`
         // }); 
