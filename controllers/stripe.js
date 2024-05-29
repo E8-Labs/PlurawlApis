@@ -80,9 +80,10 @@ export const createCard = async (user, token) => {
 
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
     console.log("Key is ", key)
-    const stripe = StripeSdk(key);
+    
 
     try {
+        const stripe = StripeSdk(key);
         let customer = await createCustomer(user);
 
         const customerSource = await stripe.customers.createSource(

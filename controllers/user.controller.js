@@ -300,7 +300,7 @@ export const AddCard = async (req, res) => {
             console.log("User provided Token is ", token)
             let card = await createCard(user, token);
 
-            res.send({ status: card !== null, message: "Card added", data: card })
+            res.send({ status: card !== null, message: card === null ? "Card added" : "Card not added", data: card })
         }
     })
 }
