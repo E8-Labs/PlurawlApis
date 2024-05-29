@@ -91,10 +91,12 @@ export const createCard = async (user, token) => {
                 source: token,
             }
         );
+        console.log("Card create ", customerSource)
 
         return customerSource
     }
     catch (error) {
+        console.log("Card error ")
         console.log(error)
         return null
     }
