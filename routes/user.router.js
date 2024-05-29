@@ -34,7 +34,7 @@ userRouter.post("/create_webhook", CreateWebHook);
 userRouter.post("/subscription_updated", SubscriptionUpdated);
 
 userRouter.post("/create_web_token", verifyJwtToken, generateWebAccessCode);
-userRouter.post("/verify_web_token", verifyJwtToken, verifyWebAccessCode);
+userRouter.post("/verify_web_token", verifyWebAccessCode);
 userRouter.post("/contact_us", contactUsEmail);
 
 
