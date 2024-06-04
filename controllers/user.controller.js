@@ -155,7 +155,7 @@ export const SocialLogin = async (req, res) => {
             email: req.body.email,
             profile_image: req.body.profile_image,
             password: req.body.provider_id,
-            role: UserRole.RoleUser,
+            role:UserRole.RoleFree, //role: UserRole.RoleUser,
             points: 0,
             provider_name: req.body.provider_name,
             provider_id: req.body.provider_id,
@@ -272,6 +272,8 @@ export const DeleteAllSubscriptions = async (req, res) => {
     );
     res.send({ status: true, message: "Subscriptions delted", data: deleted })
 }
+
+
 
 export const GetUserNotifications = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {

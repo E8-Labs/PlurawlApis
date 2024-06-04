@@ -218,10 +218,10 @@ let cards = await loadCards(user);
 
     const UserFullResource = {
         id: user.id,
-        name: user.firstname,
+        // name: user.firstname,
         profile_image: user.profile_image,
         email: user.email,
-        name: user.name,
+        name: user.name || "",
         state: user.state,
         role: user.role,
         city: user.city,

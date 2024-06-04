@@ -324,3 +324,10 @@ export const CreatePromoCode = async (req, res) => {
   let code = await createPromo(req.body.code, req.body.repetetion, duration_in_months, req.body.percent_off, applies_to);
   res.send({ status: true, data: code, message: "Create Promo Response" })
 }
+
+
+export const makeAllFree = async(req, res) => {
+  let freed = await db.user.update({role: "free"}, {where: {role: "user"}})
+  let users = await db.user.findAll()
+  res.send({ status: true, message: "all users free now", data: users });
+}
