@@ -424,7 +424,7 @@ function splitMessage2(text) {
 
 export const SendMessage = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (err, authData) => {
-        //console.log("Sending message", req.body.chatid)
+        console.log("Sending message", req.body.chatid)
         if (authData) {
             const userid = authData.user.id;
             const chatid = req.body.chatid;
@@ -434,7 +434,7 @@ export const SendMessage = async (req, res) => {
             try {
 
                 if (chat) {
-                    //console.log("Chat exists")
+                    console.log("Chat exists")
                     const message = req.body.message;
                     let messagesData = []
                     if (chat.type === "AIChat") {
@@ -457,7 +457,7 @@ export const SendMessage = async (req, res) => {
                     });
                     if (dbmessages.length > 0) {
                         // messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: messages[0].message}]
-                        //console.log("Messages are in db")
+                        console.log("Messages are in db", dbmessages.length)
                         console.log("################################################################")
                         for (let i = 0; i < dbmessages.length; i++) {
                             let m = dbmessages[i]
