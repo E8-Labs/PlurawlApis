@@ -437,7 +437,9 @@ export const SendMessage = async (req, res) => {
                     console.log("Chat exists")
                     const message = req.body.message;
                     let messagesData = []
+                    console.log("Conditiong 1")
                     if (chat.type === "AIChat") {
+                        console.log("AI Chat")
                         let name = user.name;
                         if (name.length > 0) {
                             name = name.split(" ")[0]
@@ -446,6 +448,7 @@ export const SendMessage = async (req, res) => {
                         let cdText = getAIChatPromptText(name);
                         messagesData = [{ role: "system", content: cdText }]
                     }
+                    console.log("Conditiong 2")
                     const dbmessages = await db.messageModel.findAll({
                         where: {
                             ChatId: chatid
@@ -455,6 +458,7 @@ export const SendMessage = async (req, res) => {
                             ["id", "ASC"]
                         ]
                     });
+                    console.log("Conditiong 3")
                     if (dbmessages.length > 0) {
                         // messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: messages[0].message}]
                         console.log("Messages are in db", dbmessages.length)
