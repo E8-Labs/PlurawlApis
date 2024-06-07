@@ -440,12 +440,13 @@ export const SendMessage = async (req, res) => {
                     console.log("Conditiong 1")
                     if (chat.type === "AIChat") {
                         console.log("AI Chat")
-                        let name = user.name;
+                        let name = user.name || '';
                         if (name.length > 0) {
                             name = name.split(" ")[0]
                         }
 
                         let cdText = getAIChatPromptText(name);
+                        console.log("Cd Text is ", cdText);
                         messagesData = [{ role: "system", content: cdText }]
                     }
                     console.log("Conditiong 2")
