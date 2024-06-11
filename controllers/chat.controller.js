@@ -183,7 +183,7 @@ function getAIChatPromptText(name) {
 
 
 async function GenerateFirstMessageForAIChat(chat, user, message = null, callback) {
-    let name = user.name;
+    let name = user.name || '';
     if (name.length > 0) {
         name = name.split(" ")[0]
     }
