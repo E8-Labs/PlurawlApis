@@ -5,7 +5,7 @@ const UserJournalModel = (sequelize, Sequelize) => {
         default: ''
       },
       detail: { // text or content of the journal
-        type: Sequelize.STRING(9000),
+        type: Sequelize.STRING(20000),
         default: ''
       },
       type: {
