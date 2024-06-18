@@ -1,6 +1,6 @@
 import db from "../models/index.js";
 import CheckInTypes from "../models/checkintype.js";
-import {CheckinMoods, GenerateRandomGif} from "../models/checkinmoods.js";
+import { CheckinMoods, GenerateRandomGif } from "../models/checkinmoods.js";
 import { getJournalsInAWeek, getWeeklyDates } from "../controllers/journal.controller.js";
 import { getRandomColor } from "../config/utility.js";
 import moment from "moment-timezone";
@@ -79,18 +79,18 @@ async function getUserData(user, currentUser = null) {
             UserId: user.id,
             environment: process.env.Environment
         },
-        order:[
+        order: [
             ["createdAt", "DESC"]
         ]
     })
     let plan = null
-    if(sub){
+    if (sub) {
         plan = await UserSubscriptionResource(sub)
     }
     console.log("Environment is ", process.env.Environment)
 
-    
-    
+
+
     let dateSt1 = moment(lastMonday).format("MMM DD")
     let dateSt2 = moment(lastSunday).format("MMM DD")
 
@@ -130,7 +130,7 @@ async function getUserData(user, currentUser = null) {
         }
     }
 
-    
+
 
     var mostCheckedInMood = CheckinMoods.MoodHep;
     if (lep > hep && lep > leup && lep > heup) {
@@ -176,45 +176,45 @@ async function getUserData(user, currentUser = null) {
         lastWeekVibe.snapshot = snapshot;
     }
 
-    let countries = null
-    if(user.countries !== null && user.countries !== "" ){
-        try {
-            countries = JSON.parse(user.countries);
-        } catch (e) {
-            console.error("Failed to parse countries: ", e);
-            countries = null; // or set to default, or handle the error accordingly
+    // let countries = null
+    // if(user.countries !== null && user.countries !== "" ){
+    //     try {
+    //         countries = JSON.parse(user.countries);
+    //     } catch (e) {
+    //         console.error("Failed to parse countries: ", e);
+    //         countries = null; // or set to default, or handle the error accordingly
+    //     }
+    // }
+
+
+    let haveJournals = false
+    let myJournals = await db.userJournalModel.findAll({
+        where: {
+            UserId: user.id
+        }
+    })
+    //console.log("Have Journals ", myJournals)
+    if (myJournals) {
+        if (myJournals.length > 0) {
+            haveJournals = true;
         }
     }
 
 
-let haveJournals = false
-let myJournals = await db.userJournalModel.findAll({
-    where: {
-        UserId: user.id
+    let level = 0
+    if (user.points < 200 && user.points >= 100) {
+        level = 1
     }
-})
-//console.log("Have Journals ", myJournals)
-if(myJournals){
-    if(myJournals.length > 0){
-        haveJournals = true;
+    else if (user.points < 400 && user.points >= 200) {
+        level = 2
     }
-}
-
-
-let level = 0
-if(user.points < 200 && user.points >= 100){
-    level = 1
-}
-else if(user.points < 400 && user.points >= 200){
-    level = 2
-}
-else if(user.points >= 400){
-    level = 3
-}
+    else if (user.points >= 400) {
+        level = 3
+    }
 
 
 
-let cards = await loadCards(user);
+    let cards = await loadCards(user);
 
     const UserFullResource = {
         id: user.id,
@@ -234,13 +234,12 @@ let cards = await loadCards(user);
         veteran: user.veteran,
         provider_id: user.provider_id,
         provider_name: user.provider_name,
-        points: user.points,
         lastcheckin: checkin,
         lastWeekVibe: lastWeekVibe,
         quote_of_day: quote,
         have_journals: haveJournals,
         pronouns: user.pronouns,
-        countries: countries,
+        // countries: countries,
         dob: user.dob,
         points: user.points,
         level: level,
