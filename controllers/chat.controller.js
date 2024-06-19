@@ -142,8 +142,9 @@ function getAIChatPromptText(name) {
         When prompting them to checkin in, present them with these options:  
         Provide these exact options: High Energy Pleasant, High Energy Unpleasant, Low Energy Pleasant, 
         Low Energy Unpleasant.
-        After getting the user input for the mood, your response should contain 5 feelings, ensure that 3 out of the 5 words are simple emotional words and 2 of the words are more advanced emotional words alongwith definitions for all 5 words(10 words max) 
-        that match that selection and ask them which emotion they are feeling. Make sure to put every feeling on a separate line.
+        After getting the user input for the mood, your response should contain 5 feelings, ensure that 3 out of the 5 words are 
+        simple emotional words and 2 of the words are more advanced emotional words alongwith definitions for all 5 words(10 words max) 
+        that match that selection and ask them which emotion they are feeling. Make sure to put every feeling on a separate line(Important! Don’t ask the user how they’re feeling more than once). 
         These are the questions to ask when someone checks in. Make sure that you prompt the user to checkin 
         or journal at the very beginning of your conversation.
 
@@ -286,10 +287,13 @@ async function sendQueryToGpt(message, messageData) {
         headers: {
             'content-type': 'application/json',
             'Authorization': `Bearer ${APIKEY}`
-        }
+        },
+        timeout: 240000 // Timeout in milliseconds (4 minutes)
     });
 
-    // //console.log(result.data)
+    console.log("==============================")
+    console.log(result)
+    console.log("==============================")
     // setMessages(messages.filter(item => item.type !== MessageType.Loading)) // remove the loading message
     if (result.status === 200) {
         console.log(result.data)
