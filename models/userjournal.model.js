@@ -1,11 +1,11 @@
 const UserJournalModel = (sequelize, Sequelize) => {
     const UserJournal = sequelize.define("UserJournal", {
       title: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT('medium'),
         default: ''
       },
       detail: { // text or content of the journal
-        type: Sequelize.STRING(20000),
+        type: Sequelize.TEXT('medium'),
         default: ''
       },
       type: {
@@ -18,7 +18,7 @@ const UserJournalModel = (sequelize, Sequelize) => {
         default: ''
       },
       snapshot: {
-        type: Sequelize.STRING(3000),
+        type: Sequelize.TEXT('medium'),
         default: ''
       },
       mood: {
@@ -30,7 +30,7 @@ const UserJournalModel = (sequelize, Sequelize) => {
         default: ''
       },
       description: {
-        type: Sequelize.STRING(1500),
+        type: Sequelize.TEXT('medium'),
         default: ''
       },
       pronunciation: {

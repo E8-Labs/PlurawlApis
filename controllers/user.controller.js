@@ -1,7 +1,7 @@
 import db from "../models/index.js";
 import S3 from "aws-sdk/clients/s3.js";
 import JWT from "jsonwebtoken";
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import multer from "multer";
 import path from "path";
 import moment from "moment-timezone";
@@ -355,6 +355,7 @@ export const subscribeUser = async (req, res) => {
         if (authData) {
             let user = await db.user.findByPk(authData.user.id);
 
+            console.log("Getting subs for user ", user)
             let subs = await GetActiveSubscriptions(user)
             // subs = subs.data
             if (subs && subs.data.length !== 0) {

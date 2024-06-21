@@ -177,6 +177,7 @@ export const createSubscription = async (user, subscription, code = null) => {
                     price: subscription.id,
                 },
             ],
+            trial_period_days: 7,
         };
 
         if (code !== null) {
@@ -338,9 +339,10 @@ export const GetActiveSubscriptions = async (user) => {
             customer: customer.id,
             status: 'active'
         });
-        // console.log("##############")
-        // console.log("Subscriptions for user  ", user.name)
-        // console.log("##############")
+        console.log("##############")
+        console.log("Subscriptions for user  ", user.email)
+        console.log("Customer id", customer.id)
+        console.log("##############")
         return sub
     }
     catch (error) {

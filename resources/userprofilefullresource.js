@@ -17,7 +17,7 @@ const UserProfileFullResource = async (user, currentUser = null) => {
         return await getUserData(user, currentUser);
     }
     else {
-        ////console.log("Is array")
+        //console.log("Is array")
         const data = []
         for (let i = 0; i < user.length; i++) {
             const p = await getUserData(user[i], currentUser)
