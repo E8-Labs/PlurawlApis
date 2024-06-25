@@ -383,7 +383,11 @@ export const loadCards = async (user) => {
     const stripe = StripeSdk(key);
 
     try {
-        let customer = await findCustomer(user)
+        let customers = await findCustomer(user)
+        let customer = null
+        if(customers && customers.data.length > 0){
+            customer = customers.data[0]
+        }
         console.log("Customer in load card is ", customer)
 
         let data = qs.stringify({
