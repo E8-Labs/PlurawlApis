@@ -40,6 +40,9 @@ return null;
     sub.remainingDays = remainingDays;
     //console.log("Environment is ", process.env.Environment)
     if ((sub.livemode && process.env.Environment === "Production") || (!sub.livemode && process.env.Environment === "Sandbox")) {
+        if(sub.status === "trialing"){
+            sub.status = "active"
+        }
         return sub; //
     }
     else {
