@@ -383,7 +383,7 @@ export const loadCards = async (user) => {
     const stripe = StripeSdk(key);
 
     try {
-        let customer = await createCustomer(user, "loadcards");
+        let customer = await findCustomer(user)
 
 
         let data = qs.stringify({
