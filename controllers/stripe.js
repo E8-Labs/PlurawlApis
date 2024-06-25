@@ -384,7 +384,7 @@ export const loadCards = async (user) => {
 
     try {
         let customer = await findCustomer(user)
-
+        console.log("Customer in load card is ", customer)
 
         let data = qs.stringify({
             'limit': '10'
