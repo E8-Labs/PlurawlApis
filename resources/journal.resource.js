@@ -11,15 +11,15 @@ const Op = db.Sequelize.Op;
 
 const JournalResource = async (user) => {
     if (!Array.isArray(user)) {
-        ////console.log("Not array")
+        //////console.log("Not array")
         return await getUserData(user);
     }
     else {
-        ////console.log("Is array")
+        //////console.log("Is array")
         const data = []
         for (let i = 0; i < user.length; i++) {
             const p = await getUserData(user[i])
-            ////console.log("Adding to index " + i)
+            //////console.log("Adding to index " + i)
             data.push(p);
         }
 
@@ -55,7 +55,7 @@ async function getUserData(user) {
     let key = ownerUser.enc_key;
     let iv = ownerUser.enc_iv;
     let decrypted = user.detail;
-    // console.log("decipher", user.id)
+    // //console.log("decipher", user.id)
     try{
         if(key && iv && user.encrypted){
             const decipher = crypto.createDecipheriv(algo, key, iv);
@@ -64,12 +64,12 @@ async function getUserData(user) {
         }
     }
     catch(error){
-        console.log("error encryption ", error)
+        //console.log("error encryption ", error)
     }
     
 
-// //console.log(`Hightlights ${user.id}`)
-// //console.log(th)
+// ////console.log(`Hightlights ${user.id}`)
+// ////console.log(th)
     const UserFullResource = {
         id: user.id,
         title: user.title,

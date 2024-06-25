@@ -12,15 +12,15 @@ const Op = db.Sequelize.Op;
 
 const UserProfileLiteResource = async (user, currentUser = null) => {
     if (!Array.isArray(user)) {
-        ////console.log("Not array")
+        //////console.log("Not array")
         return await getUserData(user, currentUser);
     }
     else {
-        ////console.log("Is array")
+        //////console.log("Is array")
         const data = []
         for (let i = 0; i < user.length; i++) {
             const p = await getUserData(user[i], currentUser)
-            ////console.log("Adding to index " + i)
+            //////console.log("Adding to index " + i)
             data.push(p);
         }
 
@@ -54,12 +54,12 @@ async function getUserData(user, currentUser = null) {
 
     // // Calculate the start and end date of the last week
     // const lastSunday = new Date(currentDate);
-    // //console.log(`Date Calc${currentDate.getDate()} - ${currentDate.getDay()}`);
+    // ////console.log(`Date Calc${currentDate.getDate()} - ${currentDate.getDay()}`);
     // lastSunday.setDate(currentDate.getDate() - (currentDate.getDay()));
     // const lastMonday = new Date(lastSunday);
     // lastMonday.setDate(lastSunday.getDate() - 6);
-    // console.log("Last Sunday is ", lastSunday)
-    // console.log("Last Monday is ", lastMonday)
+    // //console.log("Last Sunday is ", lastSunday)
+    // //console.log("Last Monday is ", lastMonday)
 
     // let journals = await getJournalsInAWeek(lastMonday, lastSunday, user.id)
 
@@ -81,7 +81,7 @@ async function getUserData(user, currentUser = null) {
     let plan = null
     if(sub){
         let p = JSON.parse(sub.data);
-        console.log("User have subscription plan", p)
+        //console.log("User have subscription plan", p)
         plan = p;
     }
     
@@ -158,7 +158,7 @@ async function getUserData(user, currentUser = null) {
 //         }
 
 //         let year = moment(lastSunday).format("YYYY");
-//         //console.log(`FInding ${year} ${dateSt2} ${dateSt1}`)
+//         ////console.log(`FInding ${year} ${dateSt2} ${dateSt1}`)
 //         let snapshot = await db.weeklySnapshotModel.findOne({
 //             where: {
 //                 sunday: dateSt2,
@@ -176,7 +176,7 @@ async function getUserData(user, currentUser = null) {
 //         UserId: user.id
 //     }
 // })
-// //console.log("Have Journals ", myJournals)
+// ////console.log("Have Journals ", myJournals)
 // if(myJournals){
 //     if(myJournals.length > 0){
 //         haveJournals = true;

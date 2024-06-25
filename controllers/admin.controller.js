@@ -91,7 +91,7 @@ const countUniqueDownloads = async (days) => {
         order: [[db.sequelize.fn('DATE', db.sequelize.col('createdAt')), 'ASC']],
         raw: true
       });
-    //   console.log("DA Users ", dailyUsersResult)
+    //   //console.log("DA Users ", dailyUsersResult)
   
       // Create an array of dates from startDate to endDate
       let dateArray = [];
@@ -156,14 +156,14 @@ const countUniqueDownloads = async (days) => {
         order: [[db.sequelize.fn('DATE', db.sequelize.col('createdAt')), 'ASC']],
         raw: true
       });
-      console.log("DA Users ", dailyLoginData)
+      //console.log("DA Users ", dailyLoginData)
   
       // Create an array of all dates from startDate to endDate
       let dateArray = [];
       for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
         dateArray.push(new Date(d));
       }
-      console.log("Date array ", dateArray)
+      //console.log("Date array ", dateArray)
       // Map results to a date-indexed object
       const loginDataByDate = dailyLoginData.reduce((acc, cur) => {
         acc[cur.date] = cur.total_users;
@@ -198,7 +198,7 @@ const countUniqueDownloads = async (days) => {
   export const AdminDashboard = (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
         if (authData) {
-            ////console.log("Auth data ", authData)
+            //////console.log("Auth data ", authData)
             let userid = authData.user.id;
             
             let totalDownloads = await uniqueDownloads(30);
@@ -217,7 +217,7 @@ const countUniqueDownloads = async (days) => {
 export const GetUsers = (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
         if (authData) {
-            ////console.log("Auth data ", authData)
+            //////console.log("Auth data ", authData)
             let userid = authData.user.id;
             let offset = 0;
             if (typeof req.query.offset !== 'undefined') {
@@ -293,20 +293,20 @@ export const SendPasswordResetEmail = (req, res) => {
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
                     res.send({ status: false, message: "Code not sent" })
-                    //console.log(error);
+                    ////console.log(error);
                 }
                 else{
                   res.send({ status: true, message: "Code sent" })
                 }
 
-                //console.log('Message sent: %s', info.messageId);
-                //console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+                ////console.log('Message sent: %s', info.messageId);
+                ////console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
                 
 
             });
         }
         catch (error) {
-            //console.log("Exception ", error)
+            ////console.log("Exception ", error)
         }
     }
     else {
@@ -318,9 +318,9 @@ export const SendPasswordResetEmail = (req, res) => {
 export const CreatePromoCode = async (req, res) => {
   let applies_to = req.body.applies_to || "All";
   let duration_in_months = req.body.duration_in_months || null;
-  console.log("Duration Months ", duration_in_months);
-  console.log("Code ", req.body.code);
-  console.log("Off ", req.body.percent_off);
+  //console.log("Duration Months ", duration_in_months);
+  //console.log("Code ", req.body.code);
+  //console.log("Off ", req.body.percent_off);
   let code = await createPromo(req.body.code, req.body.repetetion, duration_in_months, req.body.percent_off, applies_to);
   res.send({ status: true, data: code, message: "Create Promo Response" })
 }

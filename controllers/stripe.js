@@ -18,11 +18,11 @@ export const SubscriptionTypesProduction = [
 ]
 
 
-export const createCustomer = async (user) => {
+export const createCustomer = async (user, whoami = "default") => {
 
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
-    console.log("Key is ", key)
-    
+    console.log("Key is create customer ", key)
+    console.log('whoami', whoami)
 
 
     try {
@@ -31,7 +31,7 @@ export const createCustomer = async (user) => {
         console.log("Customer is ", alreadyCustomer)
 
         if (alreadyCustomer.data.length >= 1) {
-            console.log("Already found ", alreadyCustomer)
+            //console.log("Already found ", alreadyCustomer)
             return alreadyCustomer.data[0]
         }
         else {
@@ -48,7 +48,7 @@ export const createCustomer = async (user) => {
         // return customer
     }
     catch (error) {
-        console.log(error)
+        //console.log(error)
         return null
     }
 }
@@ -56,7 +56,7 @@ export const createCustomer = async (user) => {
 export const findCustomer = async (user) => {
 
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
-    console.log("Key is ", key)
+    console.log("Key is find cust", key)
     
     try {
         const stripe = StripeSdk(key);
@@ -71,7 +71,7 @@ export const findCustomer = async (user) => {
         return customer
     }
     catch (error) {
-        console.log(error)
+        //console.log(error)
         return null
     }
 }
@@ -80,12 +80,12 @@ export const findCustomer = async (user) => {
 export const createCard = async (user, token) => {
 
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
-    console.log("Key is ", key)
+    //console.log("Key is ", key)
     
 
     try {
         const stripe = StripeSdk(key);
-        let customer = await createCustomer(user);
+        let customer = await createCustomer(user, "createcard");
 
         const customerSource = await stripe.customers.createSource(
             customer.id,
@@ -93,13 +93,13 @@ export const createCard = async (user, token) => {
                 source: token,
             }
         );
-        console.log("Card create ", customerSource)
+        //console.log("Card create ", customerSource)
 
         return customerSource
     }
     catch (error) {
-        console.log("Card error ")
-        console.log(error)
+        //console.log("Card error ")
+        //console.log(error)
         return null
     }
 }
@@ -116,7 +116,7 @@ export const createPromo = async (code, repetition = "once", duration_in_months 
     let HalfYearPID = process.env.Environment === "Sandbox" ? "prod_Q1i1XCOwozX1Vd" : "prod_PzUoUdee8wPQHA"
     let YearPID = process.env.Environment === "Sandbox" ? "prod_Q1i1ab5JC4J7Ql" : "prod_PzUrqNVq181qHi"
     let products = [MonthPID, HalfYearPID, YearPID,]
-    console.log("Using products for ", process.env.Environment)
+    //console.log("Using products for ", process.env.Environment)
     if (applies_to === "Monthly") {
         products = [MonthPID]
     }
@@ -169,7 +169,7 @@ export const createSubscription = async (user, subscription, code = null) => {
     const key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
     const stripe = StripeSdk(key);
     try {
-        let customer = await createCustomer(user);
+        let customer = await createCustomer(user, "createsub");
         let data = {
             customer: customer.id,
             items: [
@@ -181,11 +181,11 @@ export const createSubscription = async (user, subscription, code = null) => {
         };
 
         if (code !== null) {
-            console.log("Code is not null");
+            //console.log("Code is not null");
             try {
                 let coupon = await GetCoupon(code);
                 if (coupon) {
-                    console.log("Coupon exists:", coupon);
+                    //console.log("Coupon exists:", coupon);
                     data.discounts = [{ coupon: code }];
                 } else {
                     return { status: false, message: "No such coupon" };
@@ -196,9 +196,9 @@ export const createSubscription = async (user, subscription, code = null) => {
             }
         }
 
-        console.log("Data applying for subscription is", data);
+        //console.log("Data applying for subscription is", data);
         const sub = await stripe.subscriptions.create(data);
-        console.log("Subscribed successfully:", sub);
+        //console.log("Subscribed successfully:", sub);
         return { data: sub, status: true, message: "User subscribed" };
     } catch (error) {
         console.error("Error creating subscription:", error);
@@ -210,11 +210,11 @@ export const createSubscription = async (user, subscription, code = null) => {
 export const cancelSubscription = async (user, subscription) => {
 
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
-    console.log("Subscription in stripe.js ", subscription)
+    //console.log("Subscription in stripe.js ", subscription)
 
     try {
         const stripe = StripeSdk(key);
-        let customer = await createCustomer(user);
+        let customer = await createCustomer(user, "cancelsub");
         let subid = subscription.subid;
 
         // const sub = await stripe.subscriptions.cancel(
@@ -229,7 +229,7 @@ export const cancelSubscription = async (user, subscription) => {
         return { data: sub, status: true, message: "Subscription will cancel at period end" };
     }
     catch (error) {
-        console.log(error)
+        //console.log(error)
         return { data: error, status: false, message: error };
     }
 }
@@ -238,7 +238,7 @@ export const cancelSubscription = async (user, subscription) => {
 // export const resumeSubscription = async (user, subscription) => {
 
 //     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
-//     console.log("Subscription in stripe.js ", subscription)
+//     //console.log("Subscription in stripe.js ", subscription)
 
 //     try {
 //         const stripe = StripeSdk(key);
@@ -254,7 +254,7 @@ export const cancelSubscription = async (user, subscription) => {
 //         return { data: sub, status: true, message: "Subscription cancelled" };
 //     }
 //     catch (error) {
-//         console.log(error)
+//         //console.log(error)
 //         return { data: error, status: false, message: error };
 //     }
 // }
@@ -276,9 +276,9 @@ export const CreateWebHook = async (req, res) => {
 
 export const SubscriptionUpdated = async (req, res)=>{
     let data = req.body;
-    console.log("Subscription updated", data)
+    //console.log("Subscription updated", data)
     let type = data.type;
-    console.log("EVent is ", type);
+    //console.log("EVent is ", type);
 
     if(type === "customer.subscription.updated" || type === 'customer.subscription.pending_update_expired'
     || type === 'customer.subscription.paused' || type === 'customer.subscription.resumed' || 
@@ -290,7 +290,7 @@ export const SubscriptionUpdated = async (req, res)=>{
                 subid: subid
             }
         })
-        console.log("Sub from db ", dbSub)
+        //console.log("Sub from db ", dbSub)
         if(dbSub){
             dbSub.data = JSON.stringify(sub)
             dbSub.save(); 
@@ -304,14 +304,14 @@ export const SubscriptionUpdated = async (req, res)=>{
                 subid: subid
             }
         })
-        console.log("Subscription deleted")
+        //console.log("Subscription deleted")
     }
     res.send({status: true, message: "Subscription updated", event: type})
 }
 export const RetrieveASubscriptions = async (subid) => {
-    console.log("Retrieving ", subid)
+    //console.log("Retrieving ", subid)
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
-    // console.log("Subscription in stripe.js ", subscription)
+    // //console.log("Subscription in stripe.js ", subscription)
 
     try {
         const stripe = StripeSdk(key);
@@ -321,7 +321,7 @@ export const RetrieveASubscriptions = async (subid) => {
         return sub
     }
     catch (error) {
-        console.log(error)
+        //console.log(error)
         return null
     }
 }
@@ -330,23 +330,23 @@ export const RetrieveASubscriptions = async (subid) => {
 export const GetActiveSubscriptions = async (user) => {
 
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
-    // console.log("Subscription in stripe.js ", subscription)
+    // //console.log("Subscription in stripe.js ", subscription)
 
     try {
         const stripe = StripeSdk(key);
-        let customer = await createCustomer(user);
+        let customer = await createCustomer(user, "getactivesub");
         const sub = await stripe.subscriptions.list({
             customer: customer.id,
             status: 'active'
         });
-        console.log("##############")
-        console.log("Subscriptions for user  ", user.email)
-        console.log("Customer id", customer.id)
-        console.log("##############")
+        //console.log("##############")
+        //console.log("Subscriptions for user  ", user.email)
+        //console.log("Customer id", customer.id)
+        //console.log("##############")
         return sub
     }
     catch (error) {
-        console.log(error)
+        //console.log(error)
         return null
     }
 }
@@ -356,7 +356,7 @@ export const GetActiveSubscriptions = async (user) => {
 // export const deleteCard = async (user, token) => {
 
 //     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
-//     console.log("Key is ", key)
+//     //console.log("Key is ", key)
 //     const stripe = StripeSdk(key);
 
 //     try {
@@ -372,18 +372,18 @@ export const GetActiveSubscriptions = async (user) => {
 //         return customerSource
 //     }
 //     catch (error) {
-//         console.log(error)
+//         //console.log(error)
 //         return null
 //     }
 // }
 
 export const loadCards = async (user) => {
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
-    console.log("Key is ", key)
+    //console.log("Key is ", key)
     const stripe = StripeSdk(key);
 
     try {
-        let customer = await createCustomer(user);
+        let customer = await createCustomer(user, "loadcards");
 
 
         let data = qs.stringify({
@@ -403,19 +403,19 @@ export const loadCards = async (user) => {
 
         let response = await axios.request(config);
         if (response) {
-            console.log("Load cards request");
-            console.log(JSON.stringify(response.data.data));
+            //console.log("Load cards request");
+            //console.log(JSON.stringify(response.data.data));
             return response.data.data;
         }
         else {
-            console.log("Load cards request errored");
-            console.log(error);
+            //console.log("Load cards request errored");
+            //console.log(error);
             return null
         };
     }
     catch (error) {
-        console.log("Load cards request errored out");
-        console.log(error)
+        //console.log("Load cards request errored out");
+        //console.log(error)
         return null
     }
 

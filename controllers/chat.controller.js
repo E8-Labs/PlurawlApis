@@ -29,8 +29,8 @@ const GptModel = "gpt-4-turbo-preview";//"gpt-3.5-turbo-0125";//"gpt-4-turbo-pre
 export const CreateChat = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (err, authData) => {
         if (authData) {
-            //console.log("User in chat is ")
-            //console.log(authData)
+            ////console.log("User in chat is ")
+            ////console.log(authData)
 
             let chattype = "journal"
             if (typeof (req.body.chattype) !== 'undefined') {
@@ -194,15 +194,15 @@ async function GenerateFirstMessageForAIChat(chat, user, message = null, callbac
     // if (message) {
     //     messagesData = [{ role: "system", content: cdText }, { role: 'user', content: message }]
     // }
-    console.log("First promt from user AI Chat", messagesData)
+    //console.log("First promt from user AI Chat", messagesData)
     sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
         if (gptResponse) {
-            console.log("Gpt Response Cost ", gptResponse.total_cost)
+            //console.log("Gpt Response Cost ", gptResponse.total_cost)
                                 chat.total_cost += gptResponse.total_cost;
                                 let savedChat = await chat.save();
             const result = await db.sequelize.transaction(async (t) => {
                 t.afterCommit(() => {
-                    //console.log("\n\nTransaction is commited \n\n")
+                    ////console.log("\n\nTransaction is commited \n\n")
                 });
 
                 const m1 = await db.messageModel.create({
@@ -257,10 +257,10 @@ export const UpdateChat = async (req, res) => {
 
 
 async function sendQueryToGpt(message, messageData) {
-    //console.log("Sending Message " + message)
+    ////console.log("Sending Message " + message)
 
-    //console.log(messageData)
-    // //console.log("Sending this summary to api ", summary);
+    ////console.log(messageData)
+    // ////console.log("Sending this summary to api ", summary);
     // messageData.push({
     //     role: "system",
     //     content: "You're a helpful assistant. So reply me keeping in context the whole data provided. Keep the response short and make it complete response. keep all of your responses within 300 words or less.", // summary will go here if the summary is created.
@@ -270,11 +270,11 @@ async function sendQueryToGpt(message, messageData) {
         role: "user",
         content: message // this data is being sent to chatgpt so only message should be sent
     });
-    console.log(messageData)
+    //console.log(messageData)
 
-    console.log("################################################################", messageData.length)
+    //console.log("################################################################", messageData.length)
     const APIKEY = process.env.AIKey;
-    //console.log(APIKEY)
+    ////console.log(APIKEY)
     const headers = {}
     const data = {
         model: GptModel,
@@ -291,14 +291,14 @@ async function sendQueryToGpt(message, messageData) {
         timeout: 240000 // Timeout in milliseconds (4 minutes)
     });
 
-    console.log("==============================")
-    console.log(result)
-    console.log("==============================")
+    //console.log("==============================")
+    //console.log(result)
+    //console.log("==============================")
     // setMessages(messages.filter(item => item.type !== MessageType.Loading)) // remove the loading message
     if (result.status === 200) {
-        console.log(result.data)
+        //console.log(result.data)
         let gptMessage = result.data.choices[0].message.content;
-        console.log(chalk.red(gptMessage))
+        //console.log(chalk.red(gptMessage))
         let tokens = result.data.usage.total_tokens;
         let prompt_tokens = result.data.usage.prompt_tokens;
         let completion_tokens = result.data.usage.completion_tokens;
@@ -310,7 +310,7 @@ async function sendQueryToGpt(message, messageData) {
         let outputCost = outoutCostPerToken * completion_tokens;
 
         let totalCost = inputCost + outputCost;
-        console.log("Total cost this request", totalCost);
+        //console.log("Total cost this request", totalCost);
         return {
             gptMessage: gptMessage, tokens: tokens, completion_tokens: completion_tokens,
             prompt_tokens: prompt_tokens, total_cost: totalCost
@@ -428,7 +428,7 @@ function splitMessage2(text) {
 
 export const SendMessage = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (err, authData) => {
-        console.log("Sending message", req.body.chatid)
+        //console.log("Sending message", req.body.chatid)
         if (authData) {
             const userid = authData.user.id;
             const chatid = req.body.chatid;
@@ -438,22 +438,22 @@ export const SendMessage = async (req, res) => {
             try {
 
                 if (chat) {
-                    console.log("Chat exists")
+                    //console.log("Chat exists")
                     const message = req.body.message;
                     let messagesData = []
-                    console.log("Conditiong 1")
+                    //console.log("Conditiong 1")
                     if (chat.type === "AIChat") {
-                        console.log("AI Chat")
+                        //console.log("AI Chat")
                         let name = user.name || '';
                         if (name.length > 0) {
                             name = name.split(" ")[0]
                         }
 
                         let cdText = getAIChatPromptText(name);
-                        console.log("Cd Text is ", cdText);
+                        //console.log("Cd Text is ", cdText);
                         messagesData = [{ role: "system", content: cdText }]
                     }
-                    console.log("Conditiong 2")
+                    //console.log("Conditiong 2")
                     const dbmessages = await db.messageModel.findAll({
                         where: {
                             ChatId: chatid
@@ -463,14 +463,14 @@ export const SendMessage = async (req, res) => {
                             ["id", "ASC"]
                         ]
                     });
-                    console.log("Conditiong 3")
+                    //console.log("Conditiong 3")
                     if (dbmessages.length > 0) {
                         // messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: messages[0].message}]
-                        console.log("Messages are in db", dbmessages.length)
-                        console.log("################################################################")
+                        //console.log("Messages are in db", dbmessages.length)
+                        //console.log("################################################################")
                         for (let i = 0; i < dbmessages.length; i++) {
                             let m = dbmessages[i]
-                            // //console.log(chalk.green(`Message ${m.from}-${m.id} | ${m.message}`))
+                            // ////console.log(chalk.green(`Message ${m.from}-${m.id} | ${m.message}`))
                             messagesData.push({ role: m.from === "me" ? "user" : "system", content: m.message })
                         }
 
@@ -482,13 +482,13 @@ export const SendMessage = async (req, res) => {
 
                         sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
                             if (gptResponse) {
-                                console.log("Gpt Response Cost ", gptResponse.total_cost)
+                                //console.log("Gpt Response Cost ", gptResponse.total_cost)
                                 chat.total_cost += gptResponse.total_cost;
                                 let savedChat = await chat.save();
 
                                 const result = await db.sequelize.transaction(async (t) => {
                                     t.afterCommit(() => {
-                                        //console.log("\n\nTransaction is commited \n\n")
+                                        ////console.log("\n\nTransaction is commited \n\n")
                                     });
                                     
 
@@ -551,7 +551,7 @@ export const SendMessage = async (req, res) => {
                         })
                     }
                     else {
-                        console.log("No messages, new chat")
+                        //console.log("No messages, new chat")
                         let us = await db.user.findByPk(authData.user.id)
                         GenerateFirstMessageForAIChat(chat, us, message, (messages) => {
                             if (messages) {
@@ -593,8 +593,8 @@ export const SendMessage = async (req, res) => {
 
 async function generateSummaryFromGPT(messageData) {
     const APIKEY = process.env.AIKey;
-    //console.log(APIKEY)
-    //console.log("Generating summary from ", messageData);
+    ////console.log(APIKEY)
+    ////console.log("Generating summary from ", messageData);
     const headers = {}
 
     const data = {
@@ -612,11 +612,11 @@ async function generateSummaryFromGPT(messageData) {
 
     if (result.status === 200) {
         let gptMessage = result.data.choices[0].message.content;
-        //console.log("Summary response is ", gptMessage)
+        ////console.log("Summary response is ", gptMessage)
         return gptMessage
     }
     else {
-        //console.log("Summary response error ")
+        ////console.log("Summary response error ")
         return null
     }
 }
@@ -649,7 +649,7 @@ export const GetMessages = async (req, res) => {
 
             }
             else {
-                //console.log("Not such chat", chatid)
+                ////console.log("Not such chat", chatid)
                 // no such chat exists
                 res.send({ status: false, message: "No such chat", data: null })
             }

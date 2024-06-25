@@ -49,18 +49,18 @@ job.start();
 //       let subid = item.subid;//subscription object id from stripe
 //       let sub = JSON.parse(item.data)
 //       let plan = sub.plan;
-//       console.log("Plan is ", plan)
+//       //console.log("Plan is ", plan)
 //       if(plan.active){
-//         console.log("Plan is active")
+//         //console.log("Plan is active")
 //         let subscription = await RetrieveASubscriptions(subid)
 //         item.data = JSON.stringify(subscription);
 //         let saved = item.save();
 //         if(saved){
-//           console.log("Sub updated", subscription)
+//           //console.log("Sub updated", subscription)
 //         }
 //       }
 //       else{
-//         console.log("Plan is inactive")
+//         //console.log("Plan is inactive")
 //       }
       
 //     })
@@ -74,7 +74,7 @@ job.start();
 const quoteJob = nodeCron.schedule("*/30 0-1 * * *", async function fetchPendingBankTransactions() {
   // const currentDate = new Date();
   let time = moment()
-  //console.log("Quote Crone Job Running at time ", time);
+  ////console.log("Quote Crone Job Running at time ", time);
   GenerateQuote();
 })
 // quoteJob.start();
@@ -88,17 +88,17 @@ let index = 0
 const moodJob = nodeCron.schedule('0 2 1,15 * *', async function fetchPendingBankTransactions() {
   // const currentDate = new Date();
   let time = moment()
-  console.log("Mood Cron Job Running at time ", time);
+  //console.log("Mood Cron Job Running at time ", time);
  if(index === 0){
   index += 1
-  //console.log("Running api ")
+  ////console.log("Running api ")
   let moodKeys = ["Low energy, Pleasant", "High energy, Pleasant", "Low energy, Unpleasant", "High energy, Unpleasant"]
   for(let i = 0; i < moodKeys.length; i++){
     let mood = moodKeys[i];
     let feelings = await GetFeelingsromGpt(mood)
-    console.log("Feelings obtained ", feelings)
+    //console.log("Feelings obtained ", feelings)
     if(feelings && feelings.length > 0){
-      console.log("Adding feelings to db")
+      //console.log("Adding feelings to db")
       await db.checkinMoodModel.destroy({where: {
         mood: mood
       }})

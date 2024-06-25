@@ -16,10 +16,10 @@ const UserSubscriptionResource = async (plan) => {
 }
 
 async function getUserData(p) {
-console.log("Finding subs for " , p)
+//console.log("Finding subs for " , p)
 let sub = await RetrieveASubscriptions(p.subid || p.id);
 if(!sub){
-    console.log("No subs for ", p.subid || p.id)
+    //console.log("No subs for ", p.subid || p.id)
 return null;
 }
     const cancelAtPeriodEnd = sub.cancel_at_period_end;
@@ -30,15 +30,15 @@ return null;
     // Calculate remaining days
     const currentDate = Math.floor(Date.now() / 1000); // Current date in seconds
     const remainingDays = Math.ceil((currentPeriodEnd - currentDate) / (60 * 60 * 24)); // Convert seconds to days
-    // console.log("User have subscription plan", sub)
+    // //console.log("User have subscription plan", sub)
     sub.remainingDays = remainingDays;
     if (cancelAtPeriodEnd) {
-        console.log(`Subscription will end at the end of the current period. Remaining days: ${remainingDays}`);
+        //console.log(`Subscription will end at the end of the current period. Remaining days: ${remainingDays}`);
     } else {
-        console.log('Subscription is active and set to auto-renew.');
+        //console.log('Subscription is active and set to auto-renew.');
     }
     sub.remainingDays = remainingDays;
-    console.log("Environment is ", process.env.Environment)
+    //console.log("Environment is ", process.env.Environment)
     if ((sub.livemode && process.env.Environment === "Production") || (!sub.livemode && process.env.Environment === "Sandbox")) {
         return sub; //
     }

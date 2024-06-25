@@ -2,8 +2,8 @@ import dbConfig from "../config/db.config.js";
 import passwordresetcodeModel from "./passwordresetcode.model.js";
 
 import  Sequelize from "sequelize";
-//console.log("Connecting DB")
-//console.log(dbConfig.MYSQL_DB_PASSWORD)
+////console.log("Connecting DB")
+////console.log(dbConfig.MYSQL_DB_PASSWORD)
 const sequelize = new Sequelize(dbConfig.MYSQL_DB, dbConfig.MYSQL_DB_USER, dbConfig.MYSQL_DB_PASSWORD, {
   host: dbConfig.MYSQL_DB_HOST,
   port: dbConfig.MYSQL_DB_PORT,
@@ -14,7 +14,7 @@ const sequelize = new Sequelize(dbConfig.MYSQL_DB, dbConfig.MYSQL_DB_USER, dbCon
 
 try {
   await sequelize.authenticate();
-  //console.log('Connection has been established successfully.');
+  ////console.log('Connection has been established successfully.');
 } catch (error) {
   console.error('Unable to connect to the database:', error);
 }

@@ -50,10 +50,10 @@ import chatRouter from "./routes/chat.router.js";
 import adminRouter from "./routes/admin.router.js";
 
 db.sequelize.authenticate().then(() => {
-  console.log("Connected to the database!");
+  //console.log("Connected to the database!");
 })
   .catch(err => {
-    //console.log("Cannot connect to the database!", err);
+    ////console.log("Cannot connect to the database!", err);
     // process.exit();
   });
 
@@ -74,5 +74,5 @@ app.use("/api/admin", verifyJwtToken, adminRouter);//verifyJwtToken
 
 
 const server = app.listen(process.env.Port, () => {
-  ////console.log("Started listening on " + process.env.Port);
+  //////console.log("Started listening on " + process.env.Port);
 })
