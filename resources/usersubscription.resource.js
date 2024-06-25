@@ -38,6 +38,7 @@ return null;
         //console.log('Subscription is active and set to auto-renew.');
     }
     sub.remainingDays = remainingDays;
+    sub.trialStatus = sub.status === "trialing" ? "trialing" : "none"
     //console.log("Environment is ", process.env.Environment)
     if ((sub.livemode && process.env.Environment === "Production") || (!sub.livemode && process.env.Environment === "Sandbox")) {
         if(sub.status === "trialing"){
