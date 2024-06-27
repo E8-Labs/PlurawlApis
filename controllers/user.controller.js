@@ -281,18 +281,30 @@ export const GetUserNotifications = async (req, res) => {
         if (authData) {
             let user = await db.user.findByPk(authData.user.id);
             let offset = req.query.offset || 0;
-            let cards = await db.notification.findAll({
-                limit: 20,
-                offset: Number(offset)
+    
+            // Raw SQL query
+            let query = `
+                SELECT Notifications.*
+                FROM Notifications
+                JOIN Users ON Notifications.from = Users.id
+                LIMIT 40 OFFSET ?
+            `;
+    
+            // Execute the query with the specified offset
+            let cards = await db.sequelize.query(query, {
+                replacements: [Number(offset)],
+                type: db.sequelize.QueryTypes.SELECT
             });
-            //console.log("Notifications loaded ", cards)
-            let nots = await NotificationResource(cards)
-            res.send({ status: true, message: "Notifications loaded", data: nots })
-        }
-        else {
+    
+            // Process notifications
+            let nots = await NotificationResource(cards);
+            res.send({ status: true, message: "Notifications loaded", data: nots });
+        } else {
             res.send({ status: false, message: "Unauthenticated user", data: null });
         }
-    })
+    });
+    
+    
 }
 
 export const AddCard = async (req, res) => {
