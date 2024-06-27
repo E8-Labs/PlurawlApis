@@ -340,7 +340,7 @@ export const GetUsers = (req, res) => {
           }
         },
         offset: Number(offset),
-        limit: 100
+        limit: 20
       });
       if (user) {
         let u = await UserProfileLiteResource(user);
