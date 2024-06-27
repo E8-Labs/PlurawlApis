@@ -287,7 +287,7 @@ export const GetUserNotifications = async (req, res) => {
                 SELECT Notifications.*
                 FROM Notifications
                 JOIN Users ON Notifications.from = Users.id
-                LIMIT 40 OFFSET ?
+                LIMIT 20 OFFSET ?
             `;
     
             // Execute the query with the specified offset
