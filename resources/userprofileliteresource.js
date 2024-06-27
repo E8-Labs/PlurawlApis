@@ -73,17 +73,17 @@ async function getUserData(user, currentUser = null) {
     //     }
     // })
 
-    let sub = await db.subscriptionModel.findOne({
-        where: {
-            UserId: user.id
-        }
-    })
-    let plan = null
-    if(sub){
-        let p = JSON.parse(sub.data);
-        //console.log("User have subscription plan", p)
-        plan = p;
-    }
+    // let sub = await db.subscriptionModel.findOne({
+    //     where: {
+    //         UserId: user.id
+    //     }
+    // })
+    // let plan = null
+    // if(sub){
+    //     let p = JSON.parse(sub.data);
+    //     //console.log("User have subscription plan", p)
+    //     plan = p;
+    // }
     
 //     let dateSt1 = moment(lastMonday).format("MMM DD")
 //     let dateSt2 = moment(lastSunday).format("MMM DD")
@@ -222,7 +222,7 @@ else if(user.points >= 400){
         // dob: user.dob,
         points: user.points,
         level: level,
-        plan: plan,
+        // plan: plan,
     }
 
 
