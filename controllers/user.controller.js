@@ -47,12 +47,20 @@ export const RegisterUser = async (req, res) => {
             res.send({ status: false, message: "Name is required ", data: null });
         }
         else {
+            let role = UserRole.RoleUser;
+            console.log(`Build number Req ${req.body.build_number} Env ${process.env.BUILD_NUMBER}`)
+            
+            if(req.body.build_number == process.env.BUILD_NUMBER){
+                role = UserRole.RoleFree;
+                console.log("Build number matched")
+            }
+            // return
             var userData = {
                 name: req.body.name,
                 email: req.body.email,
                 profile_image: '',
                 password: req.body.password,
-                role:UserRole.RoleUser, 
+                role: role,//UserRole.RoleUser, 
                 // role:UserRole.RoleFree, 
                 points: 0,
                 provider_name: 'Email',
@@ -149,13 +157,16 @@ export const SocialLogin = async (req, res) => {
     else {
         // //////console.log("Hello bro")
         // res.send("Hello")
-
+        let role = UserRole.RoleUser;
+        if(req.body.build_number == process.env.BUILD_NUMBER){
+            role = UserRole.RoleFree;
+        }
         var userData = {
             name: req.body.name,
             email: req.body.email,
             profile_image: req.body.profile_image,
             password: req.body.provider_id,
-            role: UserRole.RoleUser,
+            role: role,//UserRole.RoleUser,
             // role:UserRole.RoleFree, 
             points: 0,
             provider_name: req.body.provider_name,
@@ -224,8 +235,13 @@ export const LoginUser = async (req, res) => {
             email: email
         }
     })
-
-    const count = await User.count();
+    let role = UserRole.RoleUser;
+    if(req.body.build_number === process.env.BUILD_NUMBER){
+        role = UserRole.RoleFree;
+    }
+    user.role = role;
+    let updated = await user.save();
+    // const count = await User.count();
     //////console.log("Count " + count);
     if (!user) {
         res.send({ status: false, message: "Invalid email", data: null });
