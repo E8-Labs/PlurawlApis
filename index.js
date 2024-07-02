@@ -59,6 +59,6 @@ app.use("/api/journal", journalRouter);
 app.use("/api/chat", verifyJwtToken, chatRouter);
 app.use("/api/admin", verifyJwtToken, adminRouter);
 
-const server = app.listen(process.env.PORT, () => {
-  console.log("Server started listening on " + (process.env.PORT || 3000));
+const server = app.listen(process.env.Port, () => {
+  console.log("Server started listening on " + (process.env.Port));
 });
