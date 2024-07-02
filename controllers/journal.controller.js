@@ -366,7 +366,8 @@ export const AddJournal = async (req, res) => {
                     }
                     let j = await JournalResource(result)
 
-
+                    let newLevel = null
+                    let newStreak = null
                     //check and update point
                     let streak = await db.userStreakModel.findOne({
                         where: {
@@ -389,15 +390,15 @@ export const AddJournal = async (req, res) => {
 
                     }
                     if(user.points >= 100 && user.points <= 101.5){
-
+                        newLevel = {title: "Congrats! You've reached level 1", level: 1}
                         sendLevelUpEmail(1, user);
                     }
                     else if(user.points >= 200 && user.points <= 201.5){
-
+                        newLevel = {title: "Congrats! You've reached level 2", level: 2}
                         sendLevelUpEmail(2, user);
                     }
                     else if(user.points >= 400 && user.points <= 401.5){
-
+                        newLevel = {title: "Congrats! You've reached level 3", level: 3}
                         sendLevelUpEmail(3, user);
                     }
                     await user.save();
@@ -419,6 +420,7 @@ export const AddJournal = async (req, res) => {
                                 })
                             }
                             if(isContinous){
+                                newStreak = {title: "Hurray! You're on 30 day streak", streak: 30}
                                 let st = await db.userStreakModel.create({
                                     streak: UserStreaks.Streak30Day,
                                     UserId: user.id
@@ -441,6 +443,7 @@ export const AddJournal = async (req, res) => {
                             })
                         }
                         if(isContinous){
+                            newStreak = {title: "Hurray! You're on 3 day streak", streak: 3}
                             let st = await db.userStreakModel.create({
                                 streak: UserStreaks.Streak3Day,
                                 UserId: user.id
@@ -454,10 +457,19 @@ export const AddJournal = async (req, res) => {
 
 
                     
+                    if(req.body.testStreak){
+                        if(newStreak === null){
+                            newStreak = {title: "Hurray! You're on 3 day streak", streak: 3}
+                        }
+                    }
+                    if(req.body.testLevel){
+                        if(newLevel === null){
+                            newLevel = {title: "Congrats! You've reached level 1", level: 1}
+                        }
+                    }
 
 
-
-                    res.send({ status: true, message: "Journal added", data: j })
+                    res.send({ status: true, message: "Journal added", data: j, newStreak: newStreak, newLevel: newLevel })
                 })
                     .catch((error) => {
                         ////console.log(error)
