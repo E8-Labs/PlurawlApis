@@ -25,19 +25,24 @@ app.use((req, res, next) => {
   next();
 });
 
-// Apply CORS middleware
 app.use(cors({
   origin: 'https://plurawlsubscriptions.vercel.app',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true // Uncomment this line if you need to send cookies or other credentials
+  credentials: true
 }));
 
 // Parse JSON bodies
 app.use(express.json());
 
-// Handle preflight requests
-app.options('*', cors());
+// Manually handle preflight requests
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', 'https://plurawlsubscriptions.vercel.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
 
 import db from "./models/index.js";
 import journalRouter from "./routes/journal.router.js";
