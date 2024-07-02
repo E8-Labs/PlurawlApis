@@ -278,7 +278,7 @@ export const SubscriptionUpdated = async (req, res)=>{
     let data = req.body;
     //console.log("Subscription updated", data)
     let type = data.type;
-    //console.log("EVent is ", type);
+    console.log("EVent is ", type);
 
     if(type === "customer.subscription.updated" || type === 'customer.subscription.pending_update_expired'
     || type === 'customer.subscription.paused' || type === 'customer.subscription.resumed' || 
