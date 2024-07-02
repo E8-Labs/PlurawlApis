@@ -366,7 +366,7 @@ export const CancelSubscription = async (req, res) => {
                     res.send({ status: true, message: "Cancelled", data: s })
                 }
                 else {
-                    res.send({ status: true, message: cancelled.message, data: null })
+                    res.send({ status: false, message: cancelled.message, data: cancelled })
                 }
             }
             else {
