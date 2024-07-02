@@ -642,6 +642,8 @@ export const UpdateGoals = (req, res) => {
 
 
 export const GetUserProfile = (req, res) => {
+    console.log('Request headers:', req.headers);
+  console.log('Request body:', req.body);
     JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
         if (authData) {
             //////console.log("Auth data ", authData)
