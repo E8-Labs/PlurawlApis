@@ -40,16 +40,16 @@ const uploadImg = upload.single("image");//multer({storage: storage}).single('im
 
 const app = express();
 // app.use(cors());
-// app.use(cors({
-//   origin: 'https://plurawlsubscriptions.vercel.app',
-//   // methods: ['GET', 'POST'], // Allow specific HTTP methods
-//   // allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
-//   // credentials: true // If you need to send cookies or other credentials
-// }));
+app.use(cors({
+  origin: 'https://plurawlsubscriptions.vercel.app',
+  methods: ['GET', 'POST'], // Allow specific HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+  credentials: true // If you need to send cookies or other credentials
+}));
 
 // app.use(express.json());
 
-app.options('*', cors()); // Preflight requests handling
+// app.options('*', cors()); // Preflight requests handling
 
 
 import db from "./models/index.js";
