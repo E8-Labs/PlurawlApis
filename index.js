@@ -8,46 +8,33 @@ import chalk from "chalk";
 import moment from "moment-timezone";
 
 import { GenerateQuote } from "./controllers/user.controller.js";
-
 import { getWeeklyDates, getJournalsInAWeek, GetSnapshotFromJournals } from "./controllers/journal.controller.js";
-
-// import plaidRouter from "./routes/plaid.router.js";
-// import loanRouter from "./routes/loan.router.js";
-// import houseRouter from "./routes/hosue.router.js";
-
-
 import { verifyJwtToken } from "./middleware/jwtmiddleware.js";
 
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
 dotenv.config();
 
-
 const upload = multer();
-
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => cb(null, "./uploads"), // cb -> callback
-//   filename: (req, file, cb) => {
-//     const uniqueName = `${Date.now()}-${Math.round(
-//       Math.random() * 1e9
-//     )}${path.extname(file.originalname)}`;
-//     cb(null, uniqueName);
-//   },
-// });
-
-const uploadImg = upload.single("image");//multer({storage: storage}).single('image');
-
-
+const uploadImg = upload.single("image");
 
 const app = express();
-// app.use(cors());
+
+// Add logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} request for '${req.url}'`);
+  next();
+});
+
+// Apply CORS middleware
 app.use(cors({
   origin: 'https://plurawlsubscriptions.vercel.app',
-  methods: ['GET', 'POST'], // Allow specific HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
-  // credentials: true // If you need to send cookies or other credentials
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true // Uncomment this line if you need to send cookies or other credentials
 }));
 
-app.use(express.json()); // Parse JSON bodies
+// Parse JSON bodies
+app.use(express.json());
 
 // Handle preflight requests
 app.options('*', cors());
@@ -59,28 +46,19 @@ import adminRouter from "./routes/admin.router.js";
 
 db.sequelize.authenticate().then(() => {
   console.log("Connected to the database!");
-})
-  .catch(err => {
-    //console.log("Cannot connect to the database!", err);
-    // process.exit();
-  });
+}).catch(err => {
+  console.error("Cannot connect to the database!", err);
+  // process.exit();
+});
 
-// sync
-db.sequelize.sync({ alter: true })//{alter: true}
-
-
+// Sync database
+db.sequelize.sync({ alter: true });
 
 app.use("/api/users", uploadImg, userRouter);
-app.use("/api/journal", journalRouter)
-app.use("/api/chat", verifyJwtToken, chatRouter);//verifyJwtToken
-app.use("/api/admin", verifyJwtToken, adminRouter);//verifyJwtToken
-// app.use('/api/loans', verifyJwtToken, loanRouter);
-// app.use("/api/houses", verifyJwtToken, houseRouter);
+app.use("/api/journal", journalRouter);
+app.use("/api/chat", verifyJwtToken, chatRouter);
+app.use("/api/admin", verifyJwtToken, adminRouter);
 
-
-
-
-
-const server = app.listen(process.env.Port, () => {
-  //////console.log("Started listening on " + process.env.Port);
-})
+const server = app.listen(process.env.PORT, () => {
+  console.log("Server started listening on " + (process.env.PORT || 3000));
+});
