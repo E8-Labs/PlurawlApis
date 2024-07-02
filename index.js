@@ -47,10 +47,10 @@ app.use(cors({
   credentials: true // If you need to send cookies or other credentials
 }));
 
-// app.use(express.json());
+app.use(express.json()); // Parse JSON bodies
 
-// app.options('*', cors()); // Preflight requests handling
-
+// Handle preflight requests
+app.options('*', cors());
 
 import db from "./models/index.js";
 import journalRouter from "./routes/journal.router.js";
