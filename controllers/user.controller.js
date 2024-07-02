@@ -49,8 +49,8 @@ export const RegisterUser = async (req, res) => {
         else {
             let role = UserRole.RoleUser;
             console.log(`Build number Req ${req.body.build_number} Env ${process.env.BUILD_NUMBER}`)
-            
-            if(req.body.build_number == process.env.BUILD_NUMBER){
+
+            if (req.body.build_number == process.env.BUILD_NUMBER) {
                 role = UserRole.RoleFree;
                 console.log("Build number matched")
             }
@@ -158,7 +158,7 @@ export const SocialLogin = async (req, res) => {
         // //////console.log("Hello bro")
         // res.send("Hello")
         let role = UserRole.RoleUser;
-        if(req.body.build_number == process.env.BUILD_NUMBER){
+        if (req.body.build_number == process.env.BUILD_NUMBER) {
             role = UserRole.RoleFree;
         }
         var userData = {
@@ -235,12 +235,12 @@ export const LoginUser = async (req, res) => {
             email: email
         }
     })
-    let role = UserRole.RoleUser;
-    if(req.body.build_number === process.env.BUILD_NUMBER){
-        role = UserRole.RoleFree;
-    }
-    user.role = role;
-    let updated = await user.save();
+    // let role = UserRole.RoleUser;
+    // if (req.body.build_number === process.env.BUILD_NUMBER) {
+    //     role = UserRole.RoleFree;
+    // }
+    // user.role = role;
+    // let updated = await user.save();
     // const count = await User.count();
     //////console.log("Count " + count);
     if (!user) {
@@ -297,7 +297,7 @@ export const GetUserNotifications = async (req, res) => {
         if (authData) {
             let user = await db.user.findByPk(authData.user.id);
             let offset = req.query.offset || 0;
-    
+
             // Raw SQL query
             let query = `
                 SELECT Notifications.*
@@ -305,13 +305,13 @@ export const GetUserNotifications = async (req, res) => {
                 JOIN Users ON Notifications.from = Users.id
                 LIMIT 20 OFFSET ?
             `;
-    
+
             // Execute the query with the specified offset
             let cards = await db.sequelize.query(query, {
                 replacements: [Number(offset)],
                 type: db.sequelize.QueryTypes.SELECT
             });
-    
+
             // Process notifications
             let nots = await NotificationResource(cards);
             res.send({ status: true, message: "Notifications loaded", data: nots });
@@ -319,8 +319,8 @@ export const GetUserNotifications = async (req, res) => {
             res.send({ status: false, message: "Unauthenticated user", data: null });
         }
     });
-    
-    
+
+
 }
 
 export const AddCard = async (req, res) => {
@@ -389,7 +389,7 @@ export const subscribeUser = async (req, res) => {
             if (subs && subs.data.length !== 0) {
                 //console.log("User is already subscribed", subs)
                 let s = await UserSubscriptionResource(subs.data[0])
-                
+
                 res.send({ status: false, message: "Already subscribed", data: s })
             }
             else {
@@ -959,6 +959,34 @@ export const DeleteUser = (req, res) => {
             }
             const user = await User.findByPk(userid);
 
+            //Cancel the subscription######################################################################
+            let sub = await db.subscriptionModel.findOne({
+                where: {
+                    UserId: user.id
+                }
+            })
+            let cancelledSub = "finding subs"
+            if (sub) {
+                let cancelled = await cancelSubscription(user, sub);
+                if (cancelled && cancelled.status) {
+                    sub.data = JSON.stringify(cancelled.data)
+                    let saved = await sub.save();
+                    cancelledSub = "cancelled"
+                    // let s = await UserSubscriptionResource(cancelled.data)
+                    // res.send({ status: true, message: "Cancelled", data: s })
+                }
+                else {
+                    cancelledSub = "not cancelled"
+                    // res.send({ status: true, message: cancelled.message, data: null })
+                }
+            }
+            else {
+                cancelledSub = "no sub";
+                // res.send({ status: false, message: `${user.name} have no active subs`, data: null })
+            }
+            //###############################################################################################
+
+
             let deleted = await User.destroy({
                 where: {
                     id: userid
@@ -1036,9 +1064,9 @@ export const verifyWebAccessCode = async (req, res) => {
 
 
 
-export const  contactUsEmail = async(req, res) => {
+export const contactUsEmail = async (req, res) => {
     let user = req.body;
-    
+
     //console.log("Sending email for contact us ");
     let mailOptions = {
         from: `"Plurawl" ${process.env.email}`, // Sender address
@@ -1056,7 +1084,7 @@ export const  contactUsEmail = async(req, res) => {
             secure: false, // true for 465 (SSL), false for other ports
             auth: {
                 user: process.env.email, // Your email address
-              pass: process.env.AppPassword, // Your email password
+                pass: process.env.AppPassword, // Your email password
             },
         });
         transporter.sendMail(mailOptions, (error, info) => {
@@ -1064,7 +1092,7 @@ export const  contactUsEmail = async(req, res) => {
                 // res.send({ status: false, message: "Code not sent" })
                 //console.log("Contact Us Email error", error);
             }
-            else{
+            else {
                 //console.log('Email sent Contact');
             }
             ////console.log('Message sent: %s', info.messageId);
@@ -1076,4 +1104,4 @@ export const  contactUsEmail = async(req, res) => {
     catch (error) {
         //console.log("Exception Level email", error)
     }
-  }
+}
