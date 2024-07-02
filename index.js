@@ -42,8 +42,8 @@ const app = express();
 // app.use(cors());
 app.use(cors({
   origin: 'https://plurawlsubscriptions.vercel.app',
-  methods: ['GET', 'POST'], // Allow specific HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+  // methods: ['GET', 'POST'], // Allow specific HTTP methods
+  // allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
   // credentials: true // If you need to send cookies or other credentials
 }));
 
