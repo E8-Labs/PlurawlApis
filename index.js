@@ -64,6 +64,13 @@ app.use("/api/journal", journalRouter);
 app.use("/api/chat", verifyJwtToken, chatRouter);
 app.use("/api/admin", verifyJwtToken, adminRouter);
 
+
+// Add error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
 const server = app.listen(process.env.Port, () => {
   console.log("Server started listening on " + (process.env.Port));
 });
