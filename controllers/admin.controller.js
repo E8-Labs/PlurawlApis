@@ -109,8 +109,8 @@ const uniqueDownloads = async (days) => {
 
     // Ensure all dates are represented in the graph data
     const graphData = dateArray.map(date => ({
-      date: moment(date).format('YYYY-MM-DD'),
-      total_users: resultLookup[moment(date).format('YYYY-MM-DD')] || 0 // Default to 0 if no data exists for this date
+      date: moment(date).format('MM-DD-YYYY'),
+      total_users: resultLookup[moment(date).format('MM-DD-YYYY')] || 0 // Default to 0 if no data exists for this date
     }));
 
     return {
@@ -165,8 +165,8 @@ const fetchDailyRegistrations = async () => {
 
     // Combine all dates with the registration data, defaulting to zero where no data exists
     const graphData = dateArray.map(date => ({
-      date: moment(date).format('YYYY-MM-DD'),
-      total_users: registrationDataByDate[moment(date).format('YYYY-MM-DD')] || 0  // Default to 0 if no data exists for a date
+      date: moment(date).format('MM-DD-YYYY'),
+      total_users: registrationDataByDate[moment(date).format('MM-DD-YYYY')] || 0  // Default to 0 if no data exists for a date
     }));
 
     return {
@@ -234,8 +234,8 @@ const fetchLoginActivity = async () => {
 
     // Combine all dates with the login data, defaulting to zero where no data exists
     const graphData = dateArray.map(date => ({
-      date: moment(date).format('YYYY-MM-DD'),
-      total_users: loginDataByDate[moment(date).format('YYYY-MM-DD')] || 0  // Default to 0 if no data exists for a date
+      date: moment(date).format('MM-DD-YYYY'),
+      total_users: loginDataByDate[moment(date).format('MM-DD-YYYY')] || 0  // Default to 0 if no data exists for a date
     }));
 
     return {
