@@ -333,6 +333,16 @@ export const GetUsers = (req, res) => {
       if (typeof req.query.offset !== 'undefined') {
         offset = req.query.offset;
       }
+      let searchQuery = {}
+      if(req.query.search){
+        let search = req.query.search;
+        searchQuery = {
+            [Op.or]: [
+              {name: {[Op.like]: `%${search}%`}},
+              {email: {[Op.like]: `%${search}%`}}
+            ]
+        }
+      }
       const user = await User.findAll({
         where: {
           role: {
