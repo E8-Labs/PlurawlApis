@@ -542,7 +542,7 @@ export const UpdateProfile = async (req, res) => {
                 
             }
             else {
-                console.log("No profile image found")
+                console.log("No profile image found", req.file)
                 // res.send({ status: false, message: "No file uploaded", data: null })
                 // let state = req.body.state;
                 // user.state = state;
