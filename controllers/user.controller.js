@@ -25,7 +25,7 @@ const Op = db.Sequelize.Op;
 import UserRole from "../models/userrole.js";
 
 import UserProfileFullResource from "../resources/userprofilefullresource.js";
-import { GetActiveSubscriptions, SubscriptionTypesProduction, SubscriptionTypesSandbox, cancelSubscription, createCard, createCustomer, createSubscription, findCustomer, loadCards } from "./stripe.js";
+import { GetActiveSubscriptions, SubscriptionTypesProduction, checkCouponValidity, SubscriptionTypesSandbox, cancelSubscription, createCard, createCustomer, createSubscription, findCustomer, loadCards } from "./stripe.js";
 import NotificationResource from "../resources/notification.resource.js";
 
 export const RegisterUser = async (req, res) => {
@@ -281,6 +281,12 @@ export const LoginUser = async (req, res) => {
 
 }
 
+
+export const IsCouponValid = async(req, res) => {
+    let cid = req.query.coupon;
+    let valid = await checkCouponValidity(cid)
+    return res.send({status: valid, message: valid ? "Coupon is valid" : "Coupon is invalid", data: valid})
+}
 
 export const DeleteAllSubscriptions = async (req, res) => {
     let deleted = await db.subscriptionModel.destroy({

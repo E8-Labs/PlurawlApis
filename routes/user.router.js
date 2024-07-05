@@ -5,13 +5,14 @@ import {RegisterUser, LoginUser, GetUserProfile, UpdateProfile,
     GetUsers, UpdateGoals, CheckIn, UploadTracks, SocialLogin,
     SendPasswordResetEmail, ResetPassword, encrypt, AddCard, GetUserPaymentSources,
     subscribeUser, CancelSubscription, GetUserNotifications, DeleteAllSubscriptions, DeleteUser,
-generateWebAccessCode, verifyWebAccessCode, contactUsEmail} from "../controllers/user.controller.js";
+generateWebAccessCode, verifyWebAccessCode, contactUsEmail, IsCouponValid} from "../controllers/user.controller.js";
 
 
     import { CreateWebHook, SubscriptionUpdated } from "../controllers/stripe.js";
 
 userRouter.post("/register", RegisterUser);
 userRouter.post("/login", LoginUser);
+userRouter.post("/is_coupon_valid", IsCouponValid);
 userRouter.post("/social_login", SocialLogin);
 userRouter.post("/get_profile", verifyJwtToken, GetUserProfile);
 userRouter.post("/update_profile", verifyJwtToken, UpdateProfile);

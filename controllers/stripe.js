@@ -77,6 +77,48 @@ export const findCustomer = async (user) => {
 }
 
 
+export const checkCouponValidity = async (couponId) => {
+    try {
+        let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
+        console.log("Key is check coupon", key)
+        const stripe = StripeSdk(key);
+      // Retrieve the coupon from Stripe
+      console.log("Checking coupon with id ", couponId)
+      const coupon = await stripe.coupons.retrieve(couponId);
+    console.log("Coupon is ", coupon)
+      // Check if the coupon is still valid
+      if (!coupon.valid) {
+        console.log('Coupon is not valid.')
+        return false
+        return 'Coupon is not valid.';
+      }
+  
+      // Check if the coupon has a redemption limit and if it has been reached
+      if (coupon.max_redemptions && coupon.times_redeemed >= coupon.max_redemptions) {
+        return false
+        console.log( 'Coupon has reached its maximum number of redemptions.')
+      }
+  
+      // Check if the coupon has an expiration date and if it has expired
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (coupon.redeem_by && currentTime > coupon.redeem_by) {
+        return false
+        console.log( 'Coupon has expired.')
+      }
+  
+      // If all checks pass
+      
+      console.log( 'Coupon is valid and available for use.')
+      return true
+    } catch (error) {
+      // Handle errors (e.g., coupon does not exist)
+      console.error('Error retrieving coupon:', error.message);
+      console.log( `Failed to retrieve coupon: ${error.message}`)
+      return false
+    }
+  };
+
+
 export const createCard = async (user, token) => {
 
     let key = process.env.Environment === "Sandbox" ? process.env.STRIPE_SK_TEST : process.env.STRIPE_SK_PRODUCTION;
