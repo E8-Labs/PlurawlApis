@@ -490,29 +490,14 @@ export const UpdateProfile = async (req, res) => {
 
 
             if (typeof (req.file) !== 'undefined') {
-                // ////console.log("Have Profile Image")
-                // const fileContent = req.file.buffer;
-                // const fieldname = req.file.fieldname;
-                // const s3 = new S3({
-                //     accessKeyId: process.env.AccessKeyId,
-                //     secretAccessKey: process.env.SecretAccessKey,
-                //     region: process.env.Region
-                // })
-
-                // const params = {
-                //     Bucket: process.env.Bucket,
-                //     Key: fieldname + "Profile" + Date.now(),
-                //     Body: fileContent,
-                //     ContentDisposition: 'inline',
-                //     ContentType: 'image/jpeg'
-                //     // ACL: 'public-read',
-                // }
+                console.log("Image is not undefined")
 
 
                 const fileContent = req.file.buffer;
                 const fieldname = req.file.fieldname;
                 const fullProfileImageUrl = await uploadMedia(fieldname, fileContent, "image/jpeg", "profiles");
                 const thumbnailUrl = await createThumbnailAndUpload(fileContent, fieldname, "profiles");
+                console.log("Images uploaded ", thumbnailUrl)
 
                 if (user.profile_image !== null && user.profile_image !== '') {
                     try {
@@ -557,6 +542,7 @@ export const UpdateProfile = async (req, res) => {
                 
             }
             else {
+                console.log("No profile image found")
                 // res.send({ status: false, message: "No file uploaded", data: null })
                 // let state = req.body.state;
                 // user.state = state;
