@@ -15,6 +15,10 @@ const UserModel = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         default: ''
       },
+      full_profile_image: {
+        type: Sequelize.STRING,
+        default: ''
+      },
       company: {
         type: Sequelize.STRING,
         default: ''

@@ -220,6 +220,7 @@ async function getUserData(user, currentUser = null) {
         id: user.id,
         // name: user.firstname,
         profile_image: user.profile_image,
+        full_profile_image: user.full_profile_image,
         email: user.email,
         name: user.name || "",
         state: user.state,

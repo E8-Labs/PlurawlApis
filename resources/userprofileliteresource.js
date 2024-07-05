@@ -64,6 +64,7 @@ const dailyLoginData = await db.dailyLogin.findOne({
     const UserFullResource = {
         id: user.id,
         profile_image: user.profile_image,
+        full_profile_image: user.full_profile_image,
         email: user.email,
         name: user.name,
         state: user.state,

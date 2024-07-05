@@ -11,6 +11,7 @@ import nodemailer from 'nodemailer'
 import { GetCostEstimate } from "./journal.controller.js";
 import { v4 as uuidv4 } from 'uuid';
 import UserSubscriptionResource from "../resources/usersubscription.resource.js";
+import { uploadMedia, createThumbnailAndUpload, deleteFileFromS3 } from "../config/storage.js";
 
 import crypto from 'crypto'
 // import { fetchOrCreateUserToken } from "./plaid.controller.js";
@@ -490,47 +491,70 @@ export const UpdateProfile = async (req, res) => {
 
             if (typeof (req.file) !== 'undefined') {
                 // ////console.log("Have Profile Image")
+                // const fileContent = req.file.buffer;
+                // const fieldname = req.file.fieldname;
+                // const s3 = new S3({
+                //     accessKeyId: process.env.AccessKeyId,
+                //     secretAccessKey: process.env.SecretAccessKey,
+                //     region: process.env.Region
+                // })
+
+                // const params = {
+                //     Bucket: process.env.Bucket,
+                //     Key: fieldname + "Profile" + Date.now(),
+                //     Body: fileContent,
+                //     ContentDisposition: 'inline',
+                //     ContentType: 'image/jpeg'
+                //     // ACL: 'public-read',
+                // }
+
+
                 const fileContent = req.file.buffer;
                 const fieldname = req.file.fieldname;
-                const s3 = new S3({
-                    accessKeyId: process.env.AccessKeyId,
-                    secretAccessKey: process.env.SecretAccessKey,
-                    region: process.env.Region
-                })
+                const fullProfileImageUrl = await uploadMedia(fieldname, fileContent, "image/jpeg", "profiles");
+                const thumbnailUrl = await createThumbnailAndUpload(fileContent, fieldname, "profiles");
 
-                const params = {
-                    Bucket: process.env.Bucket,
-                    Key: fieldname + "Profile" + Date.now(),
-                    Body: fileContent,
-                    ContentDisposition: 'inline',
-                    ContentType: 'image/jpeg'
-                    // ACL: 'public-read',
+                if (user.profile_image !== null && user.profile_image !== '') {
+                    try {
+                        let delVideo = await deleteFileFromS3(user.profile_image)
+                        console.log("Deleted Profile Image Thumb ", delVideo)
+                        if (user.full_profile_image !== null && user.full_profile_image !== '') {
+                            let delFull = await deleteFileFromS3(user.full_profile_image)
+                            console.log("Full Profile Image Deleted ", delFull)
+                        }
+                    }
+                    catch (error) {
+                        console.log("Error deleting existing profile image, ", user.intro_video)
+                    }
                 }
 
 
-                const result = s3.upload(params, async (err, d) => {
-                    if (err) {
-                        // ////console.log("error file upload")
-                        return null
-                        //   res.send({ status: false, message: "Image not uploaded " + err, data: null });
-                    }
-                    else {
-                        // ////console.log("File uploaded " + d.Location)
-                        // return d.Location;
-                        user.profile_image = d.Location;
-                        let saved = await user.save();
-                        if (saved) {
-                            let p = await UserProfileFullResource(user)
-                            res.send({ status: true, message: "Profile Image uploaded", data: p })
-                        }
-                    }
-                });
-                // user.profile_image = uploadedImage;
-                // ////console.log("Profile uploaded after ", uploadedImage);
-                // const saved = await user.save();
-                // let u = await UserProfileFullResource(user)
-                // res.send({ status: true, message: "User Profile updated", data: u })
-                // return
+                user.profile_image = thumbnailUrl;
+                user.full_profile_image = fullProfileImageUrl;
+                let saved = await user.save();
+                if (saved) {
+                    let p = await UserProfileFullResource(user)
+                    res.send({ status: true, message: "Profile Image uploaded", data: p })
+                }
+
+                // const result = s3.upload(params, async (err, d) => {
+                //     if (err) {
+                //         // ////console.log("error file upload")
+                //         return null
+                //         //   res.send({ status: false, message: "Image not uploaded " + err, data: null });
+                //     }
+                //     else {
+                //         // ////console.log("File uploaded " + d.Location)
+                //         // return d.Location;
+                        // user.profile_image = d.Location;
+                        // let saved = await user.save();
+                        // if (saved) {
+                        //     let p = await UserProfileFullResource(user)
+                        //     res.send({ status: true, message: "Profile Image uploaded", data: p })
+                        // }
+                //     }
+                // });
+                
             }
             else {
                 // res.send({ status: false, message: "No file uploaded", data: null })
