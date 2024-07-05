@@ -14,7 +14,13 @@ import { verifyJwtToken } from "./middleware/jwtmiddleware.js";
 import dotenv from 'dotenv';
 dotenv.config();
 
-const upload = multer();
+const upload = multer({
+  // storage: multer.memoryStorage(), // or specify diskStorage if saving files to disk
+  limits: {
+    fileSize: 20 * 1024 * 1024, // 10 MB (or set to a value suitable for your use case)
+    fieldSize: 20 * 1024 * 1024, // 10 MB for the field value (if needed)
+  }
+});
 const uploadImg = upload.single("image");
 
 const app = express();
