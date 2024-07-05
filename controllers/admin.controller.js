@@ -348,7 +348,7 @@ export const GetUsers = (req, res) => {
           role: {
             [Op.ne]: UserRole.RoleAdmin
           },
-          searchQuery
+          ...searchQuery
         },
         offset: Number(offset),
         limit: 50
