@@ -61,8 +61,8 @@ export const RegisterUser = async (req, res) => {
                 email: req.body.email,
                 profile_image: '',
                 password: req.body.password,
-                // role: role,//UserRole.RoleUser, 
-                role:UserRole.RoleFree, 
+                role: role,//UserRole.RoleUser, 
+                // role:UserRole.RoleFree, 
                 points: 0,
                 provider_name: 'Email',
                 provider_id: '',
@@ -509,7 +509,7 @@ export const UpdateProfile = async (req, res) => {
                         }
                     }
                     catch (error) {
-                        console.log("Error deleting existing profile image, ", user.intro_video)
+                        console.log("Error deleting existing profile image, ", user.profile_image)
                     }
                 }
 
