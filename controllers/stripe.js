@@ -38,7 +38,7 @@ export const createCustomer = async (user, whoami = "default") => {
             const customer = await stripe.customers.create({
                 name: user.name,
                 email: user.email,
-                metadata: { id: user.id }
+                metadata: { id: user.id, dob: user.dob || '', image: user.profile_image || '', points: user.points }
             });
             console.log("Customer New ", customer)
             return customer
