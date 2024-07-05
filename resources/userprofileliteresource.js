@@ -194,6 +194,20 @@ else if(user.points < 400 && user.points >= 200){
 else if(user.points >= 400){
     level = 3
 }
+
+const dailyLoginData = await db.dailyLogin.findOne({
+    where: {
+      UserId: user.id
+    },
+    
+    order: [['createdAt', 'DESC']],
+    raw: true,
+    limit: 1
+  });
+  let lastLogin = null
+  if(dailyLoginData){
+    lastLogin = dailyLoginData.createdAt;
+  }
     const UserFullResource = {
         id: user.id,
         profile_image: user.profile_image,
@@ -203,6 +217,7 @@ else if(user.points >= 400){
         role: user.role,
         city: user.city,
         color: getRandomColor(),
+        lastLogin: lastLogin,
         // company: user.company,
         // industry: user.industry,
         // title: user.title,
