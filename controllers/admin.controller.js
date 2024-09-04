@@ -350,6 +350,9 @@ export const GetUsers = (req, res) => {
           },
           ...searchQuery
         },
+        // order: [
+        //   ["createdAt", "ASC"]
+        // ],
         offset: Number(offset),
         limit: 50
       });

@@ -6,6 +6,7 @@ import path from "path";
 import moment from "moment-timezone";
 import axios from "axios";
 import chalk from 'chalk';
+import { addToVectorDbChat, findVectorDataChat } from "../services/pineconedb.js";
 
 // import { Pinecone } from "@pinecone-database/pinecone";
 
@@ -438,8 +439,10 @@ export const SendMessage = async (req, res) => {
             try {
 
                 if (chat) {
-                    //console.log("Chat exists")
                     const message = req.body.message;
+                    let added = await addToVectorDbChat(message, chat, user)
+                    //console.log("Chat exists")
+                    
                     let messagesData = []
                     //console.log("Conditiong 1")
                     if (chat.type === "AIChat") {
@@ -465,6 +468,8 @@ export const SendMessage = async (req, res) => {
                     });
                     //console.log("Conditiong 3")
                     if (dbmessages.length > 0) {
+                        let context = await findVectorDataChat(message, chat, user)
+                        // return res.send({data: context})
                         // messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: messages[0].message}]
                         //console.log("Messages are in db", dbmessages.length)
                         //console.log("################################################################")
@@ -479,7 +484,12 @@ export const SendMessage = async (req, res) => {
                         }
                         messagesData.splice(0, 0, { role: "system", content: `Keep your response within 150 words.` })
 
-
+                        
+                        if(context && context.length > 0){
+                            console.log('Previous context is ', context )
+                            messagesData.splice(0, 0, { role: "system", content: `Refer to previous context ${context}` })
+                        }
+                        
                         sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
                             if (gptResponse) {
                                 //console.log("Gpt Response Cost ", gptResponse.total_cost)
@@ -503,6 +513,7 @@ export const SendMessage = async (req, res) => {
                                     }, { transaction: t });
 
                                     messageArray.push(m1)
+                                    let added = await addToVectorDbChat(gptResponse.gptMessage, chat, user)
                                     let messages = splitMessage(gptResponse.gptMessage);
                                     if (messages.length === 1) {
                                         const m2 = await db.messageModel.create({
@@ -553,8 +564,9 @@ export const SendMessage = async (req, res) => {
                     else {
                         //console.log("No messages, new chat")
                         let us = await db.user.findByPk(authData.user.id)
-                        GenerateFirstMessageForAIChat(chat, us, message, (messages) => {
+                        GenerateFirstMessageForAIChat(chat, us, message, async (messages) => {
                             if (messages) {
+                                // let added = await addToVectorDbChat(gptResponse.gptMessage, chat, user)
                                 res.send({ status: true, message: "Messages sent", data: { messages: messages, chat: chat } });
                             }
                             else {
