@@ -179,7 +179,7 @@ function getAIChatPromptText(name) {
     Keep response within 150 words.
     
     `
-    cdText = "You're a self discovery coach."
+    // cdText = "You're a self discovery coach."
     return cdText;
 }
 
