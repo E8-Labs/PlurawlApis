@@ -271,9 +271,10 @@ async function sendQueryToGpt(message, messageData) {
         role: "user",
         content: message // this data is being sent to chatgpt so only message should be sent
     });
-    //console.log(messageData)
+    console.log("################################################################", messageData.length)
+    console.log(messageData)
 
-    //console.log("################################################################", messageData.length)
+    console.log("################################################################", messageData.length)
     const APIKEY = process.env.AIKey;
     ////console.log(APIKEY)
     const headers = {}
