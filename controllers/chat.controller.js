@@ -487,7 +487,8 @@ export const SendMessage = async (req, res) => {
                         
                         if(context && context.length > 0){
                             console.log('Previous context is ', context )
-                            messagesData.splice(0, 0, { role: "system", content: `Use context in your response: ${context}` })
+                            messagesData.push({ role: "system", content: `Use context in your response: ${context}` })
+                            // messagesData.splice(0, 0, { role: "system", content: `Use context in your response: ${context}` })
                         }
                         
                         sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
