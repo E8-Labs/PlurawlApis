@@ -488,7 +488,7 @@ export const SendMessage = async (req, res) => {
                         
                         if(context && context.length > 0){
                             console.log('Previous context is ', context )
-                            messagesData.push({ role: "system", content: `Answer the user question and provide the response based on the context you're provided here: ${context}` })
+                            messagesData.push({ role: "user", content: `Answer the user question and provide the response based on the context you're provided here: ${context}` })
                             // messagesData.splice(0, 0, { role: "system", content: `Use context in your response: ${context}` })
                         }
                         
