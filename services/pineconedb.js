@@ -170,7 +170,7 @@ const pineconeClient = new Pinecone({
     try {
         console.log(`FindingForVector  for user ${user.id}`, text)
       // const { chatId, query } = req.body;
-      let topVectors = 5;
+      let topVectors = 50;
       // if(query == null){
       //   console.log("Find Context  query null", text)
       //   topVectors = 5
