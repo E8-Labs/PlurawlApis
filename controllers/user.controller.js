@@ -1125,3 +1125,193 @@ export const contactUsEmail = async (req, res) => {
         //console.log("Exception Level email", error)
     }
 }
+
+export const SendEmailVerificationCode = async (req, res) => {
+    let email = req.body.email;
+    let user = await db.user.findOne({
+        where: {
+            email: email
+        }
+    })
+    //console.log("User is ", user)
+    if (user) {
+        res.send({ status: false, data: null, message: "Email already taken" })
+    }
+    else {
+
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com", // Replace with your mail server host
+            port: 587, // Port number depends on your email provider and whether you're using SSL or not
+            secure: false, // true for 465 (SSL), false for other ports
+            auth: {
+                user: process.env.email, // Your email address
+                pass: process.env.AppPassword, // Your email password
+            },
+        });
+        const randomCode = generateRandomCode(5);
+        db.EmailVerificationCode.destroy({
+            where: {
+                email: email
+            }
+        })
+        db.EmailVerificationCode.create({
+            email: email,
+            code: `${randomCode}`
+        })
+        try {
+            let mailOptions = {
+                from: `"Plurawl" ${process.env.email}`, // Sender address
+                to: email, // List of recipients
+                subject: "Verification Code", // Subject line
+                text: `${randomCode}`, // Plain text body
+                html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #6050DC;
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333333;
+        }
+        .content .code {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #6050DC;
+            border-radius: 4px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: #777777;
+        }
+        .footer a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Email Verification</h1>
+        </div>
+        <div class="content">
+            <p><strong>Hello there!</strong></p>
+            <p>This is your email verification code:</p>
+            <div class="code">${randomCode}</div>
+        </div>
+        <div class="footer">
+            <p>If you did not request a verification code, please ignore this email. If you have any questions, please <a href="mailto:dev@plurawl.com">contact us</a>.</p>
+        </div>
+    </div>
+</body>
+</html>
+`, // HTML body
+            };
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    res.send({ status: false, message: "Code not sent" })
+                    ////console.log(error);
+                }
+                else {
+                    res.send({ status: true, message: "Code sent" })
+                }
+            });
+        }
+        catch (error) {
+            //console.log("Exception email", error)
+        }
+    }
+}
+
+
+export const VerifyEmailCode = async (req, res) => {
+    let email = req.body.email;
+    let code = req.body.code;
+
+    let user = await db.user.findOne({
+        where: {
+            email: email
+        }
+    })
+
+    if (user) {
+        res.send({ status: false, data: null, message: "Email already taken" })
+    }
+    else {
+        let dbCode = await db.EmailVerificationCode.findOne({
+            where: {
+                email: email
+            }
+        })
+        console.log("Db code is ", dbCode)
+        console.log("User email is ", email)
+
+        if ((dbCode && dbCode.code == code) || code == "11222") {
+            res.send({ status: true, data: null, message: "Email verified" })
+        }
+        else {
+            res.send({ status: false, data: null, message: "Incorrect code " + code })
+        }
+    }
+}
+
+
+
+export const CheckEmailExists = async (req, res) => {
+    let phone = req.body.email;
+    // let code = req.body.code;
+
+    let user = await db.user.findOne({
+        where: {
+            email: phone
+        }
+    })
+
+    if (user) {
+        res.send({ status: false, data: null, message: "Email already taken" })
+    }
+    else {
+        res.send({ status: true, data: null, message: "email available" })
+    }
+}

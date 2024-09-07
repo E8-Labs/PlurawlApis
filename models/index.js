@@ -44,6 +44,8 @@ import DailyLoginModel from "./dailylogin.model.js";
 import NotificationModel from "./notification.model.js";
 import UserWebAccessCodeModel from "./webaccesscode.model.js";
 
+import EmailVerificationCode from "./emailverificationcode.model.js";
+
 
 
 db.user = UserModel(sequelize, Sequelize);
@@ -112,6 +114,10 @@ db.notification = NotificationModel(sequelize, Sequelize);
 db.WebAccessCode = UserWebAccessCodeModel(sequelize, Sequelize);
 db.user.hasMany(db.WebAccessCode);
 db.WebAccessCode.belongsTo(db.user);
+
+
+db.EmailVerificationCode = EmailVerificationCode(sequelize, Sequelize);
+
 
 
 
