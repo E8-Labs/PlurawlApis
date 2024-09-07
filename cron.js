@@ -18,7 +18,7 @@ import { getWeeklyDates, getJournalsInAWeek, GetSnapshotFromJournals, fetchWeekl
 // import houseRouter from "./routes/hosue.router.js";
 
 
-import { verifyJwtToken } from "./middleware/jwtmiddleware.js";
+import { {verifyJwtToken, verifyJwtTokenOptional} } from "./middleware/jwtmiddleware.js";
 
 import dotenv from 'dotenv'
 import { RetrieveASubscriptions } from "./controllers/stripe.js";

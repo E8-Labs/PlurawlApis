@@ -9,7 +9,7 @@ import moment from "moment-timezone";
 
 import { GenerateQuote } from "./controllers/user.controller.js";
 import { getWeeklyDates, getJournalsInAWeek, GetSnapshotFromJournals } from "./controllers/journal.controller.js";
-import { verifyJwtToken } from "./middleware/jwtmiddleware.js";
+import { verifyJwtToken, verifyJwtTokenOptional } from "./middleware/jwtmiddleware.js";
 
 import dotenv from 'dotenv';
 dotenv.config();

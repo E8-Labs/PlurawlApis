@@ -1,6 +1,6 @@
 import express from "express";
 const userRouter = express.Router();
-import {verifyJwtToken}  from "../middleware/jwtmiddleware.js";
+import {verifyJwtToken, verifyJwtTokenOptional}  from "../middleware/jwtmiddleware.js";
 import {RegisterUser, LoginUser, GetUserProfile, UpdateProfile, 
     GetUsers, UpdateGoals, CheckIn, UploadTracks, SocialLogin,
     SendPasswordResetEmail, ResetPassword, encrypt, AddCard, GetUserPaymentSources,

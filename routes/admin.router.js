@@ -1,6 +1,6 @@
 import express from "express";
 const adminRouter = express.Router();
-import {verifyJwtToken}  from "../middleware/jwtmiddleware.js";
+import {verifyJwtToken, verifyJwtTokenOptional}  from "../middleware/jwtmiddleware.js";
 import { GetUsers, AdminDashboard, CreatePromoCode, makeAllFree } from "../controllers/admin.controller.js";
 
 

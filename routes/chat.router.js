@@ -4,7 +4,7 @@ import express from "express"
 const chatRouter = express.Router();
 
 import {CreateChat, UpdateChat, SendMessage, GetMessages, GetChatsList} from "../controllers/chat.controller.js";
-import verifyJwtToken from "../middleware/jwtmiddleware.js";
+import {verifyJwtToken, verifyJwtTokenOptional} from "../middleware/jwtmiddleware.js";
 // const { verify } = require("jsonwebtoken");
 
 chatRouter.post("/create_chat", verifyJwtToken, CreateChat);
