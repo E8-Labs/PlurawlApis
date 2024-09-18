@@ -213,6 +213,7 @@ const pineconeClient = new Pinecone({
       contextTexts.map((text)=> {
         context = `${context}\n${text}`
       })
+      return contextTexts;
       return context;//contextTexts;
     } catch (error) {
       console.log("Error finding context ", error);

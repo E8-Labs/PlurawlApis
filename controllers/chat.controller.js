@@ -179,7 +179,7 @@ function getAIChatPromptText(name) {
     Keep response within 150 words.
     
     `
-    // cdText = "You're a self discovery coach."
+    // cdText = "You're a self discovery coach. Help the user regarding his queries. "
     return cdText;
 }
 
@@ -428,6 +428,7 @@ function splitMessage2(text) {
 }
 
 
+const normalizeWhitespace = (text) => text.replace(/\s+/g, ' ').trim();
 export const SendMessage = async (req, res) => {
     JWT.verify(req.token, process.env.SecretJwtKey, async (err, authData) => {
         //console.log("Sending message", req.body.chatid)
@@ -441,7 +442,7 @@ export const SendMessage = async (req, res) => {
 
                 if (chat) {
                     const message = req.body.message;
-                    let added = await addToVectorDbChat(message, chat, user)
+                    
                     //console.log("Chat exists")
                     
                     let messagesData = []
@@ -470,7 +471,32 @@ export const SendMessage = async (req, res) => {
                     //console.log("Conditiong 3")
                     if (dbmessages.length > 0) {
                         let context = await findVectorDataChat(message, chat, user)
-                        // return res.send({data: context})
+                        let added = await addToVectorDbChat(message, chat, user)
+                        if(context && context.length > 0){
+                            for(let i = 0; i < context.length; i++){
+                                let text = context[i];
+                                let normalizedText = normalizeWhitespace(text);
+                                let dbMessage = await db.messageModel.findOne({
+                                    where:{
+                                        message:{
+                                            [db.Sequelize.Op.like]: `%${normalizedText}%`
+                                        }
+                                    }
+                                })
+                                console.log(`Finding for text ${text}`)
+                                if(dbMessage){
+                                    console.log("Is in database")
+                                    messagesData.push({ role: dbMessage.from === "me" ? "user" : "system", content: dbMessage.message })
+                                }
+                                else{
+                                    console.log("Is not in database")
+                                    messagesData.push({ role: "system", content: text })
+                                }
+                            }
+                        }
+
+                        console.log("Data from Vector DB ", messagesData)
+                        // return res.send({data: messagesData})
                         // messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: messages[0].message}]
                         //console.log("Messages are in db", dbmessages.length)
                         //console.log("################################################################")
@@ -486,11 +512,11 @@ export const SendMessage = async (req, res) => {
                         messagesData.splice(0, 0, { role: "system", content: `Keep your response within 150 words.` })
 
                         
-                        if(context && context.length > 0){
-                            console.log('Previous context is ', context )
-                            messagesData.push({ role: "user", content: `Answer the user question and provide the response based on the user's prevous conversations: ${context}` })
-                            // messagesData.splice(0, 0, { role: "system", content: `Use context in your response: ${context}` })
-                        }
+                        // if(context && context.length > 0){
+                        //     console.log('Previous context is ', context )
+                        //     messagesData.push({ role: "user", content: `Answer the user question and provide the response based on the user's prevous conversations: ${context}` })
+                        //     // messagesData.splice(0, 0, { role: "system", content: `Use context in your response: ${context}` })
+                        // }
                         
                         sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
                             if (gptResponse) {
@@ -564,6 +590,7 @@ export const SendMessage = async (req, res) => {
                         })
                     }
                     else {
+                        let added = await addToVectorDbChat(message, chat, user)
                         //console.log("No messages, new chat")
                         let us = await db.user.findByPk(authData.user.id)
                         GenerateFirstMessageForAIChat(chat, us, message, async (messages) => {
@@ -593,6 +620,7 @@ export const SendMessage = async (req, res) => {
                 // })
             }
             catch (error) {
+                console.log(error)
                 res.send({ status: false, message: "Exception " + error, data: null })
             }
 
