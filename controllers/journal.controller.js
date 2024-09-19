@@ -365,11 +365,11 @@ export const AddJournal = async (req, res) => {
               //embed Journal data now
               let embeded = await addToVectorDb(journal, user);
               // set Journal Id to chat.
-              if (typeof req.body.chatid !== "undefined") {
+              if (typeof req.body.chatid != "undefined" && req.body.chatid != null) {
                 let chat = await db.chatModel.findByPk(chatid);
                 chat.UserJournalId = result.id;
                 let chatSaved = await chat.save();
-                ////console.log("Chat Saved ", chatSaved)
+                //console.log("Chat Saved ", chatSaved)
               }
             }
             let j = await JournalResource(result);
