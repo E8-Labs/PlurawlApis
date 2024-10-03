@@ -461,7 +461,7 @@ export const CheckIn = (req, res) => {
                     description: req.body.description,
                     acronym: req.body.acronym,
                     UserId: user.id,
-                    type: req.body.type, // checkintypes
+                    type: req.body.type || "manual", // checkintypes
                 }
                 db.userCheckinModel.create(data).then(async (result) => {
                     let u = await UserProfileFullResource(user);
