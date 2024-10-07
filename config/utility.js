@@ -1,4 +1,4 @@
-import db from "../models";
+import db from "../models/index.js";
 
 const getRandomColor = () => {
   // Generate random values for red, green, and blue components
