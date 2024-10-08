@@ -24,7 +24,7 @@ const isUserRegisteredWithin14Days = async (userId) => {
       where: {
         id: userId, // Assuming the user ID field is 'id'
         createdAt: {
-          [Op.gte]: fourteenDaysAgo, // Check if createdAt is greater than or equal to 14 days ago
+          [db.Sequelize.Op.gte]: fourteenDaysAgo, // Check if createdAt is greater than or equal to 14 days ago
         },
       },
     });
