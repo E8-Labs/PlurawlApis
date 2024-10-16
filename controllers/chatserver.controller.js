@@ -3,6 +3,9 @@ import { Server } from "socket.io";
 import { OpenAI } from "openai"; // Adjust import based on your OpenAI SDK version
 import http from "http"; // Importing http module
 
+import dotenv from "dotenv";
+dotenv.config();
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
