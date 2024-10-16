@@ -117,10 +117,10 @@ io.on("connection", (socket) => {
 
           console.log("Saved message to database:", savedMessage);
 
-          // Emit a final message to indicate the stream has ended
-          socket.emit("receiveMessage", {
+          // Emit a final message to indicate the stream has ended & send both the user and other message here
+          socket.emit("completedMessage", {
             status: true,
-            message: fullResponse,
+            messages: [m1, savedMessage],
             endOfStream: true, // Indicates the end of the stream
           });
         } else {
