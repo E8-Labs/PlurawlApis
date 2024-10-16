@@ -93,8 +93,11 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something broke!");
 });
 
-const server = app.listen(process.env.Port, () => {
-  console.log("Server started listening on " + process.env.Port);
+// const server = app.listen(process.env.Port, () => {
+//   console.log("Server started listening on " + process.env.Port);
+// });
+const server = app.listen(process.env.Port, "0.0.0.0", () => {
+  console.log("Server started listening on port 8003");
 });
 
 //Socket Connection
