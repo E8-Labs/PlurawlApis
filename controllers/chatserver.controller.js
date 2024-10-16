@@ -1,9 +1,10 @@
-const express = require("express");
-const { Server } = require("socket.io");
-const OpenAI = require("openai");
+import express from "express";
+import { Server } from "socket.io";
+import { OpenAI } from "openai"; // Adjust import based on your OpenAI SDK version
+import http from "http"; // Importing http module
 
 const app = express();
-const server = require("http").createServer(app);
+const server = http.createServer(app);
 const io = new Server(server);
 const openai = new OpenAI({
   apiKey: process.env.AIKey,
@@ -34,6 +35,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("Server is running on port 3000");
+server.listen(8004, () => {
+  console.log("Server is running on port 8004");
 });
