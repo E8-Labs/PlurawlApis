@@ -32,6 +32,7 @@ io.on("connection", (socket) => {
     // responseStream.on("end", () => {
     //   socket.emit("receiveMessage", ""); // Emit an empty string to signify end of message
     // });
+    socket.emit("receiveMessage", "Echo: " + message);
   });
 
   socket.on("disconnect", () => {
