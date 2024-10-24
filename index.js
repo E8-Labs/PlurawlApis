@@ -7,6 +7,12 @@ import nodeCron from "node-cron";
 import chalk from "chalk";
 import moment from "moment-timezone";
 
+import db from "./models/index.js";
+import journalRouter from "./routes/journal.router.js";
+import chatRouter from "./routes/chat.router.js";
+import adminRouter from "./routes/admin.router.js";
+import greetingRouter from "./routes/ai.route.js";
+
 import { GenerateQuote } from "./controllers/user.controller.js";
 import {
   getWeeklyDates,
@@ -64,11 +70,6 @@ app.options("*", (req, res) => {
   res.sendStatus(200);
 });
 
-import db from "./models/index.js";
-import journalRouter from "./routes/journal.router.js";
-import chatRouter from "./routes/chat.router.js";
-import adminRouter from "./routes/admin.router.js";
-
 db.sequelize
   .authenticate()
   .then(() => {
@@ -86,6 +87,8 @@ app.use("/api/users", uploadImg, userRouter);
 app.use("/api/journal", journalRouter);
 app.use("/api/chat", verifyJwtToken, chatRouter);
 app.use("/api/admin", verifyJwtToken, adminRouter);
+
+app.use("/api/aicontent", greetingRouter);
 
 // Add error handling middleware
 app.use((err, req, res, next) => {

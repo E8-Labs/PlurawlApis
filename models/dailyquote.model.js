@@ -1,26 +1,31 @@
 const DailyQuoteModel = (sequelize, Sequelize) => {
-    const DailyQuote = sequelize.define("DailyQuote", {
+  const DailyQuote = sequelize.define(
+    "DailyQuote",
+    {
       quote: {
         type: Sequelize.STRING(500),
-        default: ''
+        default: "",
       },
       date: {
         type: Sequelize.STRING,
-        default: ''
+        default: "",
       },
-      
-    },
-    {
-        indexes: [
-            {
-                unique: true,
-                fields: ['date']
-            }
-        ]
+      UserId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
     }
-    );
-  
-    return DailyQuote;
-  };
+    // {
+    //   indexes: [
+    //     {
+    //       unique: true,
+    //       fields: ["date"],
+    //     },
+    //   ],
+    // }
+  );
 
-  export default DailyQuoteModel;
+  return DailyQuote;
+};
+
+export default DailyQuoteModel;
