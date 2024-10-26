@@ -159,13 +159,28 @@ async function checkJournalsForLastNDays(userId, numberOfDays) {
 
 // Example usage: Pass the user's ID and the number of days to check
 
-async function getRecentJournalsFromDb(user) {
+async function getRecentJournalsFromDb(user, offset = 0, search = "") {
+  const whereConditions = {
+    UserId: user.id,
+  };
+
+  // Add search filter if a search term is provided
+  if (search && search != "") {
+    whereConditions[Op.or] = [
+      { feeling: { [db.Sequelize.Op.like]: `%${search}%` } },
+      { title: { [db.Sequelize.Op.like]: `%${search}%` } },
+      { detail: { [db.Sequelize.Op.like]: `%${search}%` } },
+      { cd: { [db.Sequelize.Op.like]: `%${search}%` } },
+      { snapshot: { [db.Sequelize.Op.like]: `%${search}%` } },
+      { mood: { [db.Sequelize.Op.like]: `%${search}%` } },
+    ];
+  }
+
   const journals = await db.userJournalModel.findAll({
-    where: {
-      UserId: user.id,
-    },
-    limit: 4,
-    order: [["createdAt", "DESC"]], // Ensure 'createdAt' is correctly indexed for performance
+    where: whereConditions,
+    limit: 20,
+    offset: offset,
+    order: [["createdAt", "DESC"]],
   });
 
   const sections = [];
@@ -183,15 +198,14 @@ async function getRecentJournalsFromDb(user) {
       sectionName = moment(createdAt).format("MMMM");
     } else {
       sectionName = moment(createdAt).format("MMMM");
-      // sectionName = moment(createdAt).format('MM-DD-YYYY');
     }
 
     if (!sections.includes(sectionName)) {
       sections.push(sectionName);
-      journalsFormatted[sectionName] = []; // Initialize an empty array for new section
+      journalsFormatted[sectionName] = [];
     }
 
-    journalsFormatted[sectionName].push(journal); // Append journal to the appropriate section
+    journalsFormatted[sectionName].push(journal);
   });
 
   return {
@@ -199,20 +213,31 @@ async function getRecentJournalsFromDb(user) {
     journals: journalsFormatted,
   };
 }
+
+// Controller function to handle search parameter
 export const fetchRecentJournals = async (req, res) => {
   JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
     if (authData) {
-      let user = await db.user.findByPk(authData.user.id);
-      let data = await getRecentJournalsFromDb(user);
+      const user = await db.user.findByPk(authData.user.id);
+      if (!user) {
+        res.send({
+          data: null,
+          message: `No such user`,
+          status: false,
+        });
+      }
+      const search = req.query.search || ""; // Get search term from query parameters
+      const data = await getRecentJournalsFromDb(user, 0, search);
 
       res.send({
         data: data,
-        message: "Recent Journals for " + user.id,
+        message: `Recent Journals for ${user.id}`,
         status: true,
       });
     }
   });
 };
+
 function sendLevelUpEmail(level, user) {
   let levelName = "";
   if (level === 1) {
@@ -259,12 +284,11 @@ function sendLevelUpEmail(level, user) {
 }
 
 export const AddJournal = async (req, res) => {
-  
   JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
     if (authData) {
       let algo = process.env.EncryptionAlgorithm;
       let data = req.body;
-      console.log('JOURNAL DATA', data)
+      console.log("JOURNAL DATA", data);
       let journalType = req.body.type || "manual";
       let journalText = req.body.detail;
       console.log("Journal text is ", journalText);
@@ -365,7 +389,10 @@ export const AddJournal = async (req, res) => {
               //embed Journal data now
               let embeded = await addToVectorDb(journal, user);
               // set Journal Id to chat.
-              if (typeof req.body.chatid != "undefined" && req.body.chatid != null) {
+              if (
+                typeof req.body.chatid != "undefined" &&
+                req.body.chatid != null
+              ) {
                 let chat = await db.chatModel.findByPk(chatid);
                 chat.UserJournalId = result.id;
                 let chatSaved = await chat.save();
@@ -918,17 +945,16 @@ export const GetSnapshotFromJournals = async (text) => {
 export const AnalyzeJournal = async (req, res) => {
   // setShowIndicator(true)
   let token = req.token;
-  if(token == null || token == ""){
-    console.log("Analyzing journal without token")
-    return AnalyzeWithoutAuthToken(req, res)
+  if (token == null || token == "") {
+    console.log("Analyzing journal without token");
+    return AnalyzeWithoutAuthToken(req, res);
+  } else {
+    console.log("Analyzing journal with token");
+    return AnalyzeJournalWithVector(req, res);
   }
-  else{
-    console.log("Analyzing journal with token")
-    return AnalyzeJournalWithVector(req, res)
-  }
-}
+};
 
-const AnalyzeWithoutAuthToken = async(req, res)=>{
+const AnalyzeWithoutAuthToken = async (req, res) => {
   let paragraph = req.body.paragraph;
   let text = `Depending on the following journal written by me give me the mood of the writer from one of these:  Moods: "High energy, Pleasant", "High energy, Unpleasant", "Low energy, Pleasant", "Low energy, unpleasant" And also give me a proper feeling in one word that best describes the paragraph and falls under the mood selected above. Also give me the acronym for this feeling and a little description describing the meaning of that word. Include how we can pronounce this feeling word as well. This is the paragraph: ${paragraph} Now give me a snapshot of the conversation which is a small description that tells how i am feeling and what is mood and energy is. Do mention the mood and feeling in the paragraph and give me appropriate information that i can use to highlight those words or sentences in the snapshot using react native.
   
@@ -956,68 +982,68 @@ const AnalyzeWithoutAuthToken = async(req, res)=>{
 
   in the texthighlight key, only give me a list(array of strings) of words and sentences that should be highlighted.
   Make sure that the response string is just a json object and no extra text. If you want to add additional info. Then add it inside the comment key in the json object. 
-  `
-  let messageData = []
+  `;
+  let messageData = [];
   messageData.push({
-      role: "user",
-      content: text,
-  })
+    role: "user",
+    content: text,
+  });
 
   const APIKEY = process.env.AIKey;
   // ////console.log(APIKEY)
   // ////console.log(messageData)
-  const headers = {}
+  const headers = {};
   const data = {
-      model: GptModel,
-      messages: messageData,
-      // max_tokens: 1000,
-  }
+    model: GptModel,
+    messages: messageData,
+    // max_tokens: 1000,
+  };
 
   try {
-      ////console.log("Creating snapshot")
-      const result = await axios.post("https://api.openai.com/v1/chat/completions", data, {
-          headers: {
-              'content-type': 'application/json',
-              'Authorization': `Bearer ${APIKEY}`
-          }
+    ////console.log("Creating snapshot")
+    const result = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      data,
+      {
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${APIKEY}`,
+        },
+      }
+    );
+
+    // ////console.log("Api result is ", result)
+    if (result.status === 200) {
+      let gptMessage = result.data.choices[0].message.content;
+      gptMessage = gptMessage.replace("```", "");
+      gptMessage = gptMessage.replace("json", "");
+      gptMessage = gptMessage.replace("```", "");
+      // ////console.log("GPT Response is  ", gptMessage)
+      let json = JSON.parse(gptMessage);
+
+      let estimate = GetCostEstimate(result.data);
+      let created = await db.costModel.create({
+        type: "AnalyzeJournal",
+        total_cost: estimate.total_cost,
+        total_tokens: estimate.completion_tokens + estimate.prompt_tokens,
       });
 
-      // ////console.log("Api result is ", result)
-      if (result.status === 200) {
-          let gptMessage = result.data.choices[0].message.content;
-          gptMessage = gptMessage.replace('```', '');
-          gptMessage = gptMessage.replace('json', '');
-          gptMessage = gptMessage.replace('```', '');
-          // ////console.log("GPT Response is  ", gptMessage)
-          let json = JSON.parse(gptMessage)
-
-
-          let estimate = GetCostEstimate(result.data);
-          let created = await db.costModel.create({
-              type: "AnalyzeJournal",
-              total_cost: estimate.total_cost,
-              total_tokens: estimate.completion_tokens + estimate.prompt_tokens
-          })
-
-
-          ////console.log("Json obejct is ", json)
-          res.send({ status: true, data: json, message: "Snapshot" })
-          // return gptMessage;
-      }
-      else {
-          res.send({ status: false, message: "Snapshot not obtained", data: null })
-      }
+      ////console.log("Json obejct is ", json)
+      res.send({ status: true, data: json, message: "Snapshot" });
+      // return gptMessage;
+    } else {
+      res.send({ status: false, message: "Snapshot not obtained", data: null });
+    }
+  } catch (error) {
+    res.send({ status: false, message: "snapshot exception", data: error });
   }
-  catch (error) {
-      res.send({ status: false, message: "snapshot exception", data: error })
-  }
-}
+};
 
 export const AnalyzeJournalWithVector = async (req, res) => {
   // setShowIndicator(true)
 
   let paragraph = req.body.paragraph;
-  console.log("In Analyze Journal")
+  console.log("In Analyze Journal");
   JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
     if (authData) {
       let foundPreviousResults = await findVectorData(paragraph, authData.user);
