@@ -45,6 +45,7 @@ export const CreateChat = async (req, res) => {
         const result = await db.sequelize.transaction(async (t) => {
           const promptid = req.body.promptId;
           const userid = authData.user.id;
+          // let journalId = req.body.journalId;
 
           const chatData = {
             title: req.body.title,
@@ -100,6 +101,7 @@ export const CreateChat = async (req, res) => {
         // res.send(result);
       } catch (error) {
         // await t.rollback();
+        console.log("Excption", error);
         res.send({
           message: "Error Transaction " + error,
           data: error,

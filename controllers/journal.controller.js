@@ -291,7 +291,7 @@ export const AddJournal = async (req, res) => {
       console.log("JOURNAL DATA", data);
       let journalType = req.body.type || "manual";
       let journalText = req.body.detail;
-      console.log("Journal text is ", journalText);
+      // console.log("Journal text is ", journalText);
       console.log("---------------------------------------\n\n\n\n");
       let user = await db.user.findOne({
         where: {
