@@ -247,7 +247,10 @@ async function GenerateFirstMessageForAIChat(
 
         const m1 = await db.messageModel.create(
           {
-            message: message != null ? message : cdText, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+            message:
+              message != null
+                ? message.replace(/^"|"$/g, "")
+                : cdText.replace(/^"|"$/g, ""), // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
             ChatId: chat.id,
             from: message != null ? "me" : "gpt",
             type: message != null ? "text" : "promptinvisible",
@@ -258,7 +261,7 @@ async function GenerateFirstMessageForAIChat(
         );
         const m2 = await db.messageModel.create(
           {
-            message: gptResponse.gptMessage,
+            message: gptResponse.gptMessage.replace(/^"|"$/g, ""),
             ChatId: chat.id,
             from: "gpt",
             type: "text", //messages[1].type
@@ -589,9 +592,15 @@ export const SendMessage = async (req, res) => {
                   });
 
                   let messageArray = [];
+                  // const cleanedMessages = messages.map((msg) => {
+                  //   return {
+                  //     ...msg.toJSON(), // Convert Sequelize model instance to plain object
+                  //     message: msg.message.replace(/^"|"$/g, ""), // Remove quotes from start and end
+                  //   };
+                  // });
                   const m1 = await db.messageModel.create(
                     {
-                      message: message, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+                      message: message.replace(/^"|"$/g, ""), // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
                       ChatId: chatid,
                       from: "me",
                       type: "text",
@@ -611,7 +620,7 @@ export const SendMessage = async (req, res) => {
                   if (messages.length === 1) {
                     const m2 = await db.messageModel.create(
                       {
-                        message: messages[0],
+                        message: messages[0].replace(/^"|"$/g, ""),
                         ChatId: chatid,
                         from: "gpt",
                         type: "text", //messages[1].type
@@ -625,7 +634,7 @@ export const SendMessage = async (req, res) => {
                     let mes2 = messages[1];
                     const m2 = await db.messageModel.create(
                       {
-                        message: mes1,
+                        message: mes1.replace(/^"|"$/g, ""),
                         ChatId: chatid,
                         from: "gpt",
                         type: "text", //messages[1].type
@@ -635,7 +644,7 @@ export const SendMessage = async (req, res) => {
                     );
                     const m3 = await db.messageModel.create(
                       {
-                        message: mes2,
+                        message: mes2.replace(/^"|"$/g, ""),
                         ChatId: chatid,
                         from: "gpt",
                         type: "text", //messages[1].type
@@ -758,11 +767,20 @@ export const GetMessages = async (req, res) => {
           offset: offset,
           limit: 100,
         });
+
         if (messages) {
+          // Remove double quotes from start and end of each message's `message` text
+          const cleanedMessages = messages.map((msg) => {
+            return {
+              ...msg.toJSON(), // Convert Sequelize model instance to plain object
+              message: msg.message.replace(/^"|"$/g, ""), // Remove quotes from start and end
+            };
+          });
+
           res.send({
             status: true,
             message: "Messages ",
-            data: await messages,
+            data: cleanedMessages,
           });
         } else {
           res.send({
@@ -772,8 +790,7 @@ export const GetMessages = async (req, res) => {
           });
         }
       } else {
-        ////console.log("Not such chat", chatid)
-        // no such chat exists
+        // No such chat exists
         res.send({ status: false, message: "No such chat", data: null });
       }
     } else {
