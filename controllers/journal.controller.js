@@ -159,7 +159,12 @@ async function checkJournalsForLastNDays(userId, numberOfDays) {
 
 // Example usage: Pass the user's ID and the number of days to check
 
-async function getRecentJournalsFromDb(user, offset = 0, search = "") {
+async function getRecentJournalsFromDb(
+  user,
+  offset = 0,
+  search = "",
+  limit = 5
+) {
   const whereConditions = {
     UserId: user.id,
   };
@@ -178,7 +183,7 @@ async function getRecentJournalsFromDb(user, offset = 0, search = "") {
 
   const journals = await db.userJournalModel.findAll({
     where: whereConditions,
-    limit: 20,
+    limit: limit,
     offset: offset,
     order: [["createdAt", "DESC"]],
   });
@@ -218,6 +223,7 @@ async function getRecentJournalsFromDb(user, offset = 0, search = "") {
 export const fetchRecentJournals = async (req, res) => {
   JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
     if (authData) {
+      let limit = req.query.limit || 5;
       const user = await db.user.findByPk(authData.user.id);
       if (!user) {
         res.send({
@@ -227,7 +233,7 @@ export const fetchRecentJournals = async (req, res) => {
         });
       }
       const search = req.query.search || ""; // Get search term from query parameters
-      const data = await getRecentJournalsFromDb(user, 0, search);
+      const data = await getRecentJournalsFromDb(user, 0, search, limit);
 
       res.send({
         data: data,
