@@ -90,7 +90,7 @@ io.on("connection", (socket) => {
           let totalCompletionTokens = 0;
 
           for await (const chunk of completion) {
-            let chunkData = chunk.choices[0]?.delta?.content?.trim();
+            let chunkData = chunk.choices[0]?.delta?.content || "";
             console.log("Chunk data ", chunkData);
             totalPromptTokens += chunk.usage?.prompt_tokens;
             totalCompletionTokens += chunk.usage?.completion_tokens;
