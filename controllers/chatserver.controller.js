@@ -90,12 +90,13 @@ io.on("connection", (socket) => {
           let totalCompletionTokens = 0;
 
           for await (const chunk of completion) {
-            let chunkData = chunk.choices[0].delta.content;
+            let chunkData = chunk.choices[0]?.delta?.content?.trim();
+            console.log("Chunk data ", chunkData);
             totalPromptTokens += chunk.usage?.prompt_tokens;
             totalCompletionTokens += chunk.usage?.completion_tokens;
 
             if (chunkData) {
-              fullResponse += chunkData; // Collecting the entire response
+              fullResponse += fullResponse ? ` ${chunkData}` : chunkData; // Collecting the entire response
 
               // Emit each chunk with a 100 ms delay
               await delay(100);
