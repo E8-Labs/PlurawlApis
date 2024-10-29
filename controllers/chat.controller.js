@@ -105,6 +105,8 @@ export const CreateChat = async (req, res) => {
             snapshot: snapshot,
             cd: cd,
             type: chattype,
+            old_chat_id: oldChatId,
+            old_journal_id: journalId,
           };
 
           let chatCreated = await Chat.create(chatData, { transaction: t });

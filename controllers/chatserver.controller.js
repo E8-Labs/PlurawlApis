@@ -47,12 +47,16 @@ io.on("connection", (socket) => {
 
           // Check the type of chat and set initial context
           if (chat.type === "AIChat") {
-            let name = user.name || "";
-            if (name.length > 0) {
-              name = name.split(" ")[0];
+            if (chat.old_journal_id == null) {
+              let name = user.name || "";
+              if (name.length > 0) {
+                name = name.split(" ")[0];
+              }
+              let cdText = getAIChatPromptText(name);
+              messagesData.push({ role: "system", content: cdText });
+            } else {
+              // this chat was started from an old journal
             }
-            let cdText = getAIChatPromptText(name);
-            messagesData.push({ role: "system", content: cdText });
           }
 
           // Retrieve previous messages from the database
@@ -106,7 +110,7 @@ io.on("connection", (socket) => {
               });
             }
 
-            console.log(JSON.stringify(chunk));
+            // console.log(JSON.stringify(chunk));
           }
 
           // Save the user message to the database
