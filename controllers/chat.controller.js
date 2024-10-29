@@ -39,7 +39,7 @@ export const CreateChat = async (req, res) => {
       // alongwith CD. Earlier we had been only passing CD
       let journalText = req.body.journalText || null;
       let textHighlights = req.body.textHighlights || null;
-
+      let cd = req.body.cd || null;
       if (oldChatId || journalId) {
         console.log("Journal has Old Chat or jid");
         console.log({ oldChatId, journalId });
@@ -85,7 +85,7 @@ export const CreateChat = async (req, res) => {
       if (typeof req.body.chattype !== "undefined") {
         chattype = req.body.chattype;
       }
-      let cd = null;
+
       if (typeof req.body.cd !== "undefined") {
         cd = req.body.cd;
       }
