@@ -10,6 +10,7 @@ import {
   addToVectorDbChat,
   findVectorDataChat,
 } from "../services/pineconedb.js";
+import { Prompts } from "../constants/promtps.js";
 
 // import { Pinecone } from "@pinecone-database/pinecone";
 
@@ -26,9 +27,15 @@ const GptModel = "gpt-4-turbo-preview"; //"gpt-3.5-turbo-0125";//"gpt-4-turbo-pr
 export const CreateChat = async (req, res) => {
   JWT.verify(req.token, process.env.SecretJwtKey, async (err, authData) => {
     if (authData) {
-      ////console.log("User in chat is ")
-      ////console.log(authData)
+      let user = await db.user.findByPk(authData.user.id);
+      //If user starts chat from the old journal or chat
+      let oldChatId = req.body.oldChatId || null;
+      let journalId = req.body.journalId || null;
 
+      //If user is creating manual journal and he taps discuss deeper then we will now pass journal text and snapshot highlights as well
+      // alongwith CD. Earlier we had been only passing CD
+      let journalText = req.body.journalText || null;
+      let textHighlights = req.body.textHighlights || null;
       let chattype = "journal";
       if (typeof req.body.chattype !== "undefined") {
         chattype = req.body.chattype;
@@ -58,10 +65,34 @@ export const CreateChat = async (req, res) => {
           let chatCreated = await Chat.create(chatData, { transaction: t });
           if (chatCreated) {
             if (cd) {
-              let cdText = `What do you think is causing you to use ${cd}?`;
+              let cdText = Prompts.DiscussDeeper;
+
+              if (journalText == null || journalText == "") {
+                cdText = `What is causing you to experience this cognitive distortion: ${cd}`; // use the old process so that app doesn't break
+              } else {
+                cdText = cdText.replace(/{CD}/g, cd);
+                cdText = cdText.replace(/{username}/g, user.name);
+                cdText = cdText.replace(/{concern_statement}/g, textHighlights);
+                cdText = cdText.replace(/{journal_text}/g, journalText);
+                const m0 = await db.messageModel.create(
+                  {
+                    message: cdText, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+                    ChatId: chatCreated.id,
+                    from: "user",
+                    type: "promptinvisible",
+                    title: "",
+                  },
+                  { transaction: t }
+                );
+              }
+
+              //console.log("Cd ", cdText);
+
+              // we can replace the message below with the examples that Noah will provide
+              //Or maybe use gpt to respond so that we can get the answer.
               const m1 = await db.messageModel.create(
                 {
-                  message: cdText, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+                  message: `What is causing you to experience this cognitive distortion: ${cd}`, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
                   ChatId: chatCreated.id,
                   from: "gpt",
                   type: "text",
@@ -101,7 +132,7 @@ export const CreateChat = async (req, res) => {
         // res.send(result);
       } catch (error) {
         // await t.rollback();
-        console.log("Excption", error);
+        //console.log("Excption", error);
         res.send({
           message: "Error Transaction " + error,
           data: error,
@@ -234,15 +265,15 @@ async function GenerateFirstMessageForAIChat(
   // if (message) {
   //     messagesData = [{ role: "system", content: cdText }, { role: 'user', content: message }]
   // }
-  //console.log("First promt from user AI Chat", messagesData)
+  ////console.log("First promt from user AI Chat", messagesData)
   sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
     if (gptResponse) {
-      //console.log("Gpt Response Cost ", gptResponse.total_cost)
+      ////console.log("Gpt Response Cost ", gptResponse.total_cost)
       chat.total_cost += gptResponse.total_cost;
       let savedChat = await chat.save();
       const result = await db.sequelize.transaction(async (t) => {
         t.afterCommit(() => {
-          ////console.log("\n\nTransaction is commited \n\n")
+          //////console.log("\n\nTransaction is commited \n\n")
         });
 
         const m1 = await db.messageModel.create(
@@ -298,10 +329,10 @@ export const UpdateChat = async (req, res) => {
 };
 
 async function sendQueryToGpt(message, messageData) {
-  ////console.log("Sending Message " + message)
+  //////console.log("Sending Message " + message)
 
-  ////console.log(messageData)
-  // ////console.log("Sending this summary to api ", summary);
+  //////console.log(messageData)
+  // //////console.log("Sending this summary to api ", summary);
   // messageData.push({
   //     role: "system",
   //     content: "You're a helpful assistant. So reply me keeping in context the whole data provided. Keep the response short and make it complete response. keep all of your responses within 300 words or less.", // summary will go here if the summary is created.
@@ -311,18 +342,18 @@ async function sendQueryToGpt(message, messageData) {
     role: "user",
     content: message, // this data is being sent to chatgpt so only message should be sent
   });
-  console.log(
-    "################################################################",
-    messageData.length
-  );
-  console.log(messageData);
+  //console.log(
+  //   "################################################################",
+  //   messageData.length
+  // );
+  //console.log(messageData);
 
-  console.log(
-    "################################################################",
-    messageData.length
-  );
+  //console.log(
+  //   "################################################################",
+  //   messageData.length
+  // );
   const APIKEY = process.env.AIKey;
-  ////console.log(APIKEY)
+  //////console.log(APIKEY)
   const headers = {};
   const data = {
     model: GptModel,
@@ -343,14 +374,14 @@ async function sendQueryToGpt(message, messageData) {
     }
   );
 
-  //console.log("==============================")
-  //console.log(result)
-  //console.log("==============================")
+  ////console.log("==============================")
+  ////console.log(result)
+  ////console.log("==============================")
   // setMessages(messages.filter(item => item.type !== MessageType.Loading)) // remove the loading message
   if (result.status === 200) {
-    //console.log(result.data)
+    ////console.log(result.data)
     let gptMessage = result.data.choices[0].message.content;
-    //console.log(chalk.red(gptMessage))
+    ////console.log(chalk.red(gptMessage))
     let tokens = result.data.usage.total_tokens;
     let prompt_tokens = result.data.usage.prompt_tokens;
     let completion_tokens = result.data.usage.completion_tokens;
@@ -362,7 +393,7 @@ async function sendQueryToGpt(message, messageData) {
     let outputCost = outoutCostPerToken * completion_tokens;
 
     let totalCost = inputCost + outputCost;
-    //console.log("Total cost this request", totalCost);
+    ////console.log("Total cost this request", totalCost);
     return {
       gptMessage: gptMessage,
       tokens: tokens,
@@ -372,22 +403,6 @@ async function sendQueryToGpt(message, messageData) {
     };
   } else {
     return null;
-  }
-}
-
-function splitMessageOld(message) {
-  let wordsThreshold = 50;
-  const words = message.split(" ");
-  if (words.length <= wordsThreshold) {
-    return [message]; // Return the original message as an array with one element
-  } else {
-    const firstPart = words.slice(0, wordsThreshold).join(" "); // Take the first 50 words
-    const remainingPart = words.slice(wordsThreshold).join(" "); // Take the remaining words
-    if (remainingPart.split(" ").length < 10) {
-      return [message]; // Return the original message as an array with one element
-    } else {
-      return [firstPart, remainingPart]; // Return two parts of the message as an array
-    }
   }
 }
 
@@ -434,59 +449,10 @@ function splitMessage(text) {
   return [firstPart, secondPart]; //{ canSplit: true, firstPart: firstPart, secondPart: secondPart };
 }
 
-function splitMessage2(text) {
-  // Regular expression to detect sentence boundaries more inclusively
-  const sentenceRegex = /(?<=[.!?])\s+|\n/;
-  // Split text into sentences
-  const sentences = text
-    .split(sentenceRegex)
-    .filter((s) => s.trim().length > 0);
-
-  if (sentences.length === 0) return [text]; // Return the original text if no sentences detected
-
-  let firstPart = [];
-  let totalWords = 0;
-  let index = 0;
-
-  // Aggregate sentences into the first part until exceeding 100 words
-  while (index < sentences.length && totalWords <= 100) {
-    const sentence = sentences[index];
-    const wordCount = sentence.split(/\s+/).length;
-
-    if (totalWords + wordCount > 100) break; // Break if adding this sentence exceeds 100 words
-
-    firstPart.push(sentence);
-    totalWords += wordCount;
-    index++;
-  }
-
-  // Ensure the second part is not less than 20 words
-  let secondPart = sentences.slice(index);
-  let secondPartWordCount = secondPart.join(" ").split(/\s+/).length;
-
-  while (secondPartWordCount < 20 && firstPart.length > 0) {
-    const lastSentence = firstPart.pop();
-    secondPart.unshift(lastSentence);
-    secondPartWordCount += lastSentence.split(/\s+/).length;
-    totalWords -= lastSentence.split(/\s+/).length;
-  }
-
-  if (firstPart.length === 0 || secondPart.length === 0) {
-    // If we can't meet the criteria, return the original text as one block
-    return [text];
-  }
-
-  // Join the parts back into strings
-  const firstMessage = firstPart.join(" ");
-  const secondMessage = secondPart.join(" ");
-
-  return [firstMessage, secondMessage];
-}
-
 const normalizeWhitespace = (text) => text.replace(/\s+/g, " ").trim();
 export const SendMessage = async (req, res) => {
   JWT.verify(req.token, process.env.SecretJwtKey, async (err, authData) => {
-    //console.log("Sending message", req.body.chatid)
+    ////console.log("Sending message", req.body.chatid)
     if (authData) {
       const userid = authData.user.id;
       const chatid = req.body.chatid;
@@ -497,22 +463,22 @@ export const SendMessage = async (req, res) => {
         if (chat) {
           const message = req.body.message;
 
-          //console.log("Chat exists")
+          ////console.log("Chat exists")
 
           let messagesData = [];
-          //console.log("Conditiong 1")
+          ////console.log("Conditiong 1")
           if (chat.type === "AIChat") {
-            //console.log("AI Chat")
+            ////console.log("AI Chat")
             let name = user.name || "";
             if (name.length > 0) {
               name = name.split(" ")[0];
             }
 
             let cdText = getAIChatPromptText(name);
-            //console.log("Cd Text is ", cdText);
+            ////console.log("Cd Text is ", cdText);
             messagesData = [{ role: "system", content: cdText }];
           }
-          //console.log("Conditiong 2")
+          ////console.log("Conditiong 2")
           const dbmessages = await db.messageModel.findAll({
             where: {
               ChatId: chatid,
@@ -520,43 +486,43 @@ export const SendMessage = async (req, res) => {
             limit: 50,
             order: [["id", "ASC"]],
           });
-          //console.log("Conditiong 3")
+          ////console.log("Conditiong 3")
           if (dbmessages.length > 0) {
-            let context = await findVectorDataChat(message, chat, user);
-            let added = await addToVectorDbChat(message, chat, user);
-            if (context && context.length > 0) {
-              for (let i = 0; i < context.length; i++) {
-                let text = context[i];
-                let normalizedText = normalizeWhitespace(text);
-                let dbMessage = await db.messageModel.findOne({
-                  where: {
-                    message: {
-                      [db.Sequelize.Op.like]: `%${normalizedText}%`,
-                    },
-                  },
-                });
-                console.log(`Finding for text ${text}`);
-                if (dbMessage) {
-                  console.log("Is in database");
-                  messagesData.push({
-                    role: dbMessage.from === "me" ? "user" : "system",
-                    content: dbMessage.message,
-                  });
-                } else {
-                  console.log("Is not in database");
-                  messagesData.push({ role: "system", content: text });
-                }
-              }
-            }
+            // let context = await findVectorDataChat(message, chat, user);
+            // let added = await addToVectorDbChat(message, chat, user);
+            // if (context && context.length > 0) {
+            //   for (let i = 0; i < context.length; i++) {
+            //     let text = context[i];
+            //     let normalizedText = normalizeWhitespace(text);
+            //     let dbMessage = await db.messageModel.findOne({
+            //       where: {
+            //         message: {
+            //           [db.Sequelize.Op.like]: `%${normalizedText}%`,
+            //         },
+            //       },
+            //     });
+            //     //console.log(`Finding for text ${text}`);
+            //     if (dbMessage) {
+            //       //console.log("Is in database");
+            //       messagesData.push({
+            //         role: dbMessage.from === "me" ? "user" : "system",
+            //         content: dbMessage.message,
+            //       });
+            //     } else {
+            //       //console.log("Is not in database");
+            //       messagesData.push({ role: "system", content: text });
+            //     }
+            //   }
+            // }
 
-            console.log("Data from Vector DB ", messagesData);
+            // //console.log("Data from Vector DB ", messagesData);
             // return res.send({data: messagesData})
             // messagesData = [{role: "system", content: "You're a helpfull assistant. Reply according to the context of the previous conversation to the user."}, {role: "user", content: messages[0].message}]
-            //console.log("Messages are in db", dbmessages.length)
-            //console.log("################################################################")
+            ////console.log("Messages are in db", dbmessages.length)
+            ////console.log("################################################################")
             for (let i = 0; i < dbmessages.length; i++) {
               let m = dbmessages[i];
-              // ////console.log(chalk.green(`Message ${m.from}-${m.id} | ${m.message}`))
+              // //////console.log(chalk.green(`Message ${m.from}-${m.id} | ${m.message}`))
               messagesData.push({
                 role: m.from === "me" ? "user" : "system",
                 content: m.message,
@@ -575,20 +541,21 @@ export const SendMessage = async (req, res) => {
             });
 
             // if(context && context.length > 0){
-            //     console.log('Previous context is ', context )
+            //     //console.log('Previous context is ', context )
             //     messagesData.push({ role: "user", content: `Answer the user question and provide the response based on the user's prevous conversations: ${context}` })
             //     // messagesData.splice(0, 0, { role: "system", content: `Use context in your response: ${context}` })
             // }
 
+            console.log("MessageData", messagesData);
             sendQueryToGpt(message, messagesData).then(async (gptResponse) => {
               if (gptResponse) {
-                //console.log("Gpt Response Cost ", gptResponse.total_cost)
+                ////console.log("Gpt Response Cost ", gptResponse.total_cost)
                 chat.total_cost += gptResponse.total_cost;
                 let savedChat = await chat.save();
 
                 const result = await db.sequelize.transaction(async (t) => {
                   t.afterCommit(() => {
-                    ////console.log("\n\nTransaction is commited \n\n")
+                    //////console.log("\n\nTransaction is commited \n\n")
                   });
 
                   let messageArray = [];
@@ -674,7 +641,7 @@ export const SendMessage = async (req, res) => {
             });
           } else {
             let added = await addToVectorDbChat(message, chat, user);
-            //console.log("No messages, new chat")
+            ////console.log("No messages, new chat")
             let us = await db.user.findByPk(authData.user.id);
             GenerateFirstMessageForAIChat(
               chat,
@@ -707,7 +674,7 @@ export const SendMessage = async (req, res) => {
 
         // })
       } catch (error) {
-        console.log(error);
+        //console.log(error);
         res.send({ status: false, message: "Exception " + error, data: null });
       }
     } else {
@@ -718,8 +685,8 @@ export const SendMessage = async (req, res) => {
 
 async function generateSummaryFromGPT(messageData) {
   const APIKEY = process.env.AIKey;
-  ////console.log(APIKEY)
-  ////console.log("Generating summary from ", messageData);
+  //////console.log(APIKEY)
+  //////console.log("Generating summary from ", messageData);
   const headers = {};
 
   const data = {
@@ -741,10 +708,10 @@ async function generateSummaryFromGPT(messageData) {
 
   if (result.status === 200) {
     let gptMessage = result.data.choices[0].message.content;
-    ////console.log("Summary response is ", gptMessage)
+    //////console.log("Summary response is ", gptMessage)
     return gptMessage;
   } else {
-    ////console.log("Summary response error ")
+    //////console.log("Summary response error ")
     return null;
   }
 }
