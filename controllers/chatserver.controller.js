@@ -75,7 +75,7 @@ io.on("connection", (socket) => {
           function delay(ms) {
             return new Promise((resolve) => setTimeout(resolve, ms));
           }
-
+          console.log("message data is ", JSON.stringify(messagesData));
           const completion = await openai.chat.completions.create({
             model: "gpt-4o", // Ensure you're using the correct model
             messages: messagesData.concat({
@@ -91,7 +91,7 @@ io.on("connection", (socket) => {
 
           for await (const chunk of completion) {
             let chunkData = chunk.choices[0]?.delta?.content || "";
-            console.log("Chunk data ", chunkData);
+            // console.log("Chunk data ", chunkData);
             totalPromptTokens += chunk.usage?.prompt_tokens;
             totalCompletionTokens += chunk.usage?.completion_tokens;
 
