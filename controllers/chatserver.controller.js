@@ -71,6 +71,11 @@ io.on("connection", (socket) => {
           }
 
           // Send the user message to the OpenAI API
+          // Delay function to pause execution for specified milliseconds
+          function delay(ms) {
+            return new Promise((resolve) => setTimeout(resolve, ms));
+          }
+
           const completion = await openai.chat.completions.create({
             model: "gpt-4o", // Ensure you're using the correct model
             messages: messagesData.concat({
@@ -83,24 +88,29 @@ io.on("connection", (socket) => {
           let fullResponse = ""; // To collect the full response
           let totalPromptTokens = 0;
           let totalCompletionTokens = 0;
+
           for await (const chunk of completion) {
             let chunkData = chunk.choices[0].delta.content;
             totalPromptTokens += chunk.usage?.prompt_tokens;
             totalCompletionTokens += chunk.usage?.completion_tokens;
+
             if (chunkData) {
               fullResponse += chunkData; // Collecting the entire response
+
+              // Emit each chunk with a 100 ms delay
+              await delay(100);
+              socket.emit("receiveMessage", {
+                status: true,
+                message: chunkData,
+              });
             }
 
             console.log(JSON.stringify(chunk));
-            socket.emit("receiveMessage", {
-              status: true,
-              message: chunkData,
-            });
           }
 
-          //Save the user message to database
+          // Save the user message to the database
           const m1 = await db.messageModel.create({
-            message: messageContent, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+            message: messageContent,
             ChatId: chatid,
             from: "me",
             type: "text",
@@ -120,7 +130,7 @@ io.on("connection", (socket) => {
 
           console.log("Saved message to database:", savedMessage);
 
-          // Emit a final message to indicate the stream has ended & send both the user and other message here
+          // Emit a final message to indicate the stream has ended & send both the user and other messages here
           socket.emit("completedMessage", {
             status: true,
             messages: [m1, savedMessage],
