@@ -87,7 +87,7 @@ io.on("connection", (socket) => {
             let chunkData = chunk.choices[0].delta.content;
             totalPromptTokens += chunk.usage?.prompt_tokens;
             totalCompletionTokens += chunk.usage?.completion_tokens;
-            fullResponse += chunkData; // Collecting the entire response
+            fullResponse += typeof chunkData != "undefined" ? chunkData : ""; // Collecting the entire response
             console.log(JSON.stringify(chunk));
             socket.emit("receiveMessage", {
               status: true,
