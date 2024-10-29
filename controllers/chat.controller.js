@@ -6,6 +6,7 @@ import path from "path";
 import moment from "moment-timezone";
 import axios from "axios";
 import chalk from "chalk";
+import crypto from "crypto";
 import {
   addToVectorDbChat,
   findVectorDataChat,
@@ -36,6 +37,44 @@ export const CreateChat = async (req, res) => {
       // alongwith CD. Earlier we had been only passing CD
       let journalText = req.body.journalText || null;
       let textHighlights = req.body.textHighlights || null;
+
+      if (oldChatId || journalId) {
+        let journal = await db.userJournalModel.findOne({
+          where: {
+            id: journalId,
+          },
+        });
+
+        if (journal) {
+          let th = journal.textHighlights;
+          let snapth = journal.snapshotTextHighlights;
+
+          let algo = process.env.EncryptionAlgorithm;
+
+          let ownerUser = await db.user.findOne({
+            where: {
+              id: journal.UserId,
+            },
+          });
+          let key = ownerUser.enc_key;
+          let iv = ownerUser.enc_iv;
+          let decrypted = journal.detail;
+          // //console.log("decipher", user.id)
+          try {
+            if (key && iv && journal.encrypted) {
+              const decipher = crypto.createDecipheriv(algo, key, iv);
+              decrypted = decipher.update(journal.detail, "hex", "utf8");
+              decrypted += decipher.final("utf8");
+            }
+            journalText = decrypted;
+            textHighlights = th;
+            cd = journal.cd;
+          } catch (error) {
+            console.log("error encryption ", error);
+          }
+        }
+      }
+
       let chattype = "journal";
       if (typeof req.body.chattype !== "undefined") {
         chattype = req.body.chattype;
