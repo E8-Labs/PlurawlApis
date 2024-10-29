@@ -96,7 +96,7 @@ io.on("connection", (socket) => {
             totalCompletionTokens += chunk.usage?.completion_tokens;
 
             if (chunkData) {
-              fullResponse += fullResponse ? ` ${chunkData}` : chunkData; // Collecting the entire response
+              fullResponse += fullResponse ? `${chunkData}` : chunkData; // Collecting the entire response
 
               // Emit each chunk with a 100 ms delay
               await delay(100);
