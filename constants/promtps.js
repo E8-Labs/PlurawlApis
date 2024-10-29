@@ -2,7 +2,7 @@ export const Prompts = {
   //concern/statement, username, CD
   DiscussDeeper: `Follow these instructions carefully and guide the user through the conversation based on these instrucitons.
   Instructions: 
-  Using {username}'s journal entry here:\n"{journal_text}"\nand the assigned {CD}, discuss further acting as a therapist by doing the following steps: 
+  Using {username}'s journal entry here:\n"{journal_text}"\nand the assigned cognitive distortion: {CD}, discuss further acting as a therapist by doing the following steps: 
 Step 1: Acknowledge the {username}'s Statement and Introduce a new perspective  and challenge the CD. 
 An example response: "You mentioned [{concern_statement}], and I hear how that’s affecting you. What if we tried looking at this a bit differently? For example, [Select one {CD exercise} that fits the user's specific concern/statement] 
 
