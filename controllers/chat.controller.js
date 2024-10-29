@@ -28,6 +28,8 @@ const GptModel = "gpt-4-turbo-preview"; //"gpt-3.5-turbo-0125";//"gpt-4-turbo-pr
 export const CreateChat = async (req, res) => {
   JWT.verify(req.token, process.env.SecretJwtKey, async (err, authData) => {
     if (authData) {
+      let d = req.body;
+      console.log("JournalData", d);
       let user = await db.user.findByPk(authData.user.id);
       //If user starts chat from the old journal or chat
       let oldChatId = req.body.oldChatId || null;
@@ -39,6 +41,8 @@ export const CreateChat = async (req, res) => {
       let textHighlights = req.body.textHighlights || null;
 
       if (oldChatId || journalId) {
+        console.log("Journal has Old Chat or jid");
+        console.log({ oldChatId, journalId });
         let journal = await db.userJournalModel.findOne({
           where: {
             id: journalId,
@@ -73,6 +77,8 @@ export const CreateChat = async (req, res) => {
             console.log("error encryption ", error);
           }
         }
+      } else {
+        console.log("Journal doesn't have old chat or journal id");
       }
 
       let chattype = "journal";
