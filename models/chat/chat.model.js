@@ -32,6 +32,10 @@ let chatModel = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: true,
     },
+    has_context: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: true,
+    },
   });
   // Chat.belongsTo(User);
   // Chat.belongsTo(Prompt)

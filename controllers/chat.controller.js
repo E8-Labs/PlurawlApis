@@ -29,6 +29,7 @@ export const CreateChat = async (req, res) => {
   JWT.verify(req.token, process.env.SecretJwtKey, async (err, authData) => {
     if (authData) {
       let d = req.body;
+      let hasContext = true;
       console.log("JournalData", d);
       let user = await db.user.findByPk(authData.user.id);
       //If user starts chat from the old journal or chat
@@ -40,7 +41,12 @@ export const CreateChat = async (req, res) => {
       let journalText = req.body.journalText || null;
       let textHighlights = req.body.textHighlights || null;
       let cd = req.body.cd || null;
+
+      if (journalText) {
+        hasContext = false;
+      }
       if (oldChatId || journalId) {
+        hasContext = false;
         console.log("Journal has Old Chat or jid");
         console.log({ oldChatId, journalId });
         let journal = await db.userJournalModel.findOne({
@@ -107,6 +113,7 @@ export const CreateChat = async (req, res) => {
             type: chattype,
             old_chat_id: oldChatId,
             old_journal_id: journalId,
+            has_context: hasContext,
           };
 
           let chatCreated = await Chat.create(chatData, { transaction: t });
@@ -192,7 +199,12 @@ export const CreateChat = async (req, res) => {
   });
 };
 
-function getAIChatPromptText(name) {
+function getAIChatPromptText(name, hasPreviousJournals = false) {
+  let dontGreetText = "";
+  if (hasPreviousJournals) {
+    dontGreetText =
+      "11. This user has past journal history and returning to chat again. Don't greet him by saying \"You're a self discovery coach. Just start the conversation like you had been talking for some time.\" ";
+  }
   let cdText = `#Objective
 You're an advanced AI self discovery coach and people engage with you to vent, process their experiences and emotions, and journal about their lives.
 
@@ -247,6 +259,8 @@ Now here are the instructions that you should strictly follow.
     9. Make sure to only talk about topics you’re intended for, for example, if someone asks you to help them change a tire, your response should be that you’re not built for that as it’s outside of your skill sets. This is one example,  so have guardrails that only allow you to support users based on what you’re intended for. Only focus on guiding users through their journaling and checkin process.  
 
     10. Try not to repeat the following words too often or use the same word in the same sentence twice "awesome, vibe".
+
+    ${dontGreetText}
     
 So the instruction is, first introduce yourself as "your personal self-discovery coach" and respond to the user input, then greet the user. Using the outline above, act as one's advanced AI coach but remember not to mention you’re a therapist but rather a personal coach. Oh and your name is Plurawl, don't forget to introduce yourself.
 
@@ -307,7 +321,17 @@ async function GenerateFirstMessageForAIChat(
     name = name.split(" ")[0];
   }
 
-  let cdText = getAIChatPromptText(name);
+  let journals = await db.userJournalModel.findAll({
+    where: {
+      UserId: user.id,
+    },
+    limit: 2,
+  });
+  let hasHistory = false;
+  if (journals && journals.length > 0) {
+    hasHistory = true;
+  }
+  let cdText = getAIChatPromptText(name, hasHistory);
   let messagesData = [{ role: "system", content: cdText }];
   // if (message) {
   //     messagesData = [{ role: "system", content: cdText }, { role: 'user', content: message }]
@@ -521,7 +545,17 @@ export const SendMessage = async (req, res) => {
               name = name.split(" ")[0];
             }
 
-            let cdText = getAIChatPromptText(name);
+            let journals = await db.userJournalModel.findAll({
+              where: {
+                UserId: user.id,
+              },
+              limit: 2,
+            });
+            let hasHistory = false;
+            if (journals && journals.length > 0) {
+              hasHistory = true;
+            }
+            let cdText = getAIChatPromptText(name, hasHistory);
             ////console.log("Cd Text is ", cdText);
             messagesData = [{ role: "system", content: cdText }];
           }
@@ -535,32 +569,35 @@ export const SendMessage = async (req, res) => {
           });
           ////console.log("Conditiong 3")
           if (dbmessages.length > 0) {
-            // let context = await findVectorDataChat(message, chat, user);
-            // let added = await addToVectorDbChat(message, chat, user);
-            // if (context && context.length > 0) {
-            //   for (let i = 0; i < context.length; i++) {
-            //     let text = context[i];
-            //     let normalizedText = normalizeWhitespace(text);
-            //     let dbMessage = await db.messageModel.findOne({
-            //       where: {
-            //         message: {
-            //           [db.Sequelize.Op.like]: `%${normalizedText}%`,
-            //         },
-            //       },
-            //     });
-            //     //console.log(`Finding for text ${text}`);
-            //     if (dbMessage) {
-            //       //console.log("Is in database");
-            //       messagesData.push({
-            //         role: dbMessage.from === "me" ? "user" : "system",
-            //         content: dbMessage.message,
-            //       });
-            //     } else {
-            //       //console.log("Is not in database");
-            //       messagesData.push({ role: "system", content: text });
-            //     }
-            //   }
-            // }
+            let context = "";
+            if (chat.has_context) {
+              context = await findVectorDataChat(message, chat, user);
+              let added = await addToVectorDbChat(message, chat, user);
+              if (context && context.length > 0) {
+                for (let i = 0; i < context.length; i++) {
+                  let text = context[i];
+                  let normalizedText = normalizeWhitespace(text);
+                  let dbMessage = await db.messageModel.findOne({
+                    where: {
+                      message: {
+                        [db.Sequelize.Op.like]: `%${normalizedText}%`,
+                      },
+                    },
+                  });
+                  //console.log(`Finding for text ${text}`);
+                  if (dbMessage) {
+                    //console.log("Is in database");
+                    messagesData.push({
+                      role: dbMessage.from === "me" ? "user" : "system",
+                      content: dbMessage.message,
+                    });
+                  } else {
+                    //console.log("Is not in database");
+                    messagesData.push({ role: "system", content: text });
+                  }
+                }
+              }
+            }
 
             // //console.log("Data from Vector DB ", messagesData);
             // return res.send({data: messagesData})
