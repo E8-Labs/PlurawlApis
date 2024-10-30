@@ -369,6 +369,8 @@ export const AddJournal = async (req, res) => {
       data.detail = encrypted;
       data.encrypted = true;
       // data.cod = req.body.cd;
+
+      let pointsIncremented = 1.5;
       try {
         db.userJournalModel
           .create(data)
@@ -419,11 +421,14 @@ export const AddJournal = async (req, res) => {
             if (streak) {
               if (streak.streak === UserStreaks.Streak3Day) {
                 user.points += 1.5;
+                pointsIncremented = 1.5;
               } else if (streak.streak === UserStreaks.Streak30Day) {
                 user.points += 2;
+                pointsIncremented = 2;
               }
             } else {
               user.points += 1;
+              pointsIncremented = 1;
             }
             if (user.points >= 100 && user.points <= 101.5) {
               newLevel = {
@@ -526,6 +531,7 @@ export const AddJournal = async (req, res) => {
               data: j,
               newStreak: newStreak,
               newLevel: newLevel,
+              pointsIncremented: pointsIncremented,
             });
           })
           .catch((error) => {
