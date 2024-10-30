@@ -103,7 +103,7 @@ io.on("connection", (socket) => {
               fullResponse += fullResponse ? `${chunkData}` : chunkData; // Collecting the entire response
 
               // Emit each chunk with a 100 ms delay
-              await delay(100);
+              await delay(150);
               socket.emit("receiveMessage", {
                 status: true,
                 message: chunkData,
