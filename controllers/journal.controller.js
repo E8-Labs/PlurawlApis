@@ -702,7 +702,7 @@ export const getJournalsVibeInAWeek = async (
   });
 
   let dateSt1 = moment(lastMonday).format("MMM DD");
-  let dateSt2 = moment(lastSunday).format("MMM DD");
+  let dateSt2 = moment(lastSunday).format("DD");
 
   let checkinCondition = {
     createdAt: {
