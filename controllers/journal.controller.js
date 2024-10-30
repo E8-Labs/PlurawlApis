@@ -297,7 +297,7 @@ export const AddJournal = async (req, res) => {
       console.log("JOURNAL DATA", data);
       let journalType = req.body.type || "manual";
       let journalText = req.body.detail;
-      // console.log("Journal text is ", journalText);
+      console.log("Journal text is ", journalText);
       console.log("---------------------------------------\n\n\n\n");
       let user = await db.user.findOne({
         where: {
@@ -359,17 +359,17 @@ export const AddJournal = async (req, res) => {
       }
       data.createdAt = createdAt;
       data.updatedAt = createdAt;
-      ////console.log("Created at ", createdAt)
+      console.log("Created at ", createdAt);
 
       const cipher = crypto.createCipheriv(algo, key, iv);
 
       let encrypted = cipher.update(data.detail, "utf8", "hex");
       encrypted += cipher.final("hex");
-      ////console.log("Encrypted journal is ", encrypted)
+      console.log("Encrypted journal is ");
       data.detail = encrypted;
       data.encrypted = true;
       // data.cod = req.body.cd;
-
+      console.log("Trying to add journal");
       let pointsIncremented = 1.5;
       try {
         db.userJournalModel
@@ -391,6 +391,7 @@ export const AddJournal = async (req, res) => {
               let added = addCheckin(checkinData);
             }
             if (result) {
+              console.log("Journal Added");
               let journal = result;
               journal.journalText = journalText; //req.body.detail
               console.log("Embedding ", journal.journalText);
@@ -399,7 +400,8 @@ export const AddJournal = async (req, res) => {
               // set Journal Id to chat.
               if (
                 typeof req.body.chatid != "undefined" &&
-                req.body.chatid != null
+                req.body.chatid != null &&
+                req.body.chatid != ""
               ) {
                 let chat = await db.chatModel.findByPk(chatid);
                 chat.UserJournalId = result.id;
@@ -408,7 +410,7 @@ export const AddJournal = async (req, res) => {
               }
             }
             let j = await JournalResource(result);
-
+            console.log("Journal Resource");
             let newLevel = null;
             let newStreak = null;
             //check and update point
@@ -418,6 +420,7 @@ export const AddJournal = async (req, res) => {
               },
               order: [["id", "DESC"]],
             });
+            console.log("Journal Streak");
             if (streak) {
               if (streak.streak === UserStreaks.Streak3Day) {
                 user.points += 1.5;
@@ -450,6 +453,7 @@ export const AddJournal = async (req, res) => {
               sendLevelUpEmail(3, user);
             }
             await user.save();
+            console.log("Journal User points saved");
             //Points updated
             if (streak) {
               if (streak.streak === UserStreaks.Streak3Day) {
@@ -535,7 +539,7 @@ export const AddJournal = async (req, res) => {
             });
           })
           .catch((error) => {
-            ////console.log(error)
+            console.log("Journal Adding error", error);
             res.send({
               status: true,
               message: "Journal not added",
