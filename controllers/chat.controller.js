@@ -571,6 +571,7 @@ export const SendMessage = async (req, res) => {
           if (dbmessages.length > 0) {
             let context = "";
             if (chat.has_context) {
+              console.log("This chat has context.");
               context = await findVectorDataChat(message, chat, user);
               let added = await addToVectorDbChat(message, chat, user);
               if (context && context.length > 0) {
@@ -597,6 +598,8 @@ export const SendMessage = async (req, res) => {
                   }
                 }
               }
+            } else {
+              console.log("This chat has no context.");
             }
 
             // //console.log("Data from Vector DB ", messagesData);
