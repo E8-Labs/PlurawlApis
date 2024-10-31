@@ -191,7 +191,7 @@ async function getRecentJournalsFromDb(
   const sections = [];
   const journalsFormatted = {};
 
-  journals.forEach((journal) => {
+  journals.forEach(async (journal) => {
     const createdAt = moment(journal.createdAt);
     let sectionName;
 
@@ -210,7 +210,8 @@ async function getRecentJournalsFromDb(
       journalsFormatted[sectionName] = [];
     }
 
-    journalsFormatted[sectionName].push(journal);
+    let journalRes = await JournalResource(journal);
+    journalsFormatted[sectionName].push(journalRes);
   });
 
   return {
