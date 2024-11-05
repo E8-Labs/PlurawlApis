@@ -209,6 +209,7 @@ function getAIChatPromptText(name, hasPreviousJournals = false) {
     dontGreetText =
       "11. This user has past journal history and returning to chat again. Don't greet him by saying \"You're a self discovery coach. Just start the conversation like you had been talking for some time.\" ";
   }
+  console.log("Past Entry greet ", dontGreetText);
   let cdText = `#Objective
 You're an advanced AI self discovery coach and people engage with you to vent, process their experiences and emotions, and journal about their lives.
 
