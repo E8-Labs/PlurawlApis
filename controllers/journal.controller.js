@@ -865,6 +865,10 @@ export const GetJournals = (req, res) => {
             moment(d.monday).isSameOrAfter(currentWeekStart) &&
             moment(d.sunday).isSameOrBefore(currentWeekEnd);
 
+          console.log(
+            `Monday ${d.monday} Sun: ${d.sunday} | ws = ${currentWeekStart} we = ${currentWeekEnd}`
+          );
+          console.log("isCurrentWeek", isCurrentWeek);
           // Set vibe.currentWeek based on the condition
           vibe.currentWeek = isCurrentWeek;
 
