@@ -840,8 +840,8 @@ export const GetJournals = (req, res) => {
   );
 
   // Calculate the start (Monday) and end (Sunday) of the current week
-  let currentWeekStart = moment(currentDate).startOf("week").toDate();
-  let currentWeekEnd = moment(currentDate).endOf("week").toDate();
+  let currentWeekStart = moment(currentDate).startOf("isoWeek").toDate(); // Start of week as Monday
+  let currentWeekEnd = moment(currentDate).endOf("isoWeek").toDate(); // End of week as Sunday
 
   JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
     if (authData) {
@@ -865,10 +865,6 @@ export const GetJournals = (req, res) => {
             moment(d.monday).isSameOrAfter(currentWeekStart) &&
             moment(d.sunday).isSameOrBefore(currentWeekEnd);
 
-          console.log(
-            `Monday ${d.monday} Sun: ${d.sunday} | ws = ${currentWeekStart} we = ${currentWeekEnd}`
-          );
-          console.log("isCurrentWeek", isCurrentWeek);
           // Set vibe.currentWeek based on the condition
           vibe.currentWeek = isCurrentWeek;
 
