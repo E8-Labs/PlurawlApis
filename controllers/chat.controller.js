@@ -561,7 +561,7 @@ export const SendMessage = async (req, res) => {
               hasHistory = true;
             }
             let cdText = getAIChatPromptText(name, hasHistory);
-            ////console.log("Cd Text is ", cdText);
+            console.log("Cd Text is ", cdText);
             messagesData = [{ role: "system", content: cdText }];
           }
           ////console.log("Conditiong 2")
