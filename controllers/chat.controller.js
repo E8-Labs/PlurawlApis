@@ -203,7 +203,7 @@ export const CreateChat = async (req, res) => {
   });
 };
 
-function getAIChatPromptText(name, hasPreviousJournals = false) {
+export function getAIChatPromptText(name, hasPreviousJournals = false) {
   let dontGreetText = "";
   if (hasPreviousJournals) {
     dontGreetText =
