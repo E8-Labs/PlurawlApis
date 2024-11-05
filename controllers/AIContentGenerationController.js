@@ -118,10 +118,10 @@ export async function GetQuoteForUser(req, res) {
       }
       messageData.push({
         role: "system",
-        content: `Generate a daily prompt(Not a quote by someone) of max 200 characters for user ${user.name} considering the time of day ${timeOfDay}.
+        content: `Generate a daily prompt in the form of question that user can asnwer wihtin journal(Not a quote by someone) of max 200 characters for user ${user.name} considering the time of day ${timeOfDay}.
           Consider the user's last journal entry which is ${journalText}. If the journal entry is empty, disregard. 
           Also consider user's goals which is ${goalText}. If the goals are not provided, disregard. 
-            Make it a json object like this {quote: Prompt of the day., timestamp: Time here in Month Day Year Format}. Only generate json object and no extra text.`, // summary will go here if the summary is created.
+            Make it a json object like this {prompt: Prompt of the day., timestamp: Time here in Month Day Year Format}. Only generate json object and no extra text.`, // summary will go here if the summary is created.
       });
 
       let APIKEY = process.env.AIKey;
