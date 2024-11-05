@@ -160,6 +160,7 @@ export async function GetQuoteForUser(req, res) {
             total_tokens: estimate.completion_tokens + estimate.prompt_tokens,
           });
           let json = JSON.parse(gptMessage);
+          console.log("Quote gen ", json);
           //add to the database here
           let data = {
             date: today,
