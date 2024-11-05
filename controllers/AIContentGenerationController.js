@@ -91,7 +91,7 @@ export async function GetQuoteForUser(req, res) {
       });
 
       // if (!quote) {
-      console.log("Generating quote since no quote exists today");
+      // console.log("Generating quote since no quote exists today");
       let messageData = [];
       // ////console.log("Sending this summary to api ", summary);
       let journal = await db.userJournalModel.findOne({
@@ -162,8 +162,8 @@ export async function GetQuoteForUser(req, res) {
           let json = JSON.parse(gptMessage);
           console.log("Quote gen ", json);
           //add to the database here
-          let quote = json.quote || json.prompt || "";
-          if ((quote = "")) {
+          let prompt = json.quote || json.prompt || "";
+          if ((prompt = "")) {
             return res.send({
               status: false,
               data: null,
@@ -173,7 +173,7 @@ export async function GetQuoteForUser(req, res) {
           }
           let data = {
             date: today,
-            quote: quote,
+            quote: prompt,
             UserId: user.id,
           };
           let created = await db.dailyQuoteModel.create(data);
