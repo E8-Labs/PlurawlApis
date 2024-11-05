@@ -162,9 +162,18 @@ export async function GetQuoteForUser(req, res) {
           let json = JSON.parse(gptMessage);
           console.log("Quote gen ", json);
           //add to the database here
+          let quote = json.quote || json.prompt || "";
+          if ((quote = "")) {
+            return res.send({
+              status: false,
+              data: null,
+              message: "Some error occurred",
+              // cost: createdCost,
+            });
+          }
           let data = {
             date: today,
-            quote: json.quote,
+            quote: quote,
             UserId: user.id,
           };
           let created = await db.dailyQuoteModel.create(data);
