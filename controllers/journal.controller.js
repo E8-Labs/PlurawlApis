@@ -784,7 +784,7 @@ export const getJournalsVibeInAWeek = async (
     hep: hep,
     leup: leup,
     heup: heup,
-    dateString: dateSt1 + " - " + dateSt2,
+    dateString: dateSt1 + "     -     " + dateSt2,
     checkins: checkins,
     tracks: songs,
     gif: gif,
@@ -838,31 +838,37 @@ export const GetJournals = (req, res) => {
     originalDate.getMonth(),
     originalDate.getDate()
   );
-  // Calculate the start and end date of the last week
-  let lastSunday = new Date(currentDate);
-  lastSunday.setDate(currentDate.getDate() - currentDate.getDay());
-  // dates.slice(0, 0, { monday: originalDate, sunday: lastSunday })
-  ////console.log("Total Dates ", dates.length);
+
+  // Calculate the start (Monday) and end (Sunday) of the current week
+  let currentWeekStart = moment(currentDate).startOf("week").toDate();
+  let currentWeekEnd = moment(currentDate).endOf("week").toDate();
+
   JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
     if (authData) {
       let user = authData.user;
       let userid = user.id;
       var journals = [];
+
       for (let i = 0; i < dates.length; i++) {
-        ////console.log("Fetching for date ", dates[i])
         let d = dates[i];
-        //console.log(chalk.red(`Getting Journals Vibe in week ${d.monday} - ${d.sunday}`))
+
+        // Fetch the vibe for the week
         let vibe = await getJournalsVibeInAWeek(d.monday, d.sunday, user.id);
+
         if (vibe) {
-          ////console.log("Vibe exists ")
           let dateSt1 = moment(d.monday).format("MMM DD");
           let dateSt2 = moment(d.sunday).format("MMM DD");
           let year = moment(d.sunday).format("YYYY");
-          ////console.log("Searching for Snapshot ", year)
-          ////console.log(user.id)
-          ////console.log(dateSt1)
-          ////console.log(dateSt2)
-          //console.log(`Getting Vibe Snapshot in week ${dateSt1} - ${dateSt2} ${year} ${user.id}`)
+
+          // Check if the current week's dates fall between the range of Monday and Sunday
+          const isCurrentWeek =
+            moment(d.monday).isSameOrAfter(currentWeekStart) &&
+            moment(d.sunday).isSameOrBefore(currentWeekEnd);
+
+          // Set vibe.currentWeek based on the condition
+          vibe.currentWeek = isCurrentWeek;
+
+          // Find snapshot for the week
           let snapshot = await db.weeklySnapshotModel.findOne({
             where: {
               sunday: dateSt2,
@@ -871,11 +877,9 @@ export const GetJournals = (req, res) => {
               UserId: user.id,
             },
           });
-          //console.log(chalk.green("Snap is ", snapshot))
+
           vibe.snapshot = snapshot;
           journals.push(vibe);
-        } else {
-          ////console.log("Vibe doesn't exist ")
         }
       }
 
