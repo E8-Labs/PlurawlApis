@@ -163,7 +163,8 @@ export async function GetQuoteForUser(req, res) {
           console.log("Quote gen ", json);
           //add to the database here
           let prompt = json.quote || json.prompt || "";
-          if ((prompt = "")) {
+          console.log("Prompt is ", prompt);
+          if (prompt == "") {
             return res.send({
               status: false,
               data: null,
