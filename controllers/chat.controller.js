@@ -130,16 +130,13 @@ export const CreateChat = async (req, res) => {
               cdText = cdText.replace(/{username}/g, user.name);
               cdText = cdText.replace(/{concern_statement}/g, textHighlights);
               cdText = cdText.replace(/{journal_text}/g, journalText);
-              const m0 = await db.messageModel.create(
-                {
-                  message: cdText, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
-                  ChatId: chatCreated.id,
-                  from: "user",
-                  type: "promptinvisible",
-                  title: "",
-                },
-                { transaction: t }
-              );
+              const m0 = await db.messageModel.create({
+                message: cdText, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+                ChatId: chatCreated.id,
+                from: "user",
+                type: "promptinvisible",
+                title: "",
+              });
               try {
                 const gptResponse = await sendQueryToGpt(cdText, []);
                 console.log("Gpt response is ", gptResponse);
@@ -181,16 +178,13 @@ export const CreateChat = async (req, res) => {
             //Or maybe use gpt to respond so that we can get the answer.
             // In the past journal when we tap the reflect button, it should not show the predefined messages.
             if (!journalId) {
-              const m1 = await db.messageModel.create(
-                {
-                  message: `What is causing you to experience this cognitive distortion: ${cd}`, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
-                  ChatId: chatCreated.id,
-                  from: "gpt",
-                  type: "text",
-                  title: "",
-                },
-                { transaction: t }
-              );
+              const m1 = await db.messageModel.create({
+                message: `What is causing you to experience this cognitive distortion: ${cd}`, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+                ChatId: chatCreated.id,
+                from: "gpt",
+                type: "text",
+                title: "",
+              });
             }
 
             res.send({
