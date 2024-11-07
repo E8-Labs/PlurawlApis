@@ -138,6 +138,52 @@ export const CreateChat = async (req, res) => {
                   },
                   { transaction: t }
                 );
+                try {
+                  const gptResponse = await sendQueryToGpt(cd, []);
+
+                  if (gptResponse) {
+                    // Update total cost
+                    chatCreated.total_cost += gptResponse.total_cost;
+                    let savedChat = await chatCreated.save();
+
+                    const result = await db.sequelize.transaction(async (t) => {
+                      t.afterCommit(() => {
+                        // console.log("\n\nTransaction is committed\n\n");
+                      });
+
+                      let messageArray = [];
+
+                      // Add to vector DB chat
+                      let added = await addToVectorDbChat(
+                        gptResponse.gptMessage,
+                        chatCreated,
+                        user
+                      );
+
+                      // Save GPT response message
+                      let message = gptResponse.gptMessage;
+                      const m2 = await db.messageModel.create(
+                        {
+                          message: message.replace(/^"|"$/g, ""),
+                          ChatId: chatCreated.id,
+                          from: "gpt",
+                          type: "text",
+                          tokens: gptResponse.completion_tokens,
+                        },
+                        { transaction: t }
+                      );
+
+                      messageArray.push(m2);
+
+                      return messageArray;
+                    });
+                  } else {
+                    // Handle the case where gptResponse is null or undefined
+                    // e.g., console.log("No response from GPT");
+                  }
+                } catch (error) {
+                  console.error("Error:", error);
+                }
               }
 
               //console.log("Cd ", cdText);
