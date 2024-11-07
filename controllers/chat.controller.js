@@ -141,7 +141,7 @@ export const CreateChat = async (req, res) => {
                 { transaction: t }
               );
               try {
-                const gptResponse = await sendQueryToGpt(cd, []);
+                const gptResponse = await sendQueryToGpt(cdText, []);
                 console.log("Gpt response is ", gptResponse);
                 if (gptResponse) {
                   // Update total cost
