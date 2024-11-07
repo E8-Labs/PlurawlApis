@@ -124,6 +124,7 @@ export const CreateChat = async (req, res) => {
               if (journalText == null || journalText == "") {
                 cdText = `What is causing you to experience this cognitive distortion: ${cd}`; // use the old process so that app doesn't break
               } else {
+                //if there is cd provided. The user is creating using the cd prompt and we have to provide filtering exercises
                 cdText = cdText.replace(/{CD}/g, cd);
                 cdText = cdText.replace(/{username}/g, user.name);
                 cdText = cdText.replace(/{concern_statement}/g, textHighlights);
