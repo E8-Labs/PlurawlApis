@@ -147,36 +147,23 @@ export const CreateChat = async (req, res) => {
                     chatCreated.total_cost += gptResponse.total_cost;
                     let savedChat = await chatCreated.save();
 
-                    const result = await db.sequelize.transaction(async (t) => {
-                      t.afterCommit(() => {
-                        // console.log("\n\nTransaction is committed\n\n");
-                      });
+                    let messageArray = [];
 
-                      let messageArray = [];
+                    // Add to vector DB chat
+                    let added = await addToVectorDbChat(
+                      gptResponse.gptMessage,
+                      chatCreated,
+                      user
+                    );
 
-                      // Add to vector DB chat
-                      let added = await addToVectorDbChat(
-                        gptResponse.gptMessage,
-                        chatCreated,
-                        user
-                      );
-
-                      // Save GPT response message
-                      let message = gptResponse.gptMessage;
-                      const m2 = await db.messageModel.create(
-                        {
-                          message: message.replace(/^"|"$/g, ""),
-                          ChatId: chatCreated.id,
-                          from: "gpt",
-                          type: "text",
-                          tokens: gptResponse.completion_tokens,
-                        },
-                        { transaction: t }
-                      );
-
-                      messageArray.push(m2);
-
-                      return messageArray;
+                    // Save GPT response message
+                    let message = gptResponse.gptMessage;
+                    const m2 = await db.messageModel.create({
+                      message: message.replace(/^"|"$/g, ""),
+                      ChatId: chatCreated.id,
+                      from: "gpt",
+                      type: "text",
+                      tokens: gptResponse.completion_tokens,
                     });
                   } else {
                     // Handle the case where gptResponse is null or undefined
