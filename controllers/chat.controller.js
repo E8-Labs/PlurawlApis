@@ -100,127 +100,128 @@ export const CreateChat = async (req, res) => {
         snapshot = req.body.snapshot;
       }
       try {
-        const result = await db.sequelize.transaction(async (t) => {
-          const promptid = req.body.promptId;
-          const userid = authData.user.id;
-          // let journalId = req.body.journalId;
+        // const result = await db.sequelize.transaction(async (t) => {
+        const promptid = req.body.promptId;
+        const userid = authData.user.id;
+        // let journalId = req.body.journalId;
 
-          const chatData = {
-            title: req.body.title,
-            UserId: userid,
-            snapshot: snapshot,
-            cd: cd,
-            type: chattype,
-            old_chat_id: oldChatId,
-            old_journal_id: journalId,
-            has_context: hasContext,
-          };
+        const chatData = {
+          title: req.body.title,
+          UserId: userid,
+          snapshot: snapshot,
+          cd: cd,
+          type: chattype,
+          old_chat_id: oldChatId,
+          old_journal_id: journalId,
+          has_context: hasContext,
+        };
 
-          let chatCreated = await Chat.create(chatData, { transaction: t });
-          if (chatCreated) {
-            if (cd) {
-              let cdText = Prompts.DiscussDeeper;
+        let chatCreated = await Chat.create(chatData);
+        if (chatCreated) {
+          if (cd) {
+            let cdText = Prompts.DiscussDeeper;
 
-              if (journalText == null || journalText == "") {
-                cdText = `What is causing you to experience this cognitive distortion: ${cd}`; // use the old process so that app doesn't break
-              } else {
-                //if there is cd provided. The user is creating using the cd prompt and we have to provide filtering exercises
-                cdText = cdText.replace(/{CD}/g, cd);
-                cdText = cdText.replace(/{username}/g, user.name);
-                cdText = cdText.replace(/{concern_statement}/g, textHighlights);
-                cdText = cdText.replace(/{journal_text}/g, journalText);
-                const m0 = await db.messageModel.create(
-                  {
-                    message: cdText, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
-                    ChatId: chatCreated.id,
-                    from: "user",
-                    type: "promptinvisible",
-                    title: "",
-                  },
-                  { transaction: t }
-                );
-                try {
-                  const gptResponse = await sendQueryToGpt(cd, []);
+            if (journalText == null || journalText == "") {
+              cdText = `What is causing you to experience this cognitive distortion: ${cd}`; // use the old process so that app doesn't break
+            } else {
+              console.log("User has cd and ther is journal text");
+              //if there is cd provided. The user is creating using the cd prompt and we have to provide filtering exercises
+              cdText = cdText.replace(/{CD}/g, cd);
+              cdText = cdText.replace(/{username}/g, user.name);
+              cdText = cdText.replace(/{concern_statement}/g, textHighlights);
+              cdText = cdText.replace(/{journal_text}/g, journalText);
+              const m0 = await db.messageModel.create(
+                {
+                  message: cdText, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+                  ChatId: chatCreated.id,
+                  from: "user",
+                  type: "promptinvisible",
+                  title: "",
+                },
+                { transaction: t }
+              );
+              try {
+                const gptResponse = await sendQueryToGpt(cd, []);
+                console.log("Gpt response is ", gptResponse);
+                if (gptResponse) {
+                  // Update total cost
+                  chatCreated.total_cost += gptResponse.total_cost;
+                  let savedChat = await chatCreated.save();
 
-                  if (gptResponse) {
-                    // Update total cost
-                    chatCreated.total_cost += gptResponse.total_cost;
-                    let savedChat = await chatCreated.save();
+                  let messageArray = [];
 
-                    let messageArray = [];
+                  // Add to vector DB chat
+                  let added = await addToVectorDbChat(
+                    gptResponse.gptMessage,
+                    chatCreated,
+                    user
+                  );
 
-                    // Add to vector DB chat
-                    let added = await addToVectorDbChat(
-                      gptResponse.gptMessage,
-                      chatCreated,
-                      user
-                    );
-
-                    // Save GPT response message
-                    let message = gptResponse.gptMessage;
-                    const m2 = await db.messageModel.create({
-                      message: message.replace(/^"|"$/g, ""),
-                      ChatId: chatCreated.id,
-                      from: "gpt",
-                      type: "text",
-                      tokens: gptResponse.completion_tokens,
-                    });
-                  } else {
-                    // Handle the case where gptResponse is null or undefined
-                    // e.g., console.log("No response from GPT");
-                  }
-                } catch (error) {
-                  console.error("Error:", error);
-                }
-              }
-
-              //console.log("Cd ", cdText);
-
-              // we can replace the message below with the examples that Noah will provide
-              //Or maybe use gpt to respond so that we can get the answer.
-              // In the past journal when we tap the reflect button, it should not show the predefined messages.
-              if (!journalId) {
-                const m1 = await db.messageModel.create(
-                  {
-                    message: `What is causing you to experience this cognitive distortion: ${cd}`, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+                  // Save GPT response message
+                  let message = gptResponse.gptMessage;
+                  const m2 = await db.messageModel.create({
+                    message: message.replace(/^"|"$/g, ""),
                     ChatId: chatCreated.id,
                     from: "gpt",
                     type: "text",
-                    title: "",
-                  },
-                  { transaction: t }
-                );
+                    tokens: gptResponse.completion_tokens,
+                  });
+                } else {
+                  // Handle the case where gptResponse is null or undefined
+                  // e.g., console.log("No response from GPT");
+                }
+              } catch (error) {
+                console.error("Error:", error);
               }
+            }
 
+            //console.log("Cd ", cdText);
+
+            // we can replace the message below with the examples that Noah will provide
+            //Or maybe use gpt to respond so that we can get the answer.
+            // In the past journal when we tap the reflect button, it should not show the predefined messages.
+            if (!journalId) {
+              const m1 = await db.messageModel.create(
+                {
+                  message: `What is causing you to experience this cognitive distortion: ${cd}`, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+                  ChatId: chatCreated.id,
+                  from: "gpt",
+                  type: "text",
+                  title: "",
+                },
+                { transaction: t }
+              );
+            }
+
+            res.send({
+              message: "Chat created",
+              data: chatCreated,
+              status: true,
+            });
+          } else if (typeof req.body.chattype !== "undefined") {
+            // let type = req.body.type;
+            if (chattype === "AIChat") {
               res.send({
                 message: "Chat created",
                 data: chatCreated,
                 status: true,
               });
-            } else if (typeof req.body.chattype !== "undefined") {
-              // let type = req.body.type;
-              if (chattype === "AIChat") {
-                res.send({
-                  message: "Chat created",
-                  data: chatCreated,
-                  status: true,
-                });
-                //started from the main screen dashboard
-                //this will lead to  entry of journal through chat
+              //started from the main screen dashboard
+              //this will lead to  entry of journal through chat
 
-                //We will let user send the first message then this prompt will be sent in AI Chat
-                //   GenerateFirstMessageForAIChat(chatCreated, authData.user, (messages)=>{
-                //     if(messages){
-                //         res.send({ message: "Chat created", data: chatCreated, status: true });
-                //       }
-                //       else{
-                //         res.send({ message: "Chat created", data: chatCreated, status: true });
-                //       }
-                //   })
-              }
+              //We will let user send the first message then this prompt will be sent in AI Chat
+              //   GenerateFirstMessageForAIChat(chatCreated, authData.user, (messages)=>{
+              //     if(messages){
+              //         res.send({ message: "Chat created", data: chatCreated, status: true });
+              //       }
+              //       else{
+              //         res.send({ message: "Chat created", data: chatCreated, status: true });
+              //       }
+              //   })
             }
           }
-        });
+        }
+        // });
         // res.send(result);
       } catch (error) {
         // await t.rollback();
