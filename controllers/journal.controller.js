@@ -559,11 +559,6 @@ export const AddJournal = async (req, res) => {
 };
 
 export const GetLastJournal = async (req, res) => {
-  let js = await db.userJournalModel.findAll({
-    where: condition,
-    limit: 50,
-  });
-
   JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
     if (authData) {
       let user = authData.user;
