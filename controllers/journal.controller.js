@@ -558,6 +558,37 @@ export const AddJournal = async (req, res) => {
   });
 };
 
+export const GetLastJournal = async (req, res) => {
+  let js = await db.userJournalModel.findAll({
+    where: condition,
+    limit: 50,
+  });
+
+  JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
+    if (authData) {
+      let user = authData.user;
+      let userid = user.id;
+      let lastJournal = await db.userJournalModel.fineOne({
+        where: {
+          UserId: userid,
+        },
+        order: [["createdAt", "DESC"]],
+      });
+      if (lastJournal) {
+        res.send({
+          status: true,
+          message: "Last Journal",
+          data: await JournalResource(lastJournal),
+        });
+      } else {
+        res.send({ status: true, message: "Last Journal", data: null });
+      }
+    } else {
+      res.send({ status: false, message: "Unauthenticated user", data: null });
+    }
+  });
+};
+
 export const getJournalsInAWeek = async (
   lastMonday,
   lastSunday,
