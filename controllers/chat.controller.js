@@ -49,7 +49,7 @@ export const CreateChat = async (req, res) => {
         //get most recent journal & feed to the prompt
         let lastJournal = await db.userJournalModel.findOne({
           where: {
-            UserId: userid,
+            UserId: user.id,
           },
           order: [["createdAt", "DESC"]],
         });
