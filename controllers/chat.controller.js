@@ -41,6 +41,23 @@ export const CreateChat = async (req, res) => {
       let journalText = req.body.journalText || null;
       let textHighlights = req.body.textHighlights || null;
       let cd = req.body.cd || null;
+      let mood = null;
+
+      let jumpBackIn = req.body.jumpBackIn || false;
+
+      if (jumpBackIn) {
+        //get most recent journal & feed to the prompt
+        let lastJournal = await db.userJournalModel.findOne({
+          where: {
+            UserId: userid,
+          },
+          order: [["createdAt", "DESC"]],
+        });
+        if (lastJournal) {
+          mood = lastJournal.mood;
+          journalId = lastJournal;
+        }
+      }
 
       if (journalText) {
         hasContext = false;
@@ -120,7 +137,9 @@ export const CreateChat = async (req, res) => {
         if (chatCreated) {
           if (cd) {
             let cdText = Prompts.DiscussDeeper;
-
+            if (jumpBackIn) {
+              cdText = Prompts.JumpBackInPrompt;
+            }
             if (journalText == null || journalText == "") {
               cdText = `What is causing you to experience this cognitive distortion: ${cd}`; // use the old process so that app doesn't break
             } else {
@@ -128,6 +147,8 @@ export const CreateChat = async (req, res) => {
               //if there is cd provided. The user is creating using the cd prompt and we have to provide filtering exercises
               cdText = cdText.replace(/{CD}/g, cd);
               cdText = cdText.replace(/{username}/g, user.name);
+              cdText = cdText.replace(/{name}/g, user.name);
+              cdText = cdText.replace(/{mood}/g, mood);
               cdText = cdText.replace(/{concern_statement}/g, textHighlights);
               cdText = cdText.replace(/{journal_text}/g, journalText);
               const m0 = await db.messageModel.create({
