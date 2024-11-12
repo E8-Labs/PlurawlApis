@@ -11,6 +11,7 @@ import JournalResource from "./journal.resource.js";
 const Op = db.Sequelize.Op;
 
 const ChatResource = async (user) => {
+  console.log('"Creating chat res"');
   if (!Array.isArray(user)) {
     //////console.log("Not array")
     return await getUserData(user);
@@ -33,6 +34,15 @@ async function getUserData(user) {
       id: user.UserJournalId,
     },
   });
+  let oldJournal = await db.userJournalModel.findOne({
+    where: {
+      id: user.old_journal_id,
+    },
+  });
+  let oldJRes = null;
+  if (oldJournal) {
+    oldJRes = await JournalResource(oldJournal);
+  }
 
   let jRes = null;
   if (journal) {
@@ -41,6 +51,7 @@ async function getUserData(user) {
   const UserFullResource = {
     ...user,
     journal: jRes,
+    oldJournal: oldJRes,
   };
 
   return UserFullResource;

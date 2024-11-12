@@ -47,6 +47,7 @@ export const CreateChat = async (req, res) => {
       let jumpBackIn = req.body.jumpBackIn || false;
 
       if (jumpBackIn) {
+        console.log("Jump back in");
         //get most recent journal & feed to the prompt
         let lastJournal = await db.userJournalModel.findOne({
           where: {
@@ -55,6 +56,7 @@ export const CreateChat = async (req, res) => {
           order: [["createdAt", "DESC"]],
         });
         if (lastJournal) {
+          console.log("User have last journal id  jump back in");
           mood = lastJournal.mood;
           journalId = lastJournal;
         }
@@ -134,6 +136,7 @@ export const CreateChat = async (req, res) => {
           has_context: hasContext,
           jump_back_in: jumpBackIn,
         };
+        console.log('"Chat Data"', chatData);
 
         let chatCreated = await Chat.create(chatData);
         if (chatCreated) {
