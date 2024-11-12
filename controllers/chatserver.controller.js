@@ -76,7 +76,7 @@ io.on("connection", (socket) => {
           if (checkin) {
             //if user tapped on checkin from the chat screen
             let prompt = Prompts.CheckinPrompt;
-            prompt = cdText.replace(/{name}/g, user.name);
+            prompt = prompt.replace(/{name}/g, user.name);
 
             const m1 = await db.messageModel.create({
               message: prompt,
