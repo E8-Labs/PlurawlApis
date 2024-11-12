@@ -56,7 +56,7 @@ async function getUserData(user) {
   }
 
   const UserFullResource = {
-    ...user,
+    ...user.get(),
     journal: jRes,
     oldJournal: oldJRes,
   };
