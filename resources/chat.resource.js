@@ -29,25 +29,32 @@ const ChatResource = async (user) => {
 };
 
 async function getUserData(user) {
-  let journal = await db.userJournalModel.findOne({
-    where: {
-      id: user.UserJournalId,
-    },
-  });
-  let oldJournal = await db.userJournalModel.findOne({
-    where: {
-      id: user.old_journal_id,
-    },
-  });
+  let journal = null;
+  if (user.UserJournalId) {
+    journal = await db.userJournalModel.findOne({
+      where: {
+        id: user.UserJournalId,
+      },
+    });
+  }
+  let jRes = null;
+  if (journal) {
+    jRes = await JournalResource(journal);
+  }
+  let oldJournal = null;
+  if (user.old_journal_id) {
+    oldJournal = await db.userJournalModel.findOne({
+      where: {
+        id: user.old_journal_id,
+      },
+    });
+  }
+
   let oldJRes = null;
   if (oldJournal) {
     oldJRes = await JournalResource(oldJournal);
   }
 
-  let jRes = null;
-  if (journal) {
-    jRes = await JournalResource(journal);
-  }
   const UserFullResource = {
     ...user,
     journal: jRes,

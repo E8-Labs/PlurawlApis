@@ -58,7 +58,7 @@ export const CreateChat = async (req, res) => {
         if (lastJournal) {
           console.log("User have last journal id  jump back in");
           mood = lastJournal.mood;
-          journalId = lastJournal;
+          journalId = lastJournal.id;
         }
       }
 
