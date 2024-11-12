@@ -563,7 +563,7 @@ export const GetLastJournal = async (req, res) => {
     if (authData) {
       let user = authData.user;
       let userid = user.id;
-      let lastJournal = await db.userJournalModel.fineOne({
+      let lastJournal = await db.userJournalModel.findOne({
         where: {
           UserId: userid,
         },
