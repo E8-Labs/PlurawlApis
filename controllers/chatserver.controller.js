@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import db from "../models/index.js"; // Adjust the import based on your directory structure
 import JWT from "jsonwebtoken";
 import { getAIChatPromptText } from "./chat.controller.js";
+import { Prompts } from "../constants/promtps.js";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ io.on("connection", (socket) => {
         });
       }
 
+      let checkin = message.checkin || false;
       const userid = authData.user.id; // Extract user ID from authData
       try {
         let jsonMessage = message; // Assume this is already a JSON object
@@ -43,6 +45,7 @@ io.on("connection", (socket) => {
         const chat = await db.chatModel.findByPk(chatid);
         const user = await db.user.findOne({ where: { id: userid } });
 
+        //there is a chat
         if (chat) {
           let messagesData = [];
 
@@ -70,11 +73,25 @@ io.on("connection", (socket) => {
               // this chat was started from an old journal
             }
           }
+          if (checkin) {
+            //if user tapped on checkin from the chat screen
+            let prompt = Prompts.CheckinPrompt;
+            prompt = cdText.replace(/{name}/g, user.name);
+
+            const m1 = await db.messageModel.create({
+              message: prompt,
+              ChatId: chatid,
+              from: "me",
+              type: "promptinvisible",
+              title: "",
+              tokens: 0,
+            });
+          }
 
           // Retrieve previous messages from the database
           const dbmessages = await db.messageModel.findAll({
             where: { ChatId: chatid },
-            limit: 50,
+            limit: 200,
             order: [["id", "ASC"]],
           });
 
