@@ -12,6 +12,7 @@ import {
   findVectorDataChat,
 } from "../services/pineconedb.js";
 import { Prompts } from "../constants/promtps.js";
+import ChatResource from "../resources/chat.resource.js";
 
 // import { Pinecone } from "@pinecone-database/pinecone";
 
@@ -209,17 +210,20 @@ export const CreateChat = async (req, res) => {
               });
             }
 
+            let chatRes = await ChatResource(chatCreated);
+
             res.send({
               message: "Chat created",
-              data: chatCreated,
+              data: chatRes,
               status: true,
             });
           } else if (typeof req.body.chattype !== "undefined") {
             // let type = req.body.type;
+            let chatRes = await ChatResource(chatCreated);
             if (chattype === "AIChat") {
               res.send({
                 message: "Chat created",
-                data: chatCreated,
+                data: chatRes,
                 status: true,
               });
               //started from the main screen dashboard
