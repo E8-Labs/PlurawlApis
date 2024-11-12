@@ -131,6 +131,7 @@ export const CreateChat = async (req, res) => {
           old_chat_id: oldChatId,
           old_journal_id: journalId,
           has_context: hasContext,
+          jump_back_in: jumpBackIn,
         };
 
         let chatCreated = await Chat.create(chatData);

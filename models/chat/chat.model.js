@@ -36,6 +36,10 @@ let chatModel = (sequelize, Sequelize) => {
       type: Sequelize.BOOLEAN,
       defaultValue: true,
     },
+    jump_back_in: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+    },
   });
   // Chat.belongsTo(User);
   // Chat.belongsTo(Prompt)
