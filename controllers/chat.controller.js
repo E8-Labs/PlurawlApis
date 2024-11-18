@@ -197,13 +197,6 @@ export const CreateChat = async (req, res) => {
                     });
                     // messageArray.push(m2);
                   }
-                  const m2 = await db.messageModel.create({
-                    message: message.replace(/^"|"$/g, ""),
-                    ChatId: chatCreated.id,
-                    from: "gpt",
-                    type: "text",
-                    tokens: gptResponse.completion_tokens,
-                  });
                 } else {
                   // Handle the case where gptResponse is null or undefined
                   // e.g., console.log("No response from GPT");
