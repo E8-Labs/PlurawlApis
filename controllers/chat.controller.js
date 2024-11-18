@@ -59,6 +59,7 @@ export const CreateChat = async (req, res) => {
           console.log("User have last journal id  jump back in");
           mood = lastJournal.mood;
           journalId = lastJournal.id;
+          journalText = lastJournal.snapshot;
         }
       }
 
@@ -91,12 +92,12 @@ export const CreateChat = async (req, res) => {
           let decrypted = journal.detail;
           // //console.log("decipher", user.id)
           try {
-            if (key && iv && journal.encrypted) {
-              const decipher = crypto.createDecipheriv(algo, key, iv);
-              decrypted = decipher.update(journal.detail, "hex", "utf8");
-              decrypted += decipher.final("utf8");
-            }
-            journalText = decrypted;
+            // if (key && iv && journal.encrypted) {
+            //   const decipher = crypto.createDecipheriv(algo, key, iv);
+            //   decrypted = decipher.update(journal.detail, "hex", "utf8");
+            //   decrypted += decipher.final("utf8");
+            // }
+            journalText = journal.snapshot;
             textHighlights = th;
             cd = journal.cd;
           } catch (error) {
