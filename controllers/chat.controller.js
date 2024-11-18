@@ -141,7 +141,7 @@ export const CreateChat = async (req, res) => {
 
         let chatCreated = await Chat.create(chatData);
         if (chatCreated) {
-          if (cd) {
+          if (chattype != "AIChat" || typeof req.body.chattype == "undefined") {
             let cdText = Prompts.DiscussDeeper;
             if (jumpBackIn) {
               cdText = Prompts.JumpBackInPrompt;
