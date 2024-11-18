@@ -278,7 +278,7 @@ Now the response should be a json object with the following keys:
       },
       snapshot: Snapshot of the conversation only 100-150 words,
       snapshotTextHighlights: [Array of words. max 6 items],
-      cd: this is cognitive distortions,
+      cd: this is one of cognitive distortions. If no cd then make it null,
       cd_analysis: short description in two to three sentences explaining why the user is experiencing one of the 7 cds,
       texthighlight:[
           // info about highlighting text here. max 6 items
