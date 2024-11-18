@@ -26,6 +26,7 @@ import JournalResource from "../resources/journal.resource.js";
 import UserStreaks from "../models/UserStreaks.js";
 // import { addToVectorDb, findVectorData } from "../services/chromadb.js";
 import { addToVectorDb, findVectorData } from "../services/pineconedb.js";
+import { Prompts } from "../constants/promtps.js";
 
 const GptModel = "gpt-4-turbo-preview";
 
@@ -1073,7 +1074,7 @@ export const AnalyzeJournalWithVector = async (req, res) => {
       console.log("Fetched found vectors");
       // return res.send({data: foundPreviousResults});
 
-      let text = Prompts.AnalyzeJournal;
+      let text = Prompts.AnalyzePrompt;
       text = text.replace(/{journal_text}/g, paragraph);
       let messageData = [];
       messageData.push({
