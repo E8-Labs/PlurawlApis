@@ -185,6 +185,7 @@ export const CreateChat = async (req, res) => {
                   let message = gptResponse.gptMessage;
 
                   let messages = splitMessage(gptResponse.gptMessage);
+                  console.log("Message divided into chunks ", messages.length);
                   for (let i = 0; i < messages.length; i++) {
                     let m = messages[i];
                     const m2 = await db.messageModel.create({
