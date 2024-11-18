@@ -187,17 +187,14 @@ export const CreateChat = async (req, res) => {
                   let messages = splitMessage(gptResponse.gptMessage);
                   for (let i = 0; i < messages.length; i++) {
                     let m = messages[i];
-                    const m2 = await db.messageModel.create(
-                      {
-                        message: m.replace(/^"|"$/g, ""),
-                        ChatId: chatCreated.id,
-                        from: "gpt",
-                        type: "text", //messages[1].type
-                        tokens: gptResponse.completion_tokens,
-                      },
-                      { transaction: t }
-                    );
-                    messageArray.push(m2);
+                    const m2 = await db.messageModel.create({
+                      message: m.replace(/^"|"$/g, ""),
+                      ChatId: chatCreated.id,
+                      from: "gpt",
+                      type: "text", //messages[1].type
+                      tokens: gptResponse.completion_tokens,
+                    });
+                    // messageArray.push(m2);
                   }
                   const m2 = await db.messageModel.create({
                     message: message.replace(/^"|"$/g, ""),
