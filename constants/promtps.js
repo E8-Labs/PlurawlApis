@@ -283,6 +283,7 @@ Now the response should be a json object with the following keys:
       texthighlight:[
           // info about highlighting text here. max 6 items
       ],
+      celebratory: "celebratory response from one of the above",
   comments:"Further comments you want to add. no more than 100 words
   }
 
