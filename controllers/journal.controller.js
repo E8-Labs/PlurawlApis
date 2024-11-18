@@ -1073,34 +1073,8 @@ export const AnalyzeJournalWithVector = async (req, res) => {
       console.log("Fetched found vectors");
       // return res.send({data: foundPreviousResults});
 
-      let text = `Depending on the following journal written by me give me the mood of the writer from one of these:  Moods: "High energy, Pleasant", "High energy, Unpleasant", "Low energy, Pleasant", "Low energy, unpleasant" And also give me a proper feeling in one word that best describes the paragraph and falls under the mood selected above. Also give me the acronym for this feeling and a little description describing the meaning of that word. Include how we can pronounce this feeling word as well. This is the paragraph: ${paragraph} Now give me a snapshot of the conversation which is a small description that tells how i am feeling and what is mood and energy is. Do mention the mood and feeling in the paragraph and give me appropriate information that i can use to highlight those words or sentences in the snapshot using react native.
-    
-    It should also provide me one of the following 7 cognitive distortions (CD). List of Cognitive distortions, Blame, Filtering, Polarized Thinking, Personalization, Fortune-Telling, Negative Emotional reasoning. If the text doesn't relate to any of the mentioned Cognitive distortions then just say none.
-    Also add the hightlight sentences for the snapshot separately. These should be to highlight words or sentences from the generated summary.
-    Now the response should be a json object with the following keys: 
-    
-    {
-        mood: Hight energy, Pleasant
-        feeling: {
-            title: Anxious,
-            acronym: acronym here,
-            description: Description goes here. only 50 words,
-        pronunciation: “how to pronounce”
-        },
-        snapshot: Snapshot of the conversation only 100-150 words,
-        snapshotTextHighlights: [Array of words. max 6 items],
-        cd: this is cognitive distortions,
-        cd_analysis: short description in two to three sentences explaining why the user is experiencing one of the 7 cds (Write this in second person perspective),
-        texthighlight:[
-            // info about highlighting text here. max 6 items
-        ],
-    comments:"Further comments you want to add. no more than 100 words
-    }
-
-    in the texthighlight key, only give me a list(array of strings) of words and sentences that should be highlighted.
-    Make sure that the response string is just a json object and no extra text. If you want to add additional info. Then add it inside the comment key in the json object. 
-    Also refer to the previous journal history provided here.  Previous Journal History: ${foundPreviousResults}
-    `;
+      let text = Prompts.AnalyzeJournal;
+      text = text.replace(/{journal_text}/g, paragraph);
       let messageData = [];
       messageData.push({
         role: "user",
