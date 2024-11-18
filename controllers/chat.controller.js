@@ -205,13 +205,13 @@ export const CreateChat = async (req, res) => {
             //Or maybe use gpt to respond so that we can get the answer.
             // In the past journal when we tap the reflect button, it should not show the predefined messages.
             if (!journalId) {
-              const m1 = await db.messageModel.create({
-                message: `What is causing you to experience this cognitive distortion: ${cd}`, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
-                ChatId: chatCreated.id,
-                from: "gpt",
-                type: "text",
-                title: "",
-              });
+              // const m1 = await db.messageModel.create({
+              //   message: `What is causing you to experience this cognitive distortion: ${cd}`, // (messages[0].type == MessageType.Prompt || messages[0].type == MessageType.StackPrompt ) ? messages[0].title : messages[0].message,
+              //   ChatId: chatCreated.id,
+              //   from: "gpt",
+              //   type: "text",
+              //   title: "",
+              // });
             }
 
             let chatRes = await ChatResource(chatCreated);
