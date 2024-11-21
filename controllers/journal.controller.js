@@ -296,6 +296,7 @@ export const AddJournal = async (req, res) => {
   JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
     if (authData) {
       let algo = process.env.EncryptionAlgorithm;
+
       let data = req.body;
       console.log("JOURNAL DATA", data);
       let journalType = req.body.type || "manual";

@@ -19,6 +19,11 @@ const UserJournalModel = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       default: "",
     },
+    celeberatory: {
+      // cognitive disorder: one of 7 cognitive disorders
+      type: Sequelize.STRING,
+      default: "",
+    },
     snapshot: {
       type: Sequelize.TEXT("medium"),
       default: "",

@@ -91,6 +91,7 @@ async function getUserData(user) {
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     chat: chat,
+    celeberatory: user.celeberatory,
   };
 
   return UserFullResource;
