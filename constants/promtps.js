@@ -257,13 +257,20 @@ Encouragement for journaling:
 `,
 
   AnalyzePrompt: `Depending on the following journal written give us the mood of the writer from one of these options:  Moods: "High energy, Pleasant", "High energy, Unpleasant", "Low energy, Pleasant", "Low energy, unpleasant" And also give me a proper feeling in one word that best describes the paragraph and falls under the mood selected above. Also give me the acronym for this feeling and a short description describing the meaning of that word. Include how we can pronounce this feeling word as well. This is the paragraph: {journal_text} Now give me a snapshot of the conversation which is a small description that tells how I am feeling and what mood and energy is. Do mention the mood and feeling in the paragraph and give me appropriate information that i can use to highlight those words or sentences in the snapshot using react native.
-It should also provide me one of the following 7 cognitive distortions (CD). List of Cognitive distortions, Blame, Filtering, Polarized Thinking, Personalization, Fortune-Telling, Negative Emotional reasoning. If the text doesn't relate to any of the mentioned Cognitive distortions then  create a celebratory response, like:
+It should also provide me one of the following 7 cognitive distortions (CD). List of Cognitive distortions, Blame, Filtering, Polarized Thinking, Personalization, Fortune-Telling, Negative Emotional reasoning. 
+
+As you’re providing the output, make sure to talk to the user by using 2nd person. Use language that directly addresses 'you,' ensuring the interaction feels personal and engaging. For example:
+Instead of saying, 'The user can now view their results,' say, 'You can now view your results.'
+Use active and encouraging phrases like, 'Here's what you can do next,' or 'You might find this feature helpful.'
+Maintain a conversational tone to create a sense of dialogue and connection.
+
+If the text doesn't relate to any of the mentioned Cognitive distortions then  create a celebratory response, like:
 "Shoutout to you, that's growth! You do not seem to be experiencing any limiting beliefs."
 "OK, look at you with the growth! You do not seem to be experiencing any limiting beliefs."
 "Way to stay on track – keep it up! You do not seem to be experiencing any limiting beliefs."
 "That’s clarity in action – great work! You do not seem to be experiencing any limiting beliefs."
 "Keep challenging limits – you're building resilience! You do not seem to be experiencing any limiting beliefs."
-Make sure the response remains in the 2nd person.
+
 
 
 Now the response should be a json object with the following keys: 
