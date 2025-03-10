@@ -47,13 +47,17 @@ export async function SendAutoEmails() {
   if (users && users.length > 0) {
     for (const u of users) {
       console.log("User Start", u.id);
-      await SendVipEmailWeek1(u, admin);
-      for (let i = 1; i < AllNotTypes.length; i++) {
-        const type = AllNotTypes[i];
-        const lastNotType = AllNotTypes[i - 1];
-        await SendRemainingEmailNots(u, admin, type, lastNotType);
+      try {
+        await SendVipEmailWeek1(u, admin);
+        for (let i = 1; i < AllNotTypes.length; i++) {
+          const type = AllNotTypes[i];
+          const lastNotType = AllNotTypes[i - 1];
+          await SendRemainingEmailNots(u, admin, type, lastNotType);
+        }
+        console.log("User End", u.id);
+      } catch (error) {
+        console.log("Notifi error ", error);
       }
-      console.log("User End", u.id);
     }
   }
 }
@@ -263,4 +267,4 @@ async function SendRemainingEmailNots(
   await CreateNotification(user, from, type);
 }
 
-SendAutoEmails();
+// SendAutoEmails();
