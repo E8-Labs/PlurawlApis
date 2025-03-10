@@ -358,7 +358,7 @@ export const GetUserNotifications = async (req, res) => {
                 SELECT Notifications.*
                 FROM Notifications
                 JOIN Users ON Notifications.from = Users.id
-                WHERE Users.id = ${user.id}
+                WHERE Notifications.to = ${user.id}
                 LIMIT 20 OFFSET ?
             `;
 
