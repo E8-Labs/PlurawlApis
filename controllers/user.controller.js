@@ -1088,13 +1088,11 @@ export const generateWebAccessCode = (req, res) => {
       });
     } catch (err) {
       console.error("Error generating web access code:", err);
-      res
-        .status(500)
-        .send({
-          status: false,
-          message: "An error occurred while generating the web access code.",
-          error: err.message,
-        });
+      res.status(500).send({
+        status: false,
+        message: "An error occurred while generating the web access code.",
+        error: err.message,
+      });
     }
   });
 };
@@ -1136,13 +1134,11 @@ export const verifyWebAccessCode = async (req, res) => {
     }
   } catch (err) {
     console.error("Error verifying web access code:", err);
-    res
-      .status(500)
-      .send({
-        status: false,
-        message: "An error occurred while verifying the web access code.",
-        error: err.message,
-      });
+    res.status(500).send({
+      status: false,
+      message: "An error occurred while verifying the web access code.",
+      error: err.message,
+    });
   }
 };
 

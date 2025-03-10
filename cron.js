@@ -30,6 +30,7 @@ import {
 
 import dotenv from "dotenv";
 import { RetrieveASubscriptions } from "./controllers/stripe.js";
+import { SendAutoEmails } from "./controllers/AutoEmailController.js";
 dotenv.config();
 
 let number = 0; // "/2 * * * Monday"
@@ -135,4 +136,5 @@ const moodJob = nodeCron.schedule(
 );
 moodJob.start();
 
-// export {fetchWeeklySnapshots}
+const autoEmailCron = nodeCron.schedule("*/5 * * * *", SendAutoEmails);
+autoEmailCron.start();
