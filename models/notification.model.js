@@ -21,7 +21,7 @@ let NotificationModel = (sequelize, Sequelize) => {
         NotificationType.TypeWeek1PositiveAffirmation2,
         NotificationType.TypeWeek1FeatureDriven2,
         NotificationType.TypeWeek2PositiveAffirmationWeek2,
-        NotificationType.TypeWeek2WorldEventWeek2,
+        NotificationType.TypeWeek2WorldEvent1,
         NotificationType.TypeWeek2FeatureDriven,
         NotificationType.TypeWeek2InsightsDriven,
         NotificationType.TypeWeek2PositiveAffirmation3,
