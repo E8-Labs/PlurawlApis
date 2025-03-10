@@ -62,13 +62,13 @@ async function getUserData(user, currentUser = null) {
     text = fromUser.name + " just signed up";
   } else if (user.notification_type === "Streak3") {
     let not = NotificationTitlesAndBody[user.notification_type];
-    // text = not.body;
-    title = not.title;
+    // text = not?.body;
+    title = not?.title;
     text = fromUser.name + " is on 3 day streak";
   } else if (user.notification_type === "Streak30") {
     let not = NotificationTitlesAndBody[user.notification_type];
-    // text = not.body;
-    title = not.title;
+    // text = not?.body;
+    title = not?.title;
     text = fromUser.name + " is on 30 day streak";
   } else if (user.notification_type === "NewJournal") {
     text = fromUser.name + " added a new journal";
@@ -76,8 +76,8 @@ async function getUserData(user, currentUser = null) {
     text = fromUser.name + " just checked in";
   } else {
     let not = NotificationTitlesAndBody[user.notification_type];
-    text = not.body;
-    title = not.title;
+    text = not?.body;
+    title = not?.title;
   }
   const UserFullResource = {
     id: user.id,
