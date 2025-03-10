@@ -57,7 +57,7 @@ async function getUserData(user, currentUser = null) {
   }
 
   let text = "";
-  let title = notification_type;
+  let title = user.notification_type;
   if (user.notification_type === "NewUser") {
     text = fromUser.name + " just signed up";
   } else if (user.notification_type === "Streak3") {
