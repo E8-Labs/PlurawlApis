@@ -89,7 +89,7 @@ const HtmlTemplateMainCharacter = `
   <div class="container">
     <div class="header">💖 Main Character Energy</div>
     <div class="image-container">
-      <img src="https://i.ibb.co/xSGXMKwk/Vip-Access.png" alt="Main Character Energy">
+      <img src="https://plurawl-storage.s3.us-east-2.amazonaws.com/VipAccess.png" alt="Main Character Energy">
     </div>
     <div class="body">
       <p>Hey {First_Name},</p>
@@ -106,6 +106,7 @@ const HtmlTemplateMainCharacter = `
 </body>
 </html>`;
 
+//Not being used.
 export function generatePositiveAffirmationWeek1Email(
   First_Name,
   CTA_Link = ""
