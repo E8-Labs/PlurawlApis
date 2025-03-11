@@ -269,4 +269,4 @@ async function SendRemainingEmailNots(
   await CreateNotification(user, from, type);
 }
 
-SendAutoEmails();
+// SendAutoEmails();
