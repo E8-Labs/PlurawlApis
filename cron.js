@@ -136,5 +136,5 @@ const moodJob = nodeCron.schedule(
 );
 moodJob.start();
 
-const autoEmailCron = nodeCron.schedule("*/59 * * * *", SendAutoEmails);
-autoEmailCron.start();
+// const autoEmailCron = nodeCron.schedule("*/59 * * * *", SendAutoEmails);
+// autoEmailCron.start();

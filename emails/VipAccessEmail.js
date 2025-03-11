@@ -83,6 +83,19 @@ const HtmlTemplateVIPAccess = `
       display: block;
       margin: 0 auto;
     }
+    .body ul {
+      text-align: left;
+      list-style-type: disc;
+      padding-left: 40px;
+    }
+    .body ul li {
+      text-align: left;
+    }
+    .body ul li span {
+      display: inline-block;
+      text-align: left;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -97,9 +110,9 @@ const HtmlTemplateVIPAccess = `
       <p>This is just the beginning. We’re here to help you check in with yourself, track how you’re feeling, and keep growing—no judgment, no interruptions. Just real, raw self-reflection.</p>
       <p>Here’s what’s waiting for you:</p>
       <ul>
-        <li>All the features, like mood tracking, AI conversation, and personalized insights.</li>
-        <li>Exclusive updates as we keep improving Plurawl.</li>
-        <li>A space to be real with yourself and feel heard.</li>
+        <li><span>All the features, like mood tracking, AI conversation, and personalized insights.</span></li>
+        <li><span>Exclusive updates as we keep improving Plurawl.</span></li>
+        <li><span>A space to be real with yourself and feel heard.</span></li>
       </ul>
       <p>Ready to Dive In?</p>
       <a href="{CTA_Link}" class="cta"><p class="ctaText">Start Reflecting Now</p></a>

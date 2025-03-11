@@ -200,13 +200,15 @@ export const sendNotWithUser = async (
     try {
       // Send the notification
       let receipts = await expo.sendPushNotificationsAsync([message]);
-      //console.log(receipts);
+      console.log("Notification response");
+      console.log(receipts);
       return {
         status: true,
         message: "Notification sent successfully",
         data: receipts,
       };
     } catch (error) {
+      console.log("Not response error");
       console.error(error);
       return {
         status: false,
