@@ -1311,7 +1311,7 @@ export const SendEmailVerificationCode = async (req, res) => {
         }
       });
     } catch (error) {
-      //console.log("Exception email", error)
+      console.log("Exception email", error);
     }
   }
 };
