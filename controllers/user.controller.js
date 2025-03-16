@@ -1312,6 +1312,12 @@ export const SendEmailVerificationCode = async (req, res) => {
       });
     } catch (error) {
       console.log("Exception email", error);
+      return res.send({
+        status: false,
+        message: "Error sending email",
+        error: error,
+        errorMessage: error.message,
+      });
     }
   }
 };
