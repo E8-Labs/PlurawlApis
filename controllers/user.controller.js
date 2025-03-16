@@ -1304,8 +1304,13 @@ export const SendEmailVerificationCode = async (req, res) => {
       };
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-          res.send({ status: false, message: "Code not sent" });
-          ////console.log(error);
+          console.log(error);
+          res.send({
+            status: false,
+            message: "Code not sent",
+            error: error,
+            errorMessage: error.message,
+          });
         } else {
           res.send({ status: true, message: "Code sent" });
         }
