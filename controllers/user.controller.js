@@ -68,6 +68,7 @@ export const RegisterUser = async (req, res) => {
         role = UserRole.RoleFree;
         console.log("Build number matched");
       }
+      role = UserRole.RoleFree;
       // return
       var userData = {
         name: req.body.name,
