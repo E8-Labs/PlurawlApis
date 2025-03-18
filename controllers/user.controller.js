@@ -73,6 +73,7 @@ export const RegisterUser = async (req, res) => {
       var userData = {
         name: req.body.name,
         email: req.body.email,
+        phone: req.body.phone || null,
         profile_image: "",
         password: req.body.password,
         role: role, //UserRole.RoleUser,

@@ -1,121 +1,128 @@
 const UserModel = (sequelize, Sequelize) => {
-    const User = sequelize.define("User", {
+  const User = sequelize.define(
+    "User",
+    {
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
-      
+
       email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+      },
+      phone: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       password: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
-      
+
       profile_image: {
         type: Sequelize.STRING,
-        default: ''
+        default: "",
       },
       full_profile_image: {
         type: Sequelize.STRING,
-        default: ''
+        default: "",
       },
       company: {
         type: Sequelize.STRING,
-        default: ''
+        default: "",
       },
       title: {
         type: Sequelize.STRING,
-        default: ''
+        default: "",
       },
       industry: {
         type: Sequelize.STRING,
-        default: ''
+        default: "",
       },
       city: {
         type: Sequelize.STRING,
-        default: ''
+        default: "",
       },
       state: {
         type: Sequelize.STRING,
-        default: ''
+        default: "",
       },
-      gender:{
-        type:Sequelize.STRING,
-        values: ['Male', 'Female', 'None'],
-        default: 'Male'
+      gender: {
+        type: Sequelize.STRING,
+        values: ["Male", "Female", "None"],
+        default: "Male",
       },
-      race:{
-        type:Sequelize.STRING,
-        default: ''// ethnicity
+      race: {
+        type: Sequelize.STRING,
+        default: "", // ethnicity
       },
-      lgbtq:{
-        type:Sequelize.STRING,
-        default: ''// yes, no, prefer not to say
+      lgbtq: {
+        type: Sequelize.STRING,
+        default: "", // yes, no, prefer not to say
       },
-      veteran:{
-        type:Sequelize.STRING,
-        default: ''// yes, no, prefer not to say
+      veteran: {
+        type: Sequelize.STRING,
+        default: "", // yes, no, prefer not to say
       },
-      fcm_token:{
-        type:Sequelize.STRING,
-        default: ''
+      fcm_token: {
+        type: Sequelize.STRING,
+        default: "",
       },
-      device_id:{ // unique for every device
-        type:Sequelize.STRING,
-        defaultValue: ''
+      device_id: {
+        // unique for every device
+        type: Sequelize.STRING,
+        defaultValue: "",
       },
       provider_id: {
         type: Sequelize.STRING,
-        default: ''
+        default: "",
       },
       provider_name: {
         type: Sequelize.STRING,
-        default: 'Email', //Facebook, Apple, Google
+        default: "Email", //Facebook, Apple, Google
       },
       role: {
         type: Sequelize.ENUM,
-        values: ['user', 'admin', 'free'],
-        default: 'user'
+        values: ["user", "admin", "free"],
+        default: "user",
       },
       points: {
         type: Sequelize.INTEGER,
-        default: 0
+        default: 0,
       },
       enc_key: {
         type: Sequelize.BLOB,
-        allowNull: true
+        allowNull: true,
       },
-      enc_iv: { //initialization vector
+      enc_iv: {
+        //initialization vector
         type: Sequelize.BLOB,
-        allowNull: true
+        allowNull: true,
       },
       countries: {
         type: Sequelize.STRING,
-        default: ""
+        default: "",
       },
       pronouns: {
         type: Sequelize.STRING,
-        default: ""
+        default: "",
       },
       dob: {
         type: Sequelize.STRING,
-        default: ""
+        default: "",
       },
-      points:{
+      points: {
         type: Sequelize.DOUBLE,
         allowNull: false,
-        defaultValue: 0
-      }
-      
-    }, 
+        defaultValue: 0,
+      },
+    }
     // {
     //   associate: function(models) {
     //     User.hasMany(models.PlaidTokens, { onDelete: 'cascade' });
     //   }
     // }
-    );
-  
-    return User;
-  };
+  );
 
-  export default UserModel;
+  return User;
+};
+
+export default UserModel;
