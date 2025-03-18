@@ -20,11 +20,23 @@ import {
 journalRouter.post("/add_journal", verifyJwtToken, AddJournal);
 journalRouter.get("/recent_journals", verifyJwtToken, fetchRecentJournals);
 journalRouter.get("/get_user_journals", verifyJwtToken, GetJournals);
-journalRouter.get("/get_moods_list", GenerateListOfMoods);
+journalRouter.get(
+  "/get_moods_list",
+  verifyJwtTokenOptional,
+  GenerateListOfMoods
+);
 journalRouter.post("/analyze_journal", verifyJwtTokenOptional, AnalyzeJournal);
-journalRouter.get("/get_calendar_prompt", GetCalendarEventPrompt);
+journalRouter.get(
+  "/get_calendar_prompt",
+  verifyJwtTokenOptional,
+  GetCalendarEventPrompt
+);
 journalRouter.get("/get_insights", verifyJwtToken, GetInsights);
-journalRouter.get("/run_snapshot_cron", fetchWeeklySnapshots);
+journalRouter.get(
+  "/run_snapshot_cron",
+  verifyJwtTokenOptional,
+  fetchWeeklySnapshots
+);
 journalRouter.get("/get_last_journal", verifyJwtToken, GetLastJournal);
 
 // journalRouter.get("/generate_snaps", fetchWeeklySnapshots);
