@@ -301,6 +301,8 @@ export const AddJournal = async (req, res) => {
       console.log("JOURNAL DATA", data);
       let journalType = req.body.type || "manual";
       let journalText = req.body.detail;
+
+      let showSnapshot = req.body.showSnapshot || true;
       console.log("Journal text is ", journalText);
       console.log("---------------------------------------\n\n\n\n");
       let user = await db.user.findOne({
@@ -374,6 +376,7 @@ export const AddJournal = async (req, res) => {
       data.encrypted = true;
       // data.cod = req.body.cd;
       console.log("Trying to add journal");
+      data.showSnapshot = showSnapshot;
       let pointsIncremented = 1.5;
       try {
         db.userJournalModel

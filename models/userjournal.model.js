@@ -9,6 +9,10 @@ const UserJournalModel = (sequelize, Sequelize) => {
       type: Sequelize.TEXT("medium"),
       default: "",
     },
+    showSnapshot: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: true,
+    },
     type: {
       type: Sequelize.STRING,
       values: ["manual", "aichat", "journal", "draft"], // mood can be set via these functions
