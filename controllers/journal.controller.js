@@ -376,12 +376,14 @@ export const AddJournal = async (req, res) => {
       data.encrypted = true;
       // data.cod = req.body.cd;
       console.log("Trying to add journal");
-      data.showSnapshot = showSnapshot;
+      // data.showSnapshot = showSnapshot;
       let pointsIncremented = 1.5;
+      console.log("SHow Snapshot", data.showSnapshot);
       try {
         db.userJournalModel
           .create(data)
           .then(async (result) => {
+            console.log("Result is ", result);
             if (req.body.save_as_checkin === true) {
               let checkinData = {
                 mood: req.body.mood,
