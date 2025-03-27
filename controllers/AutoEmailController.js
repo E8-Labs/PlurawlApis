@@ -39,9 +39,21 @@ export async function SendAutoEmails() {
       role: "admin",
     },
   });
-  let users = await db.user.findAll({
-    // limit: 1,
-  });
+  // import { Op } from 'sequelize';
+
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0); // Set to 00:00:00 of today
+
+  const users = await db.user
+    .findAll
+    // {
+    // where: {
+    //   createdAt: {
+    //     [db.Sequelize.Op.gte]: startOfToday,
+    //   },
+    // },
+    // }
+    ();
 
   console.log("Found users to send email ", users.length);
   if (users && users.length > 0) {
@@ -101,7 +113,7 @@ async function SendVipEmailWeek1(user, from) {
   }
   let emailNot = generateVIPAccessEmail(user.name, PlurawlAppStoreLink);
 
-  let sent = await SendEmail(user.email, emailNot.subject, emailNot.html);
+  // let sent = await SendEmail(user.email, emailNot.subject, emailNot.html);
   let pushNot = NotificationTitlesAndBody[type];
   await sendNotWithUser(
     user,
@@ -264,7 +276,7 @@ async function SendRemainingEmailNots(
     null
   );
   if (emailNot) {
-    let sent = await SendEmail(user.email, emailNot.subject, emailNot.html);
+    // let sent = await SendEmail(user.email, emailNot.subject, emailNot.html);
   }
   await CreateNotification(user, from, type);
 }
