@@ -113,7 +113,14 @@ async function SendVipEmailWeek1(user, from) {
   }
   let emailNot = generateVIPAccessEmail(user.name, PlurawlAppStoreLink);
 
-  // let sent = await SendEmail(user.email, emailNot.subject, emailNot.html);
+  const referenceDate = new Date("2025-04-03T00:00:00Z");
+  if (new Date(user.createdAt) > referenceDate) {
+    console.log("✅ user.createdAt is after April 3rd, 2025");
+    let sent = await SendEmail(user.email, emailNot.subject, emailNot.html);
+  } else {
+    console.log("❌ user.createdAt is not after April 3rd, 2025");
+  }
+
   let pushNot = NotificationTitlesAndBody[type];
   await sendNotWithUser(
     user,
@@ -276,7 +283,14 @@ async function SendRemainingEmailNots(
     null
   );
   if (emailNot) {
-    // let sent = await SendEmail(user.email, emailNot.subject, emailNot.html);
+    const referenceDate = new Date("2025-04-03T00:00:00Z");
+    if (new Date(user.createdAt) > referenceDate) {
+      console.log("✅ user.createdAt is after April 3rd, 2025");
+      let sent = await SendEmail(user.email, emailNot.subject, emailNot.html);
+    } else {
+      console.log("❌ user.createdAt is before April 3rd, 2025");
+    }
+    //
   }
   await CreateNotification(user, from, type);
 }
