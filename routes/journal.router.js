@@ -1,5 +1,9 @@
 import express from "express";
+import multer from "multer";
 const journalRouter = express.Router();
+
+const uploadFiles = multer().fields([{ name: "media", maxCount: 10 }]);
+
 import {
   verifyJwtToken,
   verifyJwtTokenOptional,
@@ -17,7 +21,7 @@ import {
 } from "../controllers/journal.controller.js";
 // import { fetchWeeklySnapshots } from "../cron.js";
 
-journalRouter.post("/add_journal", verifyJwtToken, AddJournal);
+journalRouter.post("/add_journal", uploadFiles, verifyJwtToken, AddJournal);
 journalRouter.get("/recent_journals", verifyJwtToken, fetchRecentJournals);
 journalRouter.get("/get_user_journals", verifyJwtToken, GetJournals);
 journalRouter.get(

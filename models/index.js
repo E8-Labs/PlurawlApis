@@ -48,6 +48,7 @@ import UserWebAccessCodeModel from "./webaccesscode.model.js";
 
 import EmailVerificationCode from "./emailverificationcode.model.js";
 import UserActivityModel from "./UserActivityModel.js";
+import UserJournalMedia from "./userJournalMedia.js";
 
 db.user = UserModel(sequelize, Sequelize);
 db.goal = GoalModel(sequelize, Sequelize);
@@ -61,6 +62,13 @@ db.goal.hasMany(db.userGoalModel, { onDelete: "CASCADE", hooks: true });
 db.userJournalModel = UserJournalModel(sequelize, Sequelize);
 db.userJournalModel.belongsTo(db.user);
 db.user.hasMany(db.userJournalModel, { onDelete: "CASCADE", hooks: true });
+
+db.UserJournalMedia = UserJournalMedia(sequelize, Sequelize);
+db.UserJournalMedia.belongsTo(db.userJournalModel);
+db.userJournalModel.hasMany(db.UserJournalMedia, {
+  onDelete: "CASCADE",
+  hooks: true,
+});
 
 db.weeklySnapshotModel = WeeklySnapshotModel(sequelize, Sequelize);
 db.weeklySnapshotModel.belongsTo(db.user);

@@ -27,6 +27,7 @@ import UserStreaks from "../models/UserStreaks.js";
 // import { addToVectorDb, findVectorData } from "../services/chromadb.js";
 import { addToVectorDb, findVectorData } from "../services/pineconedb.js";
 import { Prompts } from "../constants/promtps.js";
+import { uploadMedia } from "../config/storage.js";
 
 const GptModel = "gpt-4-turbo-preview";
 
@@ -378,7 +379,35 @@ export const AddJournal = async (req, res) => {
       console.log("Trying to add journal");
       // data.showSnapshot = showSnapshot;
       let pointsIncremented = 1.5;
-      console.log("SHow Snapshot", data.showSnapshot);
+      console.log("SHow Snapshot", showSnapshot);
+
+      const files = req.files.media || req.files || []; // Depending on how multer is used
+      if (!files.length) {
+      }
+      const uploadedResults = [];
+      console.log("Files are ", files.length);
+      for (const file of files) {
+        console.log("Trying to upload image");
+        const { buffer, mimetype, fieldname, originalname } = file;
+        console.log("Mime ", mimetype);
+        console.log("File ", fieldname);
+        try {
+          const url = await uploadMedia(
+            fieldname,
+            buffer,
+            mimetype,
+            "journalImages"
+          );
+          console.log("Image uploaded ", url);
+          const type = mimetype.includes("video") ? "video" : "image";
+
+          uploadedResults.push(url);
+        } catch (err) {
+          console.log("Error ", err);
+        }
+      }
+
+      console.log("Urls of images ", uploadedResults);
       try {
         db.userJournalModel
           .create(data)
@@ -404,6 +433,13 @@ export const AddJournal = async (req, res) => {
               let journal = result;
               journal.journalText = journalText; //req.body.detail
               console.log("Embedding ", journal.journalText);
+
+              for (const url of uploadedResults) {
+                await db.UserJournalMedia.create({
+                  url: url,
+                  UserJournalId: journal.id,
+                });
+              }
               //embed Journal data now
               let embeded = await addToVectorDb(journal, user);
               // set Journal Id to chat.

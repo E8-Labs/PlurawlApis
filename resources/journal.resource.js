@@ -73,6 +73,12 @@ async function getUserData(user) {
       UserJournalId: user.id,
     },
   });
+
+  let media = await db.UserJournalMedia.findAll({
+    where: {
+      UserJournalId: user.id,
+    },
+  });
   const UserFullResource = {
     id: user.id,
     title: user.title,
@@ -93,6 +99,7 @@ async function getUserData(user) {
     chat: chat,
     celeberatory: user.celeberatory,
     showSnapshot: user.showSnapshot,
+    media: media,
   };
 
   return UserFullResource;
