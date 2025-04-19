@@ -346,7 +346,7 @@ export const AddJournal = async (req, res) => {
       data.textHighlights = textHightlightText;
 
       separator = "";
-      let snapshotTextHighlights = data.snapshotTextHighlights;
+      let snapshotTextHighlights = data.snapshotTextHighlights || [];
       let snapshottextHightlightText = "";
       for (let i = 0; i < snapshotTextHighlights.length; i++) {
         snapshottextHightlightText =
