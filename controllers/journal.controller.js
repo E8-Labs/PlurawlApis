@@ -336,7 +336,7 @@ export const AddJournal = async (req, res) => {
         );
       }
 
-      let texthighlights = data.texthighlight;
+      let texthighlights = data.texthighlight || [];
       let textHightlightText = "";
       let separator = "";
       for (let i = 0; i < texthighlights.length; i++) {
