@@ -197,6 +197,7 @@ export const SocialLogin = async (req, res) => {
     if (req.body.build_number == process.env.BUILD_NUMBER) {
       role = UserRole.RoleFree;
     }
+    role = UserRole.RoleFree;
     var userData = {
       name: req.body.name,
       email: req.body.email,
