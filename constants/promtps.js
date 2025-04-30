@@ -276,7 +276,8 @@ If the text doesn't relate to any of the mentioned Cognitive distortions then  c
 Now the response should be a json object with the following keys: 
   
   {
-      mood: Hight energy, Pleasant
+      mood: Hight energy, Pleasant,
+      titleOfJournal: "Title of the Journal based  on the journal entry, generate a concise and meaningful title that captures the core theme or emotional essence of the writing. The title should be exactly 4 to 5 words long, creatively summarizing the main idea, emotion, or reflection expressed in the entry.",
       feeling: {
           title: Anxious,
           acronym: acronym here,
