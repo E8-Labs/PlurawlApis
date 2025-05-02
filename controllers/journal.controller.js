@@ -381,8 +381,11 @@ export const AddJournal = async (req, res) => {
       let pointsIncremented = 1.5;
       console.log("SHow Snapshot", showSnapshot);
 
-      const files = req.files.media || req.files || []; // Depending on how multer is used
-      if (!files.length) {
+      let files = [];
+      if (req.files && req.files) {
+        files = req.files.media || req.files || []; // Depending on how multer is used
+        if (!files.length) {
+        }
       }
       const uploadedResults = [];
       console.log("Files are ", files.length);
