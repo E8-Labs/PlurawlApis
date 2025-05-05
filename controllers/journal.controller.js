@@ -293,12 +293,34 @@ function sendLevelUpEmail(level, user) {
   }
 }
 
+function parseFormDataParts(data) {
+  const result = {};
+  if (!data || !Array.isArray(data._parts)) return result;
+
+  for (const [key, value] of data._parts) {
+    if (result[key]) {
+      if (Array.isArray(result[key])) {
+        result[key].push(value);
+      } else {
+        result[key] = [result[key], value];
+      }
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
 export const AddJournal = async (req, res) => {
   JWT.verify(req.token, process.env.SecretJwtKey, async (error, authData) => {
     if (authData) {
       let algo = process.env.EncryptionAlgorithm;
 
-      let data = req.body;
+      const rawBody = req.body;
+      const data =
+        rawBody && Array.isArray(rawBody._parts)
+          ? parseFormDataParts(rawBody)
+          : rawBody;
       console.log("JOURNAL DATA", data);
       let journalType = req.body.type || "manual";
       let journalText = req.body.detail;
