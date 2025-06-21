@@ -71,7 +71,6 @@ Suggestion: "On a scale of 1-10, how intense does this feeling of inadequacy see
 Template for Introducing Exercises to Address Cognitive Distortion
 
 
-V2 SYSTEM PROMPT
 
 Using {username}’s journal entry:
  "[{journal_text}]"
