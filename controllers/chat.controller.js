@@ -49,9 +49,14 @@ export const CreateChat = async (req, res) => {
       if (jumpBackIn) {
         console.log("Jump back in");
         //get most recent journal & feed to the prompt
+        const Op = db.Sequelize.Op;
         let lastJournal = await db.userJournalModel.findOne({
           where: {
             UserId: user.id,
+            [Op.and]: [
+              { snapshot: { [Op.ne]: null } },
+              { snapshot: { [Op.ne]: "" } },
+            ],
           },
           order: [["createdAt", "DESC"]],
         });
