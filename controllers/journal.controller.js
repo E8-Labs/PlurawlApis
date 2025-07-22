@@ -1072,7 +1072,7 @@ export const AnalyzeJournal = async (req, res) => {
 
 const AnalyzeWithoutAuthToken = async (req, res) => {
   let paragraph = req.body.paragraph;
-  let text = Prompts.AnalyzeJournal;
+  let text = Prompts.AnalyzePrompt;
   text = text.replace(/{journal_text}/g, paragraph);
   let messageData = [];
   messageData.push({
